@@ -1,0 +1,14 @@
+extensions:
+    - PhpSpec\Extension\CodeCoverageExtension
+
+code_coverage:
+  format:
+    - html
+    - clover
+  output:
+    html: coverage
+    clover: coverage.clover
+
+suites:
+  default:
+    spec_path: tests
