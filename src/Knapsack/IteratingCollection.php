@@ -82,17 +82,11 @@ class IteratingCollection extends Collection
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function current()
     {
         return $this->item;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function key()
     {
         return $this->key;

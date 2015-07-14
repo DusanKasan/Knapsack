@@ -47,9 +47,6 @@ class Collection implements Iterator
         return $toArrayRecursive($this);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function current()
     {
         $current = $this->input->current();
@@ -57,33 +54,21 @@ class Collection implements Iterator
         return $current;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function next()
     {
         $this->input->next();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function key()
     {
         return $this->input->key();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function valid()
     {
         return $this->input->valid();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         $this->input->rewind();
