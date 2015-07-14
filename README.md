@@ -796,4 +796,5 @@ $collection->toArray(); //[1, 3, 3, 2]
         $a->mapcat('explode', [' ', Arg::value()])
         $a->toArray() == ['as','as','as','ds'];
     ```
-- write some scenario tests (multiple chained methods)
+- write some scenario tests (multiple chained methods) and move examples into these tests
+
