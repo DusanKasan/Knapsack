@@ -17,7 +17,7 @@ class ConcatenatedCollection extends Collection
     /**
      * @var bool
      */
-    private $usingSecond = FALSE;
+    private $usingSecond = false;
 
     /**
      * This is not done using AppendIterator because if you are changing iterators it is using on the fly, it can get stuck in infinite loop. On the other hand, it might be just some stupid bug in my code.
@@ -33,9 +33,6 @@ class ConcatenatedCollection extends Collection
         parent::__construct($this->input1);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function valid()
     {
         $valid = parent::valid();
@@ -48,16 +45,13 @@ class ConcatenatedCollection extends Collection
         return $valid;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         parent::rewind();
 
         $this->input1->rewind();
         $this->input2->rewind();
-        $this->usingSecond = FALSE;
+        $this->usingSecond = false;
         $this->input = $this->input1;
     }
 }

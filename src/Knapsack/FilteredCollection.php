@@ -25,9 +25,6 @@ class FilteredCollection extends Collection
         $this->filterUsingKeys = (new \ReflectionFunction($filter))->getNumberOfParameters() == 2;
     }
 
-    /**
-     * @return bool
-     */
     public function valid()
     {
         while (!$this->executeFilter($this->key(), $this->current()) && parent::valid()) {

@@ -35,13 +35,13 @@ class UniversalRecursiveIteratorSpec extends ObjectBehavior
     function it_can_iterate_correctly()
     {
         $this->rewind();
-        $this->hasChildren()->shouldReturn(TRUE);
+        $this->hasChildren()->shouldReturn(true);
         $this->getChildren()->shouldBeLike(new UniversalRecursiveIterator(new ArrayIterator([1, 2, 3])));
         $this->next();
-        $this->hasChildren()->shouldReturn(TRUE);
+        $this->hasChildren()->shouldReturn(true);
         $this->getChildren()
             ->shouldBeLike(new UniversalRecursiveIterator(new ArrayIterator([4, 5, 6, new ArrayObject([7])])));
         $this->next();
-        $this->hasChildren()->shouldReturn(FALSE);
+        $this->hasChildren()->shouldReturn(false);
     }
 }

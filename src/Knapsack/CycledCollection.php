@@ -12,6 +12,6 @@ class CycledCollection extends Collection
             $this->rewind();
         }
 
-        return TRUE;
+        return true;
     }
 }

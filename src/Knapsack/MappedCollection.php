@@ -88,17 +88,11 @@ class MappedCollection extends Collection
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function current()
     {
         return $this->value;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function key()
     {
         return $this->key;

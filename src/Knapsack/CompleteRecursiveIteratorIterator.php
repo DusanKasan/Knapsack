@@ -7,15 +7,12 @@ use RecursiveIteratorIterator;
 
 class CompleteRecursiveIteratorIterator extends RecursiveIteratorIterator
 {
-    /**
-     * @inheritdoc
-     */
     public function callHasChildren()
     {
         $hasChildren = parent::callHasChildren();
 
-        if ($hasChildren && $this->getMaxDepth() !== FALSE && $this->getDepth() == $this->getMaxDepth()) {
-            return FALSE;
+        if ($hasChildren && $this->getMaxDepth() !== false && $this->getDepth() == $this->getMaxDepth()) {
+            return false;
         }
 
         return $hasChildren;

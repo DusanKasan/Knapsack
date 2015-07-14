@@ -11,7 +11,7 @@ class SortedCollection extends Collection
      */
     private $sortCallback;
 
-    private $isSorting = FALSE;
+    private $isSorting = false;
 
     /**
      * @param array|\Traversable $input
@@ -26,9 +26,9 @@ class SortedCollection extends Collection
     public function rewind()
     {
         if (!$this->isSorting) {
-            $this->isSorting = TRUE;
+            $this->isSorting = true;
             $this->executeSort($this->sortCallback);
-            $this->isSorting = FALSE;
+            $this->isSorting = false;
         }
         parent::rewind();
     }
@@ -41,15 +41,19 @@ class SortedCollection extends Collection
         })->resetKeys()->toArray();
 
         if ($isUsingKeys) {
-            uasort($mapped,
+            uasort(
+                $mapped,
                 function ($a, $b) use ($sortCallback) {
                     return $sortCallback($a[0], $a[1], $b[0], $b[1]);
-                });
+                }
+            );
         } else {
-            uasort($mapped,
+            uasort(
+                $mapped,
                 function ($a, $b) use ($sortCallback) {
                     return $sortCallback($a[1], $b[1]);
-                });
+                }
+            );
         }
 
         $this->input = (new Collection($mapped))->map(function ($v) {

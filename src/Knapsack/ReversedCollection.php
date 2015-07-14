@@ -17,9 +17,6 @@ class ReversedCollection extends Collection
         $this->originalInput = $input;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         $tmp = [];

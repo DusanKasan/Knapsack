@@ -29,13 +29,13 @@ class IteratingCollectionSpec extends ObjectBehavior
     function it_will_generate_items_following_method_and_passing_previous_item_as_argument()
     {
         $this->rewind();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn([1, 1]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn([1, 2]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn([2, 3]);
     }
 
@@ -49,15 +49,15 @@ class IteratingCollectionSpec extends ObjectBehavior
         $this->beConstructedWith($input, $filter);
 
         $this->rewind();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->key()->shouldReturn(0);
         $this->current()->shouldReturn([1, 1]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->key()->shouldReturn(1);
         $this->current()->shouldReturn([1, 2]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->key()->shouldReturn(3);
         $this->current()->shouldReturn([2, 3]);
     }
@@ -71,13 +71,13 @@ class IteratingCollectionSpec extends ObjectBehavior
         $this->beConstructedWith($input, $filter);
 
         $this->rewind();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn([1, 1]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn([1, 2]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn([2, 3]);
     }
 
@@ -95,14 +95,14 @@ class IteratingCollectionSpec extends ObjectBehavior
         $this->beConstructedWith($input, $filter);
 
         $this->rewind();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->key()->shouldReturn(0);
         $this->current()->shouldReturn([1, 1]);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->key()->shouldReturn(1);
         $this->current()->shouldReturn([1, 2]);
         $this->next();
-        $this->valid()->shouldReturn(FALSE);
+        $this->valid()->shouldReturn(false);
     }
 }

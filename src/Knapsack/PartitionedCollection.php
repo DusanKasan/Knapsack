@@ -47,22 +47,16 @@ class PartitionedCollection extends Collection
         $this->padding = $padding;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function valid()
     {
         return parent::valid() || $this->backTrack;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         parent::rewind();
         $this->key = 0;
-        $this->backTrack = FALSE;
+        $this->backTrack = false;
         $count = 0;
         while ($this->input->valid() && $count++ < $this->numberOfItems) {
             $this->buffer[] = [$this->input->key(), $this->input->current()];
@@ -70,9 +64,6 @@ class PartitionedCollection extends Collection
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function current()
     {
         $current = new Collection($this->buffer);
@@ -88,9 +79,6 @@ class PartitionedCollection extends Collection
         return $this->key;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function next()
     {
         $this->key++;
@@ -99,12 +87,12 @@ class PartitionedCollection extends Collection
             array_shift($this->buffer);
         }
 
-        $this->backTrack = FALSE;
+        $this->backTrack = false;
         $count = 0;
         while ($this->input->valid() && $count++ < $this->numberOfItems) {
             $this->buffer[] = [$this->input->key(), $this->input->current()];
             $this->input->next();
-            $this->backTrack = TRUE;
+            $this->backTrack = true;
         }
 
         foreach ($this->padding as $k => $v) {

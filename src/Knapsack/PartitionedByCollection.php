@@ -32,18 +32,12 @@ class PartitionedByCollection extends Collection
         $this->partitionUsingKeys = (new ReflectionFunction($partitioning))->getNumberOfParameters() == 2;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         $this->key = 0;
         parent::rewind();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function current()
     {
         $buffer = [];
@@ -86,17 +80,11 @@ class PartitionedByCollection extends Collection
         return $value;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function key()
     {
         return $this->key;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function next()
     {
         $this->key++;

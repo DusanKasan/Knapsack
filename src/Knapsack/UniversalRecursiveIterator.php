@@ -9,10 +9,6 @@ use Traversable;
 
 class UniversalRecursiveIterator extends IteratorIterator implements RecursiveIterator
 {
-
-    /**
-     * @inheritdoc
-     */
     public function hasChildren()
     {
         $current = $this->current();
@@ -20,12 +16,9 @@ class UniversalRecursiveIterator extends IteratorIterator implements RecursiveIt
         return is_array($current) || (is_object($current) && $current instanceof Traversable);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getChildren()
     {
-        $result = NULL;
+        $result = null;
         $current = $this->current();
 
         if (is_array($current)) {

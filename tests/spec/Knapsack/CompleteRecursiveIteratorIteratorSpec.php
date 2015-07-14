@@ -29,14 +29,14 @@ class CompleteRecursiveIteratorIteratorSpec extends ObjectBehavior
     {
         $this->setMaxDepth(1);
         $this->rewind();
-        $this->valid()->shouldReturn(TRUE);
+        $this->valid()->shouldReturn(true);
         $this->current()->shouldReturn(1);
-        $this->callHasChildren()->shouldReturn(FALSE);
+        $this->callHasChildren()->shouldReturn(false);
         $this->next();
-        $this->valid()->shouldReturn(TRUE);
-        $this->callHasChildren()->shouldReturn(FALSE);
+        $this->valid()->shouldReturn(true);
+        $this->callHasChildren()->shouldReturn(false);
         $this->current()->shouldReturn([3]);
         $this->next();
-        $this->valid()->shouldReturn(FALSE);
+        $this->valid()->shouldReturn(false);
     }
 }

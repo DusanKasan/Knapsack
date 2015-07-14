@@ -9,9 +9,6 @@ class DistinctCollection extends Collection
      */
     private $distinctValues = [];
 
-    /**
-     * @inheritdoc
-     */
     public function valid()
     {
         while (parent::valid() && in_array($this->current(), $this->distinctValues)) {
@@ -25,9 +22,6 @@ class DistinctCollection extends Collection
         return parent::valid();
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         $this->distinctValues = [];

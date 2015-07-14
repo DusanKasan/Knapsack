@@ -122,9 +122,7 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns collection where each key/item is changed to the output of executing $mapping on each key/item.
-     *
-     * If you wish to modify keys, yield 2 values in $mapping. First is key, second is item.
+     * Returns collection where each key/item is changed to the output of executing $mapping on each key/item. If you wish to modify keys, yield 2 values in $mapping. First is key, second is item.
      *
      * @param callable $mapping
      * @return Collection
@@ -225,7 +223,7 @@ class Collection implements Iterator
      * @param mixed $ifNotFound
      * @return mixed|null
      */
-    public function get($key, $ifNotFound = NULL)
+    public function get($key, $ifNotFound = null)
     {
         return $this->find(
             function ($k, $v) use ($key) {
@@ -242,7 +240,7 @@ class Collection implements Iterator
      * @param null $ifNotFound
      * @return mixed|null
      */
-    public function find(callable $filter, $ifNotFound = NULL)
+    public function find(callable $filter, $ifNotFound = null)
     {
         $filtered = new FilteredCollection($this, $filter);
         foreach ($filtered as $value) {
@@ -295,11 +293,11 @@ class Collection implements Iterator
         foreach ($this as $k => $v) {
             $passed = $usesKeys ? $predicament($k, $v) : $predicament($v);
             if (!$passed) {
-                return FALSE;
+                return false;
             }
         }
 
-        return TRUE;
+        return true;
     }
 
     /**
@@ -315,11 +313,11 @@ class Collection implements Iterator
         foreach ($this as $k => $v) {
             $passed = $usesKeys ? $predicament($k, $v) : $predicament($v);
             if ($passed) {
-                return TRUE;
+                return true;
             }
         }
 
-        return FALSE;
+        return false;
     }
 
     /**
@@ -413,7 +411,7 @@ class Collection implements Iterator
      * @param null $ifNotFound
      * @return mixed|null
      */
-    public function findCollection(callable $filter, $ifNotFound = NULL)
+    public function findCollection(callable $filter, $ifNotFound = null)
     {
         $found = $this->find($filter, $ifNotFound);
 
@@ -431,7 +429,7 @@ class Collection implements Iterator
      * @param mixed $ifNotFound
      * @return mixed|null
      */
-    public function getCollection($key, $ifNotFound = NULL)
+    public function getCollection($key, $ifNotFound = null)
     {
         $found = $this->get($key, $ifNotFound);
 
@@ -573,7 +571,7 @@ class Collection implements Iterator
     public function dropWhile(callable $predicament)
     {
         $usesKeys = (new ReflectionFunction($predicament))->getNumberOfParameters() == 2;
-        $failedAlready = FALSE;
+        $failedAlready = false;
 
         return $this->reject(function ($k, $v) use ($usesKeys, &$failedAlready, $predicament) {
             if (!$failedAlready) {
@@ -582,7 +580,7 @@ class Collection implements Iterator
                 return $failedAlready;
             }
 
-            return FALSE;
+            return false;
         });
     }
 
@@ -606,7 +604,7 @@ class Collection implements Iterator
     public function takeWhile(callable $predicament)
     {
         $usesKeys = (new ReflectionFunction($predicament))->getNumberOfParameters() == 2;
-        $failedAlready = FALSE;
+        $failedAlready = false;
 
         return $this->filter(function ($k, $v) use ($usesKeys, &$failedAlready, $predicament) {
             if (!$failedAlready) {
@@ -615,7 +613,7 @@ class Collection implements Iterator
                 return $failedAlready;
             }
 
-            return FALSE;
+            return false;
         });
     }
 

@@ -173,7 +173,7 @@ class CollectionSpec extends ObjectBehavior
     function it_can_get_item_by_key()
     {
         $this->get(0)->shouldReturn(1);
-        $this->get(5)->shouldReturn(NULL);
+        $this->get(5)->shouldReturn(null);
         $this->get(5, 'not found')->shouldReturn('not found');
     }
 
@@ -187,7 +187,7 @@ class CollectionSpec extends ObjectBehavior
         })->shouldReturn(2);
         $this->find(function ($v) {
             return $v < 0;
-        })->shouldReturn(NULL);
+        })->shouldReturn(null);
         $this->find(function ($v) {
             return $v < 0;
         },
@@ -224,38 +224,38 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->every(function ($v) {
             return $v > 0;
-        })->shouldReturn(TRUE);
+        })->shouldReturn(true);
         $this->every(function ($v) {
             return $v > 1;
-        })->shouldReturn(FALSE);
+        })->shouldReturn(false);
         $this->every(function ($k, $v) {
             return $v > 0 && $k >= 0;
-        })->shouldReturn(TRUE);
+        })->shouldReturn(true);
         $this->every(function ($k, $v) {
             return $v > 0 && $k > 0;
-        })->shouldReturn(FALSE);
+        })->shouldReturn(false);
     }
 
     function it_can_check_if_some_items_pass_predicament_test()
     {
         $this->some(function ($v) {
             return $v < -1;
-        })->shouldReturn(FALSE);
+        })->shouldReturn(false);
         $this->some(function ($k, $v) {
             return $v > 0 && $k < -1;
-        })->shouldReturn(FALSE);
+        })->shouldReturn(false);
         $this->some(function ($v) {
             return $v < 2;
-        })->shouldReturn(TRUE);
+        })->shouldReturn(true);
         $this->some(function ($k, $v) {
             return $v > 0 && $k > 0;
-        })->shouldReturn(TRUE);
+        })->shouldReturn(true);
     }
 
     function it_can_check_if_it_contains_a_value()
     {
-        $this->contains(3)->shouldReturn(TRUE);
-        $this->contains(TRUE)->shouldReturn(FALSE);
+        $this->contains(3)->shouldReturn(true);
+        $this->contains(true)->shouldReturn(false);
     }
 
     function it_can_reverse()
@@ -263,23 +263,23 @@ class CollectionSpec extends ObjectBehavior
         $it = $this->reverse();
 
         $it->rewind();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(3);
         $it->current()->shouldReturn(2);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(2);
         $it->current()->shouldReturn(3);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(1);
         $it->current()->shouldReturn(3);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(0);
         $it->current()->shouldReturn(1);
         $it->next();
-        $it->valid()->shouldReturn(FALSE);
+        $it->valid()->shouldReturn(false);
     }
 
     function it_can_reduce_from_right()
@@ -329,13 +329,13 @@ class CollectionSpec extends ObjectBehavior
             return [$v[1], $v[0] + $v[1]];
         });
         $it->rewind();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([1, 1]);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([1, 2]);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([2, 3]);
 
         $it = $this->iterate(function ($k, $v) {
@@ -344,15 +344,15 @@ class CollectionSpec extends ObjectBehavior
         });
 
         $it->rewind();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(0);
         $it->current()->shouldReturn([1, 1]);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(1);
         $it->current()->shouldReturn([1, 2]);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->key()->shouldReturn(3);
         $it->current()->shouldReturn([2, 3]);
 
@@ -361,13 +361,13 @@ class CollectionSpec extends ObjectBehavior
         });
 
         $it->rewind();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([1, 1]);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([1, 2]);
         $it->next();
-        $it->valid()->shouldReturn(TRUE);
+        $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([2, 3]);
     }
 
@@ -595,16 +595,16 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_if_it_is_not_empty()
     {
-        $this->isEmpty()->shouldReturn(FALSE);
-        $this->isNotEmpty()->shouldReturn(TRUE);
+        $this->isEmpty()->shouldReturn(false);
+        $this->isNotEmpty()->shouldReturn(true);
     }
 
     function it_can_check_if_it_is_empty()
     {
         $this->beConstructedWith([]);
 
-        $this->isEmpty()->shouldReturn(TRUE);
-        $this->isNotEmpty()->shouldReturn(FALSE);
+        $this->isEmpty()->shouldReturn(true);
+        $this->isNotEmpty()->shouldReturn(false);
     }
 
     function it_can_check_frequency_of_distinct_items()

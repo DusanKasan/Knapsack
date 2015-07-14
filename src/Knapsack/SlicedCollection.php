@@ -31,9 +31,6 @@ class SlicedCollection extends Collection
         $this->from = $from;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function valid()
     {
         $valid = parent::valid();
@@ -43,24 +40,18 @@ class SlicedCollection extends Collection
         }
 
         if ($this->index > $this->to && $this->to !== 0) {
-            return FALSE;
+            return false;
         }
 
         return $valid;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function next()
     {
         parent::next();
         $this->index++;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function rewind()
     {
         parent::rewind();

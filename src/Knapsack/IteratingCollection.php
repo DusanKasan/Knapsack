@@ -37,11 +37,11 @@ class IteratingCollection extends Collection
             try {
                 $this->executeMapping($this->key, $this->item);
             } catch (NoMoreItems $e) {
-                return FALSE;
+                return false;
             }
         }
 
-        return TRUE;
+        return true;
     }
 
     /**
