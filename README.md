@@ -5,7 +5,7 @@
 
 Knapsack is a [collection pipeline](http://martinfowler.com/articles/collection-pipeline/) library implementing most of the sequence operations proposed by [Clojures sequences](http://clojure.org/sequences)
 
-The heart of Knapsack is its Collection class. It is an iterator implementor that accepts Traversable object or array as constructor argument. It provides most of Clojures sequence function plus some extra ones. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
+The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Knapsack/Collection.php). It is an iterator implementor that accepts Traversable object or array as constructor argument. It provides most of Clojures sequence function plus some extra ones. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
  
 Most of the methods of Collection return lazy collections (such as filter/map/etc.). However, some return non-lazy collections (reverse) or simple values (count). For these operations all of the items in the collection must be iterated over (and realized). There are also operations (drop) that iterate over some items of the collection but do not affect/return them in the result. This behaviour as well as laziness is noted for each of the operations.  
 
