@@ -37,13 +37,14 @@ class SlicedCollection extends Collection
     {
         $valid = parent::valid();
         while ($valid && $this->index < $this->from) {
-            $valid = parent::valid();
             $this->next();
+            $valid = parent::valid();
         }
 
         if ($this->index > $this->to && $this->to !== 0) {
             return false;
         }
+
 
         return $valid;
     }

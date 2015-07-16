@@ -24,6 +24,7 @@ class Collection implements Iterator
             $input = new RecursiveArrayIterator($input);
         }
 
+        $input->rewind();
         $this->input = $input;
     }
 
@@ -369,11 +370,7 @@ class Collection implements Iterator
      */
     public function resetKeys()
     {
-        $counter = 0;
-
-        return $this->indexBy(function () use (&$counter) {
-            return $counter++;
-        });
+        return new ResetKeysCollection($this);
     }
 
     /**
