@@ -18,13 +18,14 @@ class GroupedCollection extends Collection
     public function __construct($input, callable $grouping)
     {
         parent::__construct($input);
+        $this->originalInput = $this->input;
         $this->grouping = $grouping;
     }
 
     public function rewind()
     {
-        parent::rewind();
         $this->group();
+        parent::rewind();
     }
 
     private function group()
@@ -32,7 +33,7 @@ class GroupedCollection extends Collection
         $grouping = $this->grouping;
         $input = [];
 
-        foreach ($this->input as $item) {
+        foreach ($this->originalInput as $item) {
             $key = $grouping($item);
             $input[$key][] = $item;
         }

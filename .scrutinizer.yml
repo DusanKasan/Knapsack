@@ -9,6 +9,8 @@ build:
         coverage:
           file: 'coverage.clover'
           format: 'php-clover'
+      -
+        command: 'vendor/bin/phpunit --bootstrap vendor/autoload.php tests/scenarios/'
 
 tools:
     php_code_sniffer:

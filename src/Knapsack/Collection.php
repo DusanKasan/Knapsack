@@ -133,7 +133,7 @@ class Collection implements Iterator
      */
     public function reduce($startValue, callable $reduction)
     {
-        $usesKeys = (new ReflectionFunction($reduction))->getNumberOfParameters() == 3;
+        $usesKeys = $this->getNumberOfArguments($reduction) == 3;
 
         foreach ($this as $key => $item) {
             $startValue = $usesKeys ? $reduction($startValue, $key, $item) : $reduction($startValue, $item);
@@ -261,7 +261,7 @@ class Collection implements Iterator
      */
     public function indexBy(callable $indexer)
     {
-        $usesKeys = (new ReflectionFunction($indexer))->getNumberOfParameters() == 2;
+        $usesKeys = $this->getNumberOfArguments($indexer) == 2;
 
         return new MappedCollection(
             $this,
@@ -280,7 +280,7 @@ class Collection implements Iterator
      */
     public function every(callable $predicament)
     {
-        $usesKeys = (new ReflectionFunction($predicament))->getNumberOfParameters() == 2;
+        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
 
         foreach ($this as $k => $v) {
             $passed = $usesKeys ? $predicament($k, $v) : $predicament($v);
@@ -300,7 +300,7 @@ class Collection implements Iterator
      */
     public function some(callable $predicament)
     {
-        $usesKeys = (new ReflectionFunction($predicament))->getNumberOfParameters() == 2;
+        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
 
         foreach ($this as $k => $v) {
             $passed = $usesKeys ? $predicament($k, $v) : $predicament($v);
@@ -436,7 +436,7 @@ class Collection implements Iterator
      */
     public function reject(callable $filter)
     {
-        $usesKeys = (new ReflectionFunction($filter))->getNumberOfParameters() == 2;
+        $usesKeys = $this->getNumberOfArguments($filter) == 2;
 
         return $this->filter(function ($k, $v) use ($filter, $usesKeys) {
             return !call_user_func_array($filter, $usesKeys ? [$k, $v] : [$v]);
@@ -558,7 +558,7 @@ class Collection implements Iterator
      */
     public function dropWhile(callable $predicament)
     {
-        $usesKeys = (new ReflectionFunction($predicament))->getNumberOfParameters() == 2;
+        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
         $failedAlready = false;
 
         return $this->reject(function ($k, $v) use ($usesKeys, &$failedAlready, $predicament) {
@@ -591,7 +591,7 @@ class Collection implements Iterator
      */
     public function takeWhile(callable $predicament)
     {
-        $usesKeys = (new ReflectionFunction($predicament))->getNumberOfParameters() == 2;
+        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
         $failedAlready = false;
 
         return $this->filter(function ($k, $v) use ($usesKeys, &$failedAlready, $predicament) {
@@ -771,5 +771,18 @@ class Collection implements Iterator
     protected function canBeConvertedToCollection($item)
     {
         return is_array($item) || ($item instanceof Traversable && !($item instanceof Collection));
+    }
+
+    /**
+     * @param callable $reduction
+     * @return int
+     */
+    protected function getNumberOfArguments(callable $reduction)
+    {
+        if (is_array($reduction) && count($reduction) == 2) {
+            return (new \ReflectionMethod($reduction[0], $reduction[1]))->getNumberOfParameters();
+        } else {
+            return (new ReflectionFunction($reduction))->getNumberOfParameters();
+        }
     }
 }

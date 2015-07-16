@@ -30,7 +30,7 @@ class PartitionedByCollection extends Collection
     {
         parent::__construct($input);
         $this->partitioning = $partitioning;
-        $this->partitionUsingKeys = (new ReflectionFunction($partitioning))->getNumberOfParameters() == 2;
+        $this->partitionUsingKeys = $this->getNumberOfArguments($partitioning) == 2;
     }
 
     public function rewind()

@@ -26,7 +26,7 @@ class IteratingCollection extends Collection
     {
         parent::__construct($input);
         $this->followedCallback = $followedCallback;
-        $this->callbackUsesKeys = (new ReflectionFunction($followedCallback))->getNumberOfParameters() == 2;
+        $this->callbackUsesKeys = $this->getNumberOfArguments($followedCallback) == 2;
     }
 
     public function valid()

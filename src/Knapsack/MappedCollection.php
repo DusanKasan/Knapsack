@@ -36,7 +36,7 @@ class MappedCollection extends Collection
     {
         parent::__construct($input);
         $this->mapping = $callback;
-        $this->mapUsingKeys = (new ReflectionFunction($callback))->getNumberOfParameters() == 2;
+        $this->mapUsingKeys = $this->getNumberOfArguments($callback) == 2;
     }
 
     public function valid()

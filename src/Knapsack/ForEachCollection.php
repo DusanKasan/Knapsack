@@ -18,7 +18,7 @@ class ForEachCollection extends Collection
     {
         parent::__construct($input);
         $this->callback = $callback;
-        $this->usesKeys = (new ReflectionFunction($callback))->getNumberOfParameters() == 2;
+        $this->usesKeys = $this->getNumberOfArguments($callback) == 2;
     }
 
     public function current()

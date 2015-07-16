@@ -36,7 +36,7 @@ class SortedCollection extends Collection
 
     private function executeSort($sortCallback)
     {
-        $isUsingKeys = (new ReflectionFunction($sortCallback))->getNumberOfParameters() == 4;
+        $isUsingKeys = $this->getNumberOfArguments($sortCallback) == 4;
         $mapped = $this->map(function ($k, $v) {
             return [$k, $v];
         })->resetKeys()->toArray();
