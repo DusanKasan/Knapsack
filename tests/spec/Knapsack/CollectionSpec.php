@@ -4,10 +4,12 @@ namespace spec\Knapsack;
 
 use ArrayIterator;
 use DOMXPath;
+use Iterator;
+use IteratorAggregate;
 use Knapsack\Collection;
+use Knapsack\Exceptions\InvalidArgument;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use Traversable;
 
 /**
  * @mixin Collection
@@ -23,14 +25,27 @@ class CollectionSpec extends ObjectBehavior
     function it_is_initializable()
     {
         $this->shouldHaveType(Collection::class);
-        $this->shouldHaveType(Traversable::class);
+        $this->shouldHaveType(Iterator::class);
     }
 
-    function it_can_iterate_correctly_when_passed_iterator()
+    function it_can_be_instantiated_from_iterator()
     {
         $iterator = new ArrayIterator([1, 2]);
         $this->beConstructedWith($iterator);
         $this->toArray()->shouldReturn([1, 2]);
+    }
+
+    function it_can_be_instantiated_from_iterator_aggregate(IteratorAggregate $iteratorAggregate)
+    {
+        $iterator = new ArrayIterator([1, 2]);
+        $iteratorAggregate->getIterator()->willReturn($iterator);
+        $this->beConstructedWith($iteratorAggregate);
+        $this->toArray()->shouldReturn([1, 2]);
+    }
+
+    function it_will_throw_when_passed_something_other_than_array_or_traversable()
+    {
+        $this->shouldThrow(InvalidArgument::class)->during('__construct', [1]);
     }
 
     function it_can_iterate_correctly_when_passed_array()
