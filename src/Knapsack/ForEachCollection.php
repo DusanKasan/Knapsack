@@ -2,7 +2,6 @@
 
 namespace Knapsack;
 
-use ReflectionFunction;
 use Traversable;
 
 class ForEachCollection extends Collection

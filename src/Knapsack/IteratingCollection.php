@@ -4,7 +4,6 @@ namespace Knapsack;
 
 use Generator;
 use Knapsack\Exceptions\NoMoreItems;
-use ReflectionFunction;
 use Traversable;
 
 class IteratingCollection extends Collection

@@ -3,7 +3,6 @@
 namespace Knapsack;
 
 use Generator;
-use ReflectionFunction;
 use Traversable;
 
 class MappedCollection extends Collection

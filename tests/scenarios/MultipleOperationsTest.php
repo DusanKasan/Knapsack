@@ -4,7 +4,6 @@ namespace scenarios\Knapsack;
 
 use Knapsack\Collection;
 use PHPUnit_Framework_TestCase;
-use stdClass;
 
 class MultipleOperationsTest extends PHPUnit_Framework_TestCase
 {

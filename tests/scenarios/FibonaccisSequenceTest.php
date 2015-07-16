@@ -4,7 +4,6 @@ namespace scenarios\Knapsack;
 
 use Knapsack\Collection;
 use PHPUnit_Framework_TestCase;
-use stdClass;
 
 class FibonaccisSequenceTest extends PHPUnit_Framework_TestCase
 {

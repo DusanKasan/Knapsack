@@ -9,6 +9,8 @@ The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Kn
  
 Most of the methods of Collection return lazy collections (such as filter/map/etc.). However, some return non-lazy collections (reverse) or simple values (count). For these operations all of the items in the collection must be iterated over (and realized). There are also operations (drop) that iterate over some items of the collection but do not affect/return them in the result. This behaviour as well as laziness is noted for each of the operations.  
 
+If you want more example usage beyond what is provided here, check the [specs](https://github.com/DusanKasan/Knapsack/tree/master/tests/spec/Knapsack) and/or [scenarios](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios) 
+
 Feel free to report any [issues](https://github.com/DusanKasan/Knapsack/issues) you find. I will do my best to fix them as soon as possible, but community [pull requests](https://github.com/DusanKasan/Knapsack/pulls) to fix them are more than welcome.
 
 ## Documentation
