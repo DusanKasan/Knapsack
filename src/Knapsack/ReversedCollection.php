@@ -2,15 +2,17 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class ReversedCollection extends Collection
 {
     /**
-     * @var array|\Traversable
+     * @var array|Traversable
      */
     private $originalInput;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      */
     public function __construct($input)
     {

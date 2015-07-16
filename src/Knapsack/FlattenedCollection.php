@@ -2,10 +2,12 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class FlattenedCollection extends Collection
 {
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param int $depth
      */
     public function __construct($input, $depth = -1)

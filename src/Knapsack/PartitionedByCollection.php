@@ -3,6 +3,7 @@
 namespace Knapsack;
 
 use ReflectionFunction;
+use Traversable;
 
 class PartitionedByCollection extends Collection
 {
@@ -22,7 +23,7 @@ class PartitionedByCollection extends Collection
     private $partitionUsingKeys;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param callable $partitioning
      */
     public function __construct($input, callable $partitioning)

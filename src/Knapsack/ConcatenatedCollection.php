@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class ConcatenatedCollection extends Collection
 {
     /**
@@ -22,8 +24,8 @@ class ConcatenatedCollection extends Collection
     /**
      * This is not done using AppendIterator because if you are changing iterators it is using on the fly, it can get stuck in infinite loop. On the other hand, it might be just some stupid bug in my code.
      *
-     * @param array|\Traversable $input1
-     * @param array|\Traversable $input2
+     * @param array|Traversable $input1
+     * @param array|Traversable $input2
      */
     public function __construct($input1, $input2)
     {

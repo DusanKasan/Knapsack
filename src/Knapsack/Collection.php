@@ -16,7 +16,7 @@ class Collection implements Iterator
     protected $input;
 
     /**
-     * @param Traversable|array $input
+     * @param array|Traversable $input
      */
     public function __construct($input)
     {
@@ -205,8 +205,8 @@ class Collection implements Iterator
      * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $ifNotFound.
      *
      * @param mixed $key
-     * @param mixed $ifNotFound
-     * @return mixed|null
+     * @param mixed|null $ifNotFound
+     * @return mixed
      */
     public function get($key, $ifNotFound = null)
     {
@@ -222,8 +222,8 @@ class Collection implements Iterator
      * Returns first value matched by $filter. If no value matches, return $ifNotFound.
      *
      * @param callable $filter
-     * @param null $ifNotFound
-     * @return mixed|null
+     * @param mixed|null $ifNotFound
+     * @return mixed
      */
     public function find(callable $filter, $ifNotFound = null)
     {
@@ -308,7 +308,7 @@ class Collection implements Iterator
     /**
      * Returns true if $needle is present in the collection.
      *
-     * @param $needle
+     * @param mixed $needle
      * @return bool
      */
     public function contains($needle)
@@ -331,7 +331,7 @@ class Collection implements Iterator
     /**
      * Reduce the collection to single value. Walks from right to left.
      *
-     * @param $startValue
+     * @param mixed $startValue
      * @param callable $reduction Must take 2 arguments, intermediate value and item from the iterator.
      * @return mixed
      */
@@ -393,8 +393,8 @@ class Collection implements Iterator
      * Returns first item matched by $filter, converted to Collection if possible (i.e. if it is Traversable or array). If no value matches, return $ifNotFound.
      *
      * @param callable $filter
-     * @param null $ifNotFound
-     * @return mixed|null
+     * @param mixed|null $ifNotFound
+     * @return mixed
      */
     public function findCollection(callable $filter, $ifNotFound = null)
     {
@@ -411,8 +411,8 @@ class Collection implements Iterator
      * Returns item at the key $key converted to Collection if possible (i.e. if it is Traversable or array). If multiple values have this key, return first. If no value has this key, return $ifNotFound.
      *
      * @param mixed $key
-     * @param mixed $ifNotFound
-     * @return mixed|null
+     * @param mixed|null $ifNotFound
+     * @return mixed
      */
     public function getCollection($key, $ifNotFound = null)
     {
@@ -706,7 +706,7 @@ class Collection implements Iterator
      * necessary to complete last partition up to $numberOfItems items. In case there are
      * not enough padding elements, return a partition with less than $numberOfItems items.
      *
-     * @param $numberOfItems
+     * @param int $numberOfItems
      * @param int $step
      * @param array $padding
      * @return PartitionedCollection
@@ -725,15 +725,6 @@ class Collection implements Iterator
     public function partitionBy(callable $partitioning)
     {
         return new PartitionedByCollection($this, $partitioning);
-    }
-
-    /**
-     * @param $found
-     * @return bool
-     */
-    protected function canBeConvertedToCollection($found)
-    {
-        return is_array($found) || ($found instanceof Traversable && !($found instanceof Collection));
     }
 
     /**
@@ -768,5 +759,14 @@ class Collection implements Iterator
         return $this->countBy(function ($v) {
             return $v;
         });
+    }
+
+    /**
+     * @param mixed $item
+     * @return bool
+     */
+    protected function canBeConvertedToCollection($item)
+    {
+        return is_array($item) || ($item instanceof Traversable && !($item instanceof Collection));
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class FilteredCollection extends Collection
 {
     /**
@@ -15,7 +17,7 @@ class FilteredCollection extends Collection
     private $filterUsingKeys;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param callable $filter
      */
     public function __construct($input, callable $filter)

@@ -5,6 +5,7 @@ namespace Knapsack;
 use Generator;
 use Knapsack\Exceptions\NoMoreItems;
 use ReflectionFunction;
+use Traversable;
 
 class IteratingCollection extends Collection
 {
@@ -18,7 +19,7 @@ class IteratingCollection extends Collection
     private $callbackUsesKeys;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param callable $followedCallback
      */
     public function __construct($input, callable $followedCallback)

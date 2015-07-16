@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class SlicedCollection extends Collection
 {
     /**
@@ -20,7 +22,7 @@ class SlicedCollection extends Collection
     private $from;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param int $from
      * @param int $to
      */
