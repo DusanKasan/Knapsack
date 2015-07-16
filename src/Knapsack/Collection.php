@@ -4,7 +4,6 @@ namespace Knapsack;
 
 use Iterator;
 use IteratorAggregate;
-use IteratorIterator;
 use Knapsack\Exceptions\InvalidArgument;
 use RecursiveArrayIterator;
 use ReflectionFunction;
