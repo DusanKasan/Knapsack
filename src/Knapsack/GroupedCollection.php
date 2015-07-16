@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class GroupedCollection extends Collection
 {
     /**
@@ -10,7 +12,7 @@ class GroupedCollection extends Collection
     private $grouping;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param callable $grouping
      */
     public function __construct($input, callable $grouping)

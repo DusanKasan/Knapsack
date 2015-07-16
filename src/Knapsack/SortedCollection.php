@@ -3,6 +3,7 @@
 namespace Knapsack;
 
 use ReflectionFunction;
+use Traversable;
 
 class SortedCollection extends Collection
 {
@@ -14,7 +15,7 @@ class SortedCollection extends Collection
     private $isSorting = false;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param callable $sortCallback
      */
     public function __construct($input, callable $sortCallback)

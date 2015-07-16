@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class InterleavedCollection extends Collection
 {
     /**
@@ -11,9 +13,13 @@ class InterleavedCollection extends Collection
 
     private $buffer = [];
 
-    public function __construct($firstColection, $secondCollection)
+    /**
+     * @param array|Traversable $firstCollection
+     * @param array|Traversable $secondCollection
+     */
+    public function __construct($firstCollection, $secondCollection)
     {
-        $this->collections[] = new Collection($firstColection);
+        $this->collections[] = new Collection($firstCollection);
         $this->collections[] = new Collection($secondCollection);
     }
 

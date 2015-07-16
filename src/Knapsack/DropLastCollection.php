@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Traversable;
+
 class DropLastCollection extends Collection
 {
     /**
@@ -15,7 +17,7 @@ class DropLastCollection extends Collection
     private $buffer;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param int $numberOfItems
      */
     public function __construct($input, $numberOfItems)

@@ -3,6 +3,7 @@
 namespace Knapsack;
 
 use ReflectionFunction;
+use Traversable;
 
 class ForEachCollection extends Collection
 {
@@ -10,7 +11,7 @@ class ForEachCollection extends Collection
     private $callback;
 
     /**
-     * @param array|\Traversable $input
+     * @param array|Traversable $input
      * @param callable $callback
      */
     public function __construct($input, callable $callback)
