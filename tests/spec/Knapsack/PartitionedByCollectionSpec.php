@@ -27,4 +27,14 @@ class PartitionedByCollectionSpec extends ObjectBehavior
     {
         $this->toArray()->shouldReturn([[1], [1 => 3, 2 => 3], [3 => 2]]);
     }
+
+    function it_can_be_partitioned_using_keys()
+    {
+        $this->beConstructedWith([1, 3, 3, 2],
+            function ($k, $v) {
+                return $k - $v;
+            });
+
+        $this->toArray()->shouldReturn([[1], [1 => 3], [2 => 3], [3 => 2]]);
+    }
 }

@@ -23,8 +23,14 @@ class InterleavedCollectionSpec extends ObjectBehavior
         $this->shouldHaveType(Collection::class);
     }
 
-    function it_will_only_have_distinct_values()
+    function it_will_be_interleaved()
     {
         $this->resetKeys()->toArray()->shouldReturn([1, 'a', 2, 'b', 3, 'c', 4, 'd', 'e']);
+    }
+
+    function it_will_retain_correct_keys()
+    {
+        $this->beConstructedWith(['b' => 1], ['a' => 2]);
+        $this->toArray()->shouldReturn(['b' => 1, 'a' => 2]);
     }
 }

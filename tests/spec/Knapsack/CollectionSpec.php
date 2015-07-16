@@ -591,6 +591,11 @@ class CollectionSpec extends ObjectBehavior
         })
             ->toArray()
             ->shouldReturn([[1], [1 => 3, 2 => 3], [3 => 2]]);
+
+        $this->partitionBy(function ($k, $v) {
+            return $k - $v;
+        })
+            ->toArray()->shouldReturn([[1], [1 => 3], [2 => 3], [3 => 2]]);
     }
 
     function it_can_check_if_it_is_not_empty()

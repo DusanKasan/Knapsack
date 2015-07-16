@@ -3,6 +3,9 @@
 namespace Knapsack;
 
 use Iterator;
+use IteratorAggregate;
+use IteratorIterator;
+use Knapsack\Exceptions\InvalidArgument;
 use RecursiveArrayIterator;
 use ReflectionFunction;
 use stdClass;
@@ -22,6 +25,10 @@ class Collection implements Iterator
     {
         if (is_array($input)) {
             $input = new RecursiveArrayIterator($input);
+        } elseif ($input instanceof IteratorAggregate) {
+            $input = $input->getIterator();
+        } elseif (!($input instanceof Iterator)) {
+            throw new InvalidArgument;
         }
 
         $input->rewind();
