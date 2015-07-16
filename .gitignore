@@ -1,1 +1,5 @@
-.idea
+/vendor
+
+/coverage
+coverage.clover
+coverage.xml
