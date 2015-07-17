@@ -62,4 +62,30 @@ class MappedCollectionSpec extends ObjectBehavior
         $this->beConstructedWith($iterator, $mapping);
         $this->toArray()->shouldReturn([2, 3]);
     }
+
+    function it_can_use_instance_methods_as_filter()
+    {
+        $instance = new TestClass();
+        $this->beConstructedWith([1, 2], [$instance, 'dynamicMethod']);
+        $this->toArray()->shouldReturn([2, 3]);
+    }
+
+    function it_can_use_static_methods_as_filter()
+    {
+        $this->beConstructedWith([1, 2], ['spec\Knapsack\TestClass', 'staticMethod']);
+        $this->toArray()->shouldReturn([2, 3]);
+    }
+}
+
+class TestClass
+{
+    public function dynamicMethod($v)
+    {
+        return $v + 1;
+    }
+
+    public static function staticMethod($v)
+    {
+        return $v + 1;
+    }
 }

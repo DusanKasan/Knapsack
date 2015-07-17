@@ -7,6 +7,9 @@ use Knapsack\PartitionedCollection;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
+/**
+ * @mixin PartitionedCollection
+ */
 class PartitionedCollectionSpec extends ObjectBehavior
 {
     function let()

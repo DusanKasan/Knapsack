@@ -10,7 +10,7 @@ use PHPUnit_Framework_TestCase;
  */
 class GroupingFlightsTest extends PHPUnit_Framework_TestCase
 {
-    private $data = [
+    private $inputData = [
         [
             "origin" => "BOS",
             "dest" => "LAX",
@@ -33,7 +33,7 @@ class GroupingFlightsTest extends PHPUnit_Framework_TestCase
 
     public function testIt()
     {
-        $collection = new Collection($this->data);
+        $collection = new Collection($this->inputData);
 
         $result = $collection
             ->groupBy(function ($v) {
@@ -43,9 +43,11 @@ class GroupingFlightsTest extends PHPUnit_Framework_TestCase
             ->map([$this, 'buildResults'])
             ->toArray();
 
-        $expected['LAX'] = [
-            'meanDelay' => 10,
-            'cancellationRate' => 0.5
+        $expected = [
+            'LAX' => [
+                'meanDelay' => 10,
+                'cancellationRate' => 0.5
+            ]
         ];
 
         $this->assertEquals($expected, $result);

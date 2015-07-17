@@ -7,6 +7,9 @@ use Knapsack\CycledCollection;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
+/**
+ * @mixin CycledCollection
+ */
 class CycledCollectionSpec extends ObjectBehavior
 {
     function let()
@@ -20,8 +23,12 @@ class CycledCollectionSpec extends ObjectBehavior
         $this->shouldHaveType(Collection::class);
     }
 
-    function it_will_only_have_distinct_values()
+    function it_will_cycle()
     {
-        $this->take(6)->resetKeys()->toArray()->shouldReturn([1, 2, 3, 1, 2, 3]);
+        $this
+            ->take(6)
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([1, 2, 3, 1, 2, 3]);
     }
 }

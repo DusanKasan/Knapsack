@@ -2,6 +2,7 @@
 
 namespace Knapsack;
 
+use Iterator;
 use Traversable;
 
 class GroupedCollection extends Collection
@@ -10,6 +11,11 @@ class GroupedCollection extends Collection
      * @var callable
      */
     private $grouping;
+
+    /**
+     * @var Iterator
+     */
+    private $originalInput;
 
     /**
      * @param array|Traversable $input

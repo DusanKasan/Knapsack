@@ -8,6 +8,9 @@ use Knapsack\IteratingCollection;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
+/**
+ * @mixin IteratingCollection
+ */
 class IteratingCollectionSpec extends ObjectBehavior
 {
 

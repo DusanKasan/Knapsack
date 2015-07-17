@@ -23,8 +23,10 @@ class DropLastCollectionSpec extends ObjectBehavior
         $this->shouldHaveType(Collection::class);
     }
 
-    function it_will_only_have_distinct_values()
+    function it_will_drop_last()
     {
-        $this->toArray()->shouldReturn([1, 'a' => 2]);
+        $this
+            ->toArray()
+            ->shouldReturn([1, 'a' => 2]);
     }
 }
