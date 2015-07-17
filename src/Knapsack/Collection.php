@@ -235,8 +235,9 @@ class Collection implements Iterator
     public function find(callable $filter, $ifNotFound = null)
     {
         $filtered = new FilteredCollection($this, $filter);
-        foreach ($filtered as $value) {
-            return $value;
+
+        foreach ($filtered as $item) {
+            return $item;
         }
 
         return $ifNotFound;

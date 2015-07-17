@@ -799,4 +799,4 @@ $collection->toArray(); //[1, 3, 3, 2]
         $a->toArray() == ['as','as','as','ds'];
     ```
 - write some scenario tests (multiple chained methods) and move examples into these tests
-
+- rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code

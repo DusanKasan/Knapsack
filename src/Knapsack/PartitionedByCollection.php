@@ -71,13 +71,12 @@ class PartitionedByCollection extends Collection
     private function executePartitioning($key, $item)
     {
         $partitioning = $this->partitioning;
-        if ($this->partitionUsingKeys) {
-            $value = $partitioning($key, $item);
-        } else {
-            $value = $partitioning($item);
-        }
 
-        return $value;
+        if ($this->partitionUsingKeys) {
+            return $partitioning($key, $item);
+        } else {
+            return $partitioning($item);
+        }
     }
 
     public function key()

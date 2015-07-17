@@ -7,16 +7,16 @@ class DistinctCollection extends Collection
     /**
      * @var array
      */
-    private $distinctValues = [];
+    private $distinctItems = [];
 
     public function valid()
     {
-        while (parent::valid() && in_array($this->current(), $this->distinctValues)) {
+        while (parent::valid() && in_array($this->current(), $this->distinctItems)) {
             $this->next();
         }
 
         if (parent::valid()) {
-            $this->distinctValues[] = $this->current();
+            $this->distinctItems[] = $this->current();
         }
 
         return parent::valid();
@@ -24,7 +24,7 @@ class DistinctCollection extends Collection
 
     public function rewind()
     {
-        $this->distinctValues = [];
+        $this->distinctItems = [];
         parent::rewind();
     }
 }

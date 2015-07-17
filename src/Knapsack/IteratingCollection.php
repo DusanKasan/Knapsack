@@ -46,15 +46,15 @@ class IteratingCollection extends Collection
 
     /**
      * @param mixed $key
-     * @param mixed $value
+     * @param mixed $item
      */
-    private function executeMapping($key, $value)
+    private function executeMapping($key, $item)
     {
         $mapping = $this->followedCallback;
         if ($this->callbackUsesKeys) {
-            $mapped = $mapping($key, $value);
+            $mapped = $mapping($key, $item);
         } else {
-            $mapped = $mapping($value);
+            $mapped = $mapping($item);
         }
 
         if ($mapped instanceof Generator) {

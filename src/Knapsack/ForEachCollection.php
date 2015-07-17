@@ -29,16 +29,16 @@ class ForEachCollection extends Collection
 
     /**
      * @param mixed $key
-     * @param mixed $value
+     * @param mixed $item
      * @return mixed
      */
-    private function executeCallback($key, $value)
+    private function executeCallback($key, $item)
     {
         $callback = $this->callback;
         if ($this->usesKeys) {
-            return $callback($key, $value);
+            return $callback($key, $item);
         } else {
-            return $callback($value);
+            return $callback($item);
         }
     }
 }

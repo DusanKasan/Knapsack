@@ -38,16 +38,16 @@ class FilteredCollection extends Collection
 
     /**
      * @param mixed $key
-     * @param mixed $value
+     * @param mixed $item
      * @return mixed
      */
-    private function executeFilter($key, $value)
+    private function executeFilter($key, $item)
     {
         $filter = $this->filterCallback;
         if ($this->filterUsingKeys) {
-            return $filter($key, $value);
+            return $filter($key, $item);
         } else {
-            return $filter($value);
+            return $filter($item);
         }
     }
 }

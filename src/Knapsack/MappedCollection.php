@@ -25,7 +25,7 @@ class MappedCollection extends Collection
     /**
      * @var mixed
      */
-    private $value;
+    private $item;
 
     /**
      * @param array|Traversable $input
@@ -51,22 +51,22 @@ class MappedCollection extends Collection
 
     /**
      * @param mixed $key
-     * @param mixed $value
+     * @param mixed $item
      */
-    private function executeMapping($key, $value)
+    private function executeMapping($key, $item)
     {
         $mapping = $this->mapping;
         if ($this->mapUsingKeys) {
-            $mapped = $mapping($key, $value);
+            $mapped = $mapping($key, $item);
         } else {
-            $mapped = $mapping($value);
+            $mapped = $mapping($item);
         }
 
         if ($mapped instanceof Generator) {
             $this->resolveGeneratorMapping($key, $mapped);
         } else {
             $this->key = $key;
-            $this->value = $mapped;
+            $this->item = $mapped;
         }
     }
 
@@ -80,16 +80,16 @@ class MappedCollection extends Collection
 
         if (count($arr) == 1) {
             $this->key = $key;
-            $this->value = $arr[0];
+            $this->item = $arr[0];
         } else {
             $this->key = $arr[0];
-            $this->value = $arr[1];
+            $this->item = $arr[1];
         }
     }
 
     public function current()
     {
-        return $this->value;
+        return $this->item;
     }
 
     public function key()
