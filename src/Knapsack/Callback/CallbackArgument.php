@@ -32,16 +32,25 @@ class CallbackArgument
         }
     }
 
+    /**
+     * @return bool
+     */
     public function hasValue()
     {
         return $this->hasDefaultValue;
     }
 
+    /**
+     * @return mixed
+     */
     public function getValue()
     {
         return $this->defaultValue;
     }
 
+    /**
+     * @param $value
+     */
     public function setValue($value)
     {
         $class = $this->reflectionParameter->getClass();
@@ -57,6 +66,9 @@ class CallbackArgument
         $this->defaultValue = $value;
     }
 
+    /**
+     * @return null|string
+     */
     public function getClassName()
     {
         return $this->reflectionParameter->getClass() ?

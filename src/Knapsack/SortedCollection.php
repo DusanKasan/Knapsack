@@ -2,6 +2,8 @@
 
 namespace Knapsack;
 
+use Knapsack\Callback\Argument;
+use Knapsack\Callback\Callback;
 use Traversable;
 
 class SortedCollection extends Collection
@@ -38,26 +40,32 @@ class SortedCollection extends Collection
 
     private function executeSort($sortCallback)
     {
-        $isUsingKeys = $this->getNumberOfArguments($sortCallback) == 4;
-        $mapped = $this->map(function ($k, $v) {
-            return [$k, $v];
-        })->resetKeys()->toArray();
+        $callback = new Callback($sortCallback);
+        $template = $callback->getArgumentsCount() == 4 ?
+            [Argument::KEY(), Argument::ITEM(), Argument::SECOND_KEY(), Argument::SECOND_ITEM()] :
+            [Argument::ITEM(), Argument::SECOND_ITEM()];
+        $callback->setArgumentTemplate($template);
 
-        if ($isUsingKeys) {
-            uasort(
-                $mapped,
-                function ($a, $b) use ($sortCallback) {
-                    return $sortCallback($a[0], $a[1], $b[0], $b[1]);
-                }
-            );
-        } else {
-            uasort(
-                $mapped,
-                function ($a, $b) use ($sortCallback) {
-                    return $sortCallback($a[1], $b[1]);
-                }
-            );
-        }
+        $mapped = $this
+            ->map(function ($k, $v) {
+                return [$k, $v];
+            })
+            ->resetKeys()
+            ->toArray();
+
+        uasort(
+            $mapped,
+            function ($a, $b) use ($callback) {
+                $templateArguments = [
+                    Argument::KEY => $a[0],
+                    Argument::ITEM => $a[1],
+                    Argument::SECOND_KEY => $b[0],
+                    Argument::SECOND_ITEM => $b[1],
+                ];
+
+                return $callback->execute($templateArguments);
+            }
+        );
 
         $this->input = (new Collection($mapped))->map(function ($v) {
             yield $v[0];

@@ -4,6 +4,7 @@ namespace Knapsack;
 
 use Iterator;
 use IteratorAggregate;
+use Knapsack\Callback\Argument;
 use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\InvalidArgument;
 use RecursiveArrayIterator;
@@ -135,10 +136,18 @@ class Collection implements Iterator
      */
     public function reduce($startValue, callable $reduction)
     {
-        $usesKeys = $this->getNumberOfArguments($reduction) == 3;
+        $callback = new Callback($reduction);
+        $template = $callback->getArgumentsCount() == 3 ?
+            [Argument::INTERMEDIATE_VALUE(), Argument::KEY(), Argument::ITEM()] :
+            [Argument::INTERMEDIATE_VALUE(), Argument::ITEM()];
+        $callback->setArgumentTemplate($template);
 
         foreach ($this as $key => $item) {
-            $startValue = $usesKeys ? $reduction($startValue, $key, $item) : $reduction($startValue, $item);
+            $startValue = $callback->execute([
+                Argument::INTERMEDIATE_VALUE => $startValue,
+                Argument::KEY => $key,
+                Argument::ITEM => $item,
+            ]);
         }
 
         return $startValue;
@@ -753,18 +762,5 @@ class Collection implements Iterator
         return $this->countBy(function ($v) {
             return $v;
         });
-    }
-
-    /**
-     * @param callable $reduction
-     * @return int
-     */
-    protected function getNumberOfArguments(callable $reduction)
-    {
-        if (is_array($reduction) && count($reduction) == 2) {
-            return (new ReflectionMethod($reduction[0], $reduction[1]))->getNumberOfParameters();
-        } else {
-            return (new ReflectionFunction($reduction))->getNumberOfParameters();
-        }
     }
 }

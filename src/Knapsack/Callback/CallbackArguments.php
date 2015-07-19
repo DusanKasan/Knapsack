@@ -24,6 +24,10 @@ class CallbackArguments
         }
     }
 
+    /**
+     * @param array $variables
+     * @return array
+     */
     public function resolve(array $variables = [])
     {
         $result = [];
@@ -45,9 +49,19 @@ class CallbackArguments
         return $result;
     }
 
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->arguments);
+    }
+
+    /**
+     * @param array $templateArguments
+     */
     public function applyTemplate(array $templateArguments)
     {
-        //todo: sizes must match
         for ($i = 0; $i < count($templateArguments) && $i < count($this->arguments); $i++) {
             $this->arguments[$i]->setValue($templateArguments[$i]);
         }

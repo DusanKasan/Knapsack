@@ -22,24 +22,50 @@ class Callback
         $this->callback = $callback;
         $this->arguments = new CallbackArguments($this->getArguments($callback));
 
-        if (!empty($argumentTemplate)) {
-            $this->arguments->applyTemplate($argumentTemplate);
-        } else {
-            $guessedTemplate = $this->guessTemplate($this->arguments);
-            $this->arguments->applyTemplate($guessedTemplate);
-        }
+        $template = $argumentTemplate ?: $this->guessTemplate($this->arguments);
+        $this->arguments->applyTemplate($template);
     }
 
+    /**
+     * @param mixed $key
+     * @param mixed $value
+     * @return mixed
+     */
     public function executeWithKeyAndValue($key, $value)
     {
-        $input = [
+        $templateVariables = [
             Argument::KEY => $key,
             Argument::ITEM => $value,
         ];
 
-        $arguments = $this->arguments->resolve($input);
+        return $this->execute($templateVariables);
+    }
+
+    /**
+     * @param array $templateVariables
+     * @return mixed
+     */
+    public function execute(array $templateVariables = [])
+    {
+        $arguments = $this->arguments->resolve($templateVariables);
 
         return call_user_func_array($this->callback, $arguments);
+    }
+
+    /**
+     * @param array $template
+     */
+    public function setArgumentTemplate(array $template)
+    {
+        $this->arguments->applyTemplate($template);
+    }
+
+    /**
+     * @return int
+     */
+    public function getArgumentsCount()
+    {
+        return $this->arguments->count();
     }
 
     /**
@@ -61,7 +87,8 @@ class Callback
      */
     private function guessTemplate(CallbackArguments $arguments)
     {
-        $argumentCount = count($this->getArguments($this->callback)); //todo: add count method
-        return $argumentCount == 1 ? [Argument::ITEM()] : [Argument::KEY(), Argument::ITEM()];
+        return $this->getArgumentsCount() == 1 ?
+            [Argument::ITEM()] :
+            [Argument::KEY(), Argument::ITEM()];
     }
 }
