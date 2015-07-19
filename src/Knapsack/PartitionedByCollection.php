@@ -2,12 +2,13 @@
 
 namespace Knapsack;
 
+use Knapsack\Callback\Callback;
 use Traversable;
 
 class PartitionedByCollection extends Collection
 {
     /**
-     * @var callable
+     * @var Callback
      */
     private $partitioning;
 
@@ -16,10 +17,6 @@ class PartitionedByCollection extends Collection
      */
     private $key;
 
-    /**
-     * @var bool
-     */
-    private $partitionUsingKeys;
 
     /**
      * @param array|Traversable $input
@@ -28,8 +25,7 @@ class PartitionedByCollection extends Collection
     public function __construct($input, callable $partitioning)
     {
         parent::__construct($input);
-        $this->partitioning = $partitioning;
-        $this->partitionUsingKeys = $this->getNumberOfArguments($partitioning) == 2;
+        $this->partitioning = new Callback($partitioning);
     }
 
     public function rewind()
@@ -45,14 +41,14 @@ class PartitionedByCollection extends Collection
         if ($this->input->valid()) {
             $key = $this->input->key();
             $item = $this->input->current();
-            $lastResult = $this->executePartitioning($key, $item);
+            $lastResult = $this->partitioning->executeWithKeyAndValue($key, $item);
             $this->input->next();
             $buffer[] = [$key, $item];
 
             while ($this->input->valid()) {
                 $key = $this->input->key();
                 $item = $this->input->current();
-                if ($lastResult != $this->executePartitioning($key, $item)) {
+                if ($lastResult != $this->partitioning->executeWithKeyAndValue($key, $item)) {
                     break;
                 }
 
@@ -66,17 +62,6 @@ class PartitionedByCollection extends Collection
             yield $v[0];
             yield $v[1];
         });
-    }
-
-    private function executePartitioning($key, $item)
-    {
-        $partitioning = $this->partitioning;
-
-        if ($this->partitionUsingKeys) {
-            return $partitioning($key, $item);
-        } else {
-            return $partitioning($item);
-        }
     }
 
     public function key()

@@ -37,11 +37,8 @@ class PartitionedCollection extends Collection
 
     public function __construct($input, $numberOfItems, $step = 0, $padding = [])
     {
-        if ($this->canBeConvertedToCollection($input)) {
-            $input = new Collection($input);
-        }
+        parent::__construct($input);
 
-        $this->input = $input;
         $this->numberOfItems = $numberOfItems;
         $this->step = $step ?: $numberOfItems;
         $this->padding = $padding;

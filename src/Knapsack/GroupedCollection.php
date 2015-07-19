@@ -3,12 +3,13 @@
 namespace Knapsack;
 
 use Iterator;
+use Knapsack\Callback\Callback;
 use Traversable;
 
 class GroupedCollection extends Collection
 {
     /**
-     * @var callable
+     * @var Callback
      */
     private $grouping;
 
@@ -25,7 +26,7 @@ class GroupedCollection extends Collection
     {
         parent::__construct($input);
         $this->originalInput = $this->input;
-        $this->grouping = $grouping;
+        $this->grouping = new Callback($grouping);
     }
 
     public function rewind()
@@ -36,11 +37,10 @@ class GroupedCollection extends Collection
 
     private function group()
     {
-        $grouping = $this->grouping;
         $input = [];
 
-        foreach ($this->originalInput as $item) {
-            $key = $grouping($item);
+        foreach ($this->originalInput as $key => $item) {
+            $key = $this->grouping->executeWithKeyAndValue($key, $item);
             $input[$key][] = $item;
         }
 

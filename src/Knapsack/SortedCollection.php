@@ -11,6 +11,9 @@ class SortedCollection extends Collection
      */
     private $sortCallback;
 
+    /**
+     * @var bool
+     */
     private $isSorting = false;
 
     /**

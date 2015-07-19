@@ -4,9 +4,11 @@ namespace Knapsack;
 
 use Iterator;
 use IteratorAggregate;
+use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\InvalidArgument;
 use RecursiveArrayIterator;
 use ReflectionFunction;
+use ReflectionMethod;
 use stdClass;
 use Traversable;
 
@@ -262,12 +264,12 @@ class Collection implements Iterator
      */
     public function indexBy(callable $indexer)
     {
-        $usesKeys = $this->getNumberOfArguments($indexer) == 2;
+        $callback = new Callback($indexer);
 
         return new MappedCollection(
             $this,
-            function ($k, $v) use ($indexer, $usesKeys) {
-                yield $usesKeys ? $indexer($k, $v) : $indexer($v);
+            function ($k, $v) use ($callback) {
+                yield $callback->executeWithKeyAndValue($k, $v);
                 yield $v;
             }
         );
@@ -281,11 +283,10 @@ class Collection implements Iterator
      */
     public function every(callable $predicament)
     {
-        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
+        $callback = new Callback($predicament);
 
         foreach ($this as $k => $v) {
-            $passed = $usesKeys ? $predicament($k, $v) : $predicament($v);
-            if (!$passed) {
+            if (!$callback->executeWithKeyAndValue($k, $v)) {
                 return false;
             }
         }
@@ -301,11 +302,10 @@ class Collection implements Iterator
      */
     public function some(callable $predicament)
     {
-        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
+        $callback = new Callback($predicament);
 
         foreach ($this as $k => $v) {
-            $passed = $usesKeys ? $predicament($k, $v) : $predicament($v);
-            if ($passed) {
+            if ($callback->executeWithKeyAndValue($k, $v)) {
                 return true;
             }
         }
@@ -403,12 +403,7 @@ class Collection implements Iterator
     public function findCollection(callable $filter, $ifNotFound = null)
     {
         $found = $this->find($filter, $ifNotFound);
-
-        if ($this->canBeConvertedToCollection($found)) {
-            $found = new Collection($found);
-        }
-
-        return $found;
+        return new Collection($found);
     }
 
     /**
@@ -421,12 +416,7 @@ class Collection implements Iterator
     public function getCollection($key, $ifNotFound = null)
     {
         $found = $this->get($key, $ifNotFound);
-
-        if ($this->canBeConvertedToCollection($found)) {
-            $found = new Collection($found);
-        }
-
-        return $found;
+        return new Collection($found);
     }
 
     /**
@@ -437,10 +427,10 @@ class Collection implements Iterator
      */
     public function reject(callable $filter)
     {
-        $usesKeys = $this->getNumberOfArguments($filter) == 2;
+        $callback = new Callback($filter);
 
-        return $this->filter(function ($k, $v) use ($filter, $usesKeys) {
-            return !call_user_func_array($filter, $usesKeys ? [$k, $v] : [$v]);
+        return $this->filter(function ($k, $v) use ($callback) {
+            return !$callback->executeWithKeyAndValue($k, $v);
         });
     }
 
@@ -451,9 +441,11 @@ class Collection implements Iterator
      */
     public function keys()
     {
-        return $this->map(function ($k, $v) {
-            return $k;
-        })->resetKeys();
+        return $this
+            ->map(function ($k, $v) {
+                return $k;
+            })
+            ->resetKeys();
     }
 
     /**
@@ -464,11 +456,10 @@ class Collection implements Iterator
      */
     public function interpose($separator)
     {
-        return $this->map(
-            function ($v) use ($separator) {
+        return $this
+            ->map(function ($v) use ($separator) {
                 return [$v, $separator];
-            }
-        )
+            })
             ->flatten(1)
             ->dropLast();
     }
@@ -559,12 +550,12 @@ class Collection implements Iterator
      */
     public function dropWhile(callable $predicament)
     {
-        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
+        $callback = new Callback($predicament);
         $failedAlready = false;
 
-        return $this->reject(function ($k, $v) use ($usesKeys, &$failedAlready, $predicament) {
+        return $this->reject(function ($k, $v) use (&$failedAlready, $callback) {
             if (!$failedAlready) {
-                $failedAlready = call_user_func_array($predicament, $usesKeys ? [$k, $v] : [$v]);
+                $failedAlready = $callback->executeWithKeyAndValue($k, $v);
 
                 return $failedAlready;
             }
@@ -592,13 +583,12 @@ class Collection implements Iterator
      */
     public function takeWhile(callable $predicament)
     {
-        $usesKeys = $this->getNumberOfArguments($predicament) == 2;
+        $callback = new Callback($predicament);
         $failedAlready = false;
 
-        return $this->filter(function ($k, $v) use ($usesKeys, &$failedAlready, $predicament) {
+        return $this->filter(function ($k, $v) use ($callback, &$failedAlready) {
             if (!$failedAlready) {
-                $failedAlready = $usesKeys ? $predicament($k, $v) : $predicament($v);
-
+                $failedAlready = $callback->executeWithKeyAndValue($k, $v);
                 return $failedAlready;
             }
 
@@ -766,22 +756,13 @@ class Collection implements Iterator
     }
 
     /**
-     * @param mixed $item
-     * @return bool
-     */
-    protected function canBeConvertedToCollection($item)
-    {
-        return is_array($item) || ($item instanceof Traversable && !($item instanceof Collection));
-    }
-
-    /**
      * @param callable $reduction
      * @return int
      */
     protected function getNumberOfArguments(callable $reduction)
     {
         if (is_array($reduction) && count($reduction) == 2) {
-            return (new \ReflectionMethod($reduction[0], $reduction[1]))->getNumberOfParameters();
+            return (new ReflectionMethod($reduction[0], $reduction[1]))->getNumberOfParameters();
         } else {
             return (new ReflectionFunction($reduction))->getNumberOfParameters();
         }

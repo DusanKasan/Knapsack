@@ -2,11 +2,14 @@
 
 namespace Knapsack;
 
+use Knapsack\Callback\Callback;
 use Traversable;
 
 class ForEachCollection extends Collection
 {
-    private $usesKeys;
+    /**
+     * @var Callback
+     */
     private $callback;
 
     /**
@@ -16,29 +19,14 @@ class ForEachCollection extends Collection
     public function __construct($input, callable $callback)
     {
         parent::__construct($input);
-        $this->callback = $callback;
-        $this->usesKeys = $this->getNumberOfArguments($callback) == 2;
+        $this->callback = new Callback($callback);
     }
 
     public function current()
     {
-        $this->executeCallback($this->key(), parent::current());
+        $current = parent::current();
+        $this->callback->executeWithKeyAndValue(parent::key(), $current);
 
-        return parent::current();
-    }
-
-    /**
-     * @param mixed $key
-     * @param mixed $item
-     * @return mixed
-     */
-    private function executeCallback($key, $item)
-    {
-        $callback = $this->callback;
-        if ($this->usesKeys) {
-            return $callback($key, $item);
-        } else {
-            return $callback($item);
-        }
+        return $current;
     }
 }

@@ -2,19 +2,15 @@
 
 namespace Knapsack;
 
+use Knapsack\Callback\Callback;
 use Traversable;
 
 class FilteredCollection extends Collection
 {
     /**
-     * @var callable
+     * @var Callback
      */
     private $filterCallback;
-
-    /**
-     * @var bool
-     */
-    private $filterUsingKeys;
 
     /**
      * @param array|Traversable $input
@@ -23,31 +19,18 @@ class FilteredCollection extends Collection
     public function __construct($input, callable $filter)
     {
         parent::__construct($input);
-        $this->filterCallback = $filter;
-        $this->filterUsingKeys = (new \ReflectionFunction($filter))->getNumberOfParameters() == 2;
+        $this->filterCallback = new Callback($filter);
     }
 
     public function valid()
     {
-        while (!$this->executeFilter($this->key(), $this->current()) && parent::valid()) {
+        while (
+            parent::valid() &&
+            !$this->filterCallback->executeWithKeyAndValue($this->key(), $this->current())
+        ) {
             $this->next();
         }
 
         return parent::valid();
-    }
-
-    /**
-     * @param mixed $key
-     * @param mixed $item
-     * @return mixed
-     */
-    private function executeFilter($key, $item)
-    {
-        $filter = $this->filterCallback;
-        if ($this->filterUsingKeys) {
-            return $filter($key, $item);
-        } else {
-            return $filter($item);
-        }
     }
 }

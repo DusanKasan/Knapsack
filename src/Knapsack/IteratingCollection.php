@@ -3,19 +3,26 @@
 namespace Knapsack;
 
 use Generator;
+use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\NoMoreItems;
 use Traversable;
 
 class IteratingCollection extends Collection
 {
     /**
-     * @var callable
+     * @var Callback
      */
     private $followedCallback;
 
+    /**
+     * @var mixed
+     */
     private $key;
+
+    /**
+     * @var mixed
+     */
     private $item;
-    private $callbackUsesKeys;
 
     /**
      * @param array|Traversable $input
@@ -24,8 +31,7 @@ class IteratingCollection extends Collection
     public function __construct($input, callable $followedCallback)
     {
         parent::__construct($input);
-        $this->followedCallback = $followedCallback;
-        $this->callbackUsesKeys = $this->getNumberOfArguments($followedCallback) == 2;
+        $this->followedCallback = new Callback($followedCallback);
     }
 
     public function valid()
@@ -50,12 +56,7 @@ class IteratingCollection extends Collection
      */
     private function executeMapping($key, $item)
     {
-        $mapping = $this->followedCallback;
-        if ($this->callbackUsesKeys) {
-            $mapped = $mapping($key, $item);
-        } else {
-            $mapped = $mapping($item);
-        }
+        $mapped = $this->followedCallback->executeWithKeyAndValue($key, $item);
 
         if ($mapped instanceof Generator) {
             $this->resolveGeneratorMapping($key, $mapped);

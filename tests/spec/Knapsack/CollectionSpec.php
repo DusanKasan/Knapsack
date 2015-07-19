@@ -6,10 +6,10 @@ use ArrayIterator;
 use DOMXPath;
 use Iterator;
 use IteratorAggregate;
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\Exceptions\InvalidArgument;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 /**
  * @mixin Collection

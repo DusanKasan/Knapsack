@@ -42,4 +42,15 @@ class FilteredCollectionSpec extends ObjectBehavior
 
         $this->toArray()->shouldReturn([3 => 4]);
     }
+
+    function it_can_filter_and_automatically_convert_to_collection_in_callback()
+    {
+        $input = [[1, 2], [2, 3, 4]];
+        $filter = function (Collection $c) {
+            return $c->size() == 2;
+        };
+        $this->beConstructedWith($input, $filter);
+
+        $this->toArray()->shouldReturn([[1,2]]);
+    }
 }

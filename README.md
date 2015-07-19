@@ -790,7 +790,6 @@ $collection->toArray(); //[1, 3, 3, 2]
 ```
 
 ## Todo    
-- any callback passed with an argument with Collection typehint, should have that argument converted from array|Traversable to Collection if possible before passing to that function
 - multiple collections can be passed to lets say concat
 - implement somemthing like this (in a function executor object?):
     ```php
