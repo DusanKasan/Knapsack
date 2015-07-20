@@ -74,6 +74,22 @@ $result = $collection
 echo $result; //6
 ```
 
+### Arguments passed to callbacks typehinted as Collection are converted automatically
+Prettified basic map reduce from before.
+
+```php
+$collection = new Collection([[1, 2], [3, 4, 5]]);
+$result = $collection
+    ->map(function (Collection $i) {
+        return $i->size();
+    })
+    ->reduce(0, function($tmp, $v) {
+        return $tmp+$v;
+    });
+        
+echo $result; //5
+```
+
 ### Collections are immutable
 ```php
 function multiplyBy2($v)
@@ -791,11 +807,10 @@ $collection->toArray(); //[1, 3, 3, 2]
 
 ## Todo    
 - multiple collections can be passed to lets say concat
-- implement somemthing like this (in a function executor object?):
+- implement something like this (in a function executor object?):
     ```php
         $a = new Collection(['as as', 'as ds']);
         $a->mapcat('explode', [' ', Arg::value()])
         $a->toArray() == ['as','as','as','ds'];
     ```
-- write some scenario tests (multiple chained methods) and move examples into these tests
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
