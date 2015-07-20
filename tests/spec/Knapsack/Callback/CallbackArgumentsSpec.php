@@ -16,6 +16,7 @@ class CallbackArgumentsSpec extends ObjectBehavior
     function let()
     {
         $function = function($a = 1, $b = 2) {
+            return $a + $b;
         };
 
         $reflectionParameter1 = new ReflectionParameter($function, 0);

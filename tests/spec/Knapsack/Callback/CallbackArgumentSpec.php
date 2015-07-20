@@ -14,14 +14,10 @@ use ReflectionParameter;
  */
 class CallbackArgumentSpec extends ObjectBehavior
 {
-    /**
-     * @var ReflectionParameter
-     */
-    private $reflectionParameter;
-
     function let()
     {
         $function = function($a) {
+            return $a;
         };
 
         $reflectionParameter = new ReflectionParameter($function, 0);
@@ -41,6 +37,7 @@ class CallbackArgumentSpec extends ObjectBehavior
     function it_can_check_and_get_default_value_of_original_argument()
     {
         $function = function($a = 1) {
+            return $a;
         };
 
         $reflectionParameter = new ReflectionParameter($function, 0);
@@ -62,6 +59,7 @@ class CallbackArgumentSpec extends ObjectBehavior
     function it_can_overwrite_original_default_value()
     {
         $function = function($a = 1) {
+            return $a;
         };
 
         $reflectionParameter = new ReflectionParameter($function, 0);
@@ -77,6 +75,7 @@ class CallbackArgumentSpec extends ObjectBehavior
     function it_will_convert_the_default_value_to_collection_if_hinted_and_possible()
     {
         $function = function(Collection $a) {
+            return $a;
         };
 
         $reflectionParameter = new ReflectionParameter($function, 0);
