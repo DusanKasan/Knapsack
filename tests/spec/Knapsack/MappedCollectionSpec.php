@@ -2,10 +2,10 @@
 
 namespace spec\Knapsack;
 
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\MappedCollection;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 use tests\helpers\Knapsack\PlusOneAdder;
 
 /**
@@ -75,5 +75,36 @@ class MappedCollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 2], [PlusOneAdder::class, 'staticMethod']);
         $this->toArray()->shouldReturn([2, 3]);
+    }
+
+    function it_will_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith(
+            [[1, 2], [3, 4, 5], [6]],
+            function (Collection $i) {
+                return $i->size();
+            }
+        );
+
+        $this
+            ->toArray()
+            ->shouldReturn([2, 3, 1]);
+    }
+
+    function it_can_work_with_argument_template()
+    {
+        $function = function ($item, $delta) {
+            return $item + $delta;
+        };
+
+        $this->beConstructedWith(
+            [1, 2, 3, 4],
+            $function,
+            [Argument::item(), 1]
+        );
+
+        $this
+            ->toArray()
+            ->shouldReturn([2, 3, 4, 5]);
     }
 }

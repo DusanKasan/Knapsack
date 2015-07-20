@@ -15,11 +15,12 @@ class FilteredCollection extends Collection
     /**
      * @param array|Traversable $input
      * @param callable $filter
+     * @param array $argumentTemplate
      */
-    public function __construct($input, callable $filter)
+    public function __construct($input, callable $filter, array $argumentTemplate = [])
     {
         parent::__construct($input);
-        $this->filterCallback = new Callback($filter);
+        $this->filterCallback = new Callback($filter, $argumentTemplate);
     }
 
     public function valid()

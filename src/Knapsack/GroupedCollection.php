@@ -21,12 +21,13 @@ class GroupedCollection extends Collection
     /**
      * @param array|Traversable $input
      * @param callable $grouping
+     * @param array $argumentTemplate
      */
-    public function __construct($input, callable $grouping)
+    public function __construct($input, callable $grouping, array $argumentTemplate = [])
     {
         parent::__construct($input);
         $this->originalInput = $this->input;
-        $this->grouping = new Callback($grouping);
+        $this->grouping = new Callback($grouping, $argumentTemplate);
     }
 
     public function rewind()

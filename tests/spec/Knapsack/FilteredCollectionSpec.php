@@ -2,10 +2,10 @@
 
 namespace spec\Knapsack;
 
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\FilteredCollection;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 /**
  * @mixin FilteredCollection
@@ -52,5 +52,22 @@ class FilteredCollectionSpec extends ObjectBehavior
         $this->beConstructedWith($input, $filter);
 
         $this->toArray()->shouldReturn([[1, 2]]);
+    }
+
+    function it_can_work_with_argument_template()
+    {
+        $function = function ($item, $delta) {
+            return ($item + $delta) % 2 == 0;
+        };
+
+        $this->beConstructedWith(
+            [1, 2, 3, 4],
+            $function,
+            [Argument::item(), 1]
+        );
+
+        $this
+            ->toArray()
+            ->shouldReturn([1, 2 => 3]);
     }
 }

@@ -86,11 +86,12 @@ class Collection implements Iterator
      * Returns a lazy collection of items for which $filter returned true.
      *
      * @param callable $filter
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function filter(callable $filter)
+    public function filter(callable $filter, array $argumentTemplate = [])
     {
-        return new FilteredCollection($this, $filter);
+        return new FilteredCollection($this, $filter, $argumentTemplate);
     }
 
     /**
@@ -118,11 +119,12 @@ class Collection implements Iterator
      * Returns collection where each key/item is changed to the output of executing $mapping on each key/item. If you wish to modify keys, yield 2 values in $mapping. First is key, second is item.
      *
      * @param callable $mapping
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function map(callable $mapping)
+    public function map(callable $mapping, array $argumentTemplate = [])
     {
-        return new MappedCollection($this, $mapping);
+        return new MappedCollection($this, $mapping, $argumentTemplate);
     }
 
     /**
@@ -130,11 +132,12 @@ class Collection implements Iterator
      *
      * @param mixed $startValue
      * @param callable $reduction Must take 2 arguments, intermediate value and item from the iterator.
+     * @param array $argumentTemplate
      * @return mixed
      */
-    public function reduce($startValue, callable $reduction)
+    public function reduce($startValue, callable $reduction, array $argumentTemplate = [])
     {
-        $callback = new Callback($reduction);
+        $callback = new Callback($reduction, $argumentTemplate);
         $template = $callback->getArgumentsCount() == 3 ?
             [Argument::intermediateValue(), Argument::key(), Argument::item()] :
             [Argument::intermediateValue(), Argument::item()];
@@ -166,11 +169,12 @@ class Collection implements Iterator
      * Returns collection sorted using $sortCallback($item1, $item2). $sortCallback should return true if first item is larger than the second and false otherwise.
      *
      * @param callable $sortCallback
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function sort(callable $sortCallback)
+    public function sort(callable $sortCallback, array $argumentTemplate = [])
     {
-        return new SortedCollection($this, $sortCallback);
+        return new SortedCollection($this, $sortCallback, $argumentTemplate);
     }
 
     /**
@@ -189,22 +193,24 @@ class Collection implements Iterator
      * Returns collection which items are separated into groups indexed by the return value of $grouping.
      *
      * @param callable $differentiator
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function groupBy(callable $differentiator)
+    public function groupBy(callable $differentiator, array $argumentTemplate = [])
     {
-        return new GroupedCollection($this, $differentiator);
+        return new GroupedCollection($this, $differentiator, $argumentTemplate);
     }
 
     /**
      * Returns a lazy collection in which ca$callback is executed for each item. $callback could take 1 argument (the item) or 2 arguments (key, item).
      *
      * @param callable $callback
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function each(callable $callback)
+    public function each(callable $callback, array $argumentTemplate = [])
     {
-        return new ForEachCollection($this, $callback);
+        return new ForEachCollection($this, $callback, $argumentTemplate);
     }
 
     /**
@@ -239,11 +245,12 @@ class Collection implements Iterator
      *
      * @param callable $filter
      * @param mixed|null $ifNotFound
+     * @param array $argumentTemplate
      * @return mixed
      */
-    public function find(callable $filter, $ifNotFound = null)
+    public function find(callable $filter, $ifNotFound = null, array $argumentTemplate = [])
     {
-        $filtered = new FilteredCollection($this, $filter);
+        $filtered = new FilteredCollection($this, $filter, $argumentTemplate);
 
         foreach ($filtered as $item) {
             return $item;
@@ -256,20 +263,22 @@ class Collection implements Iterator
      * Returns a collection of items whose keys are the return values of $differentiator and values are the number of items in this collection for which the $differentiator returned this value.
      *
      * @param callable $differentiator
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function countBy(callable $differentiator)
+    public function countBy(callable $differentiator, array $argumentTemplate = [])
     {
-        return new CountByCollection($this, $differentiator);
+        return new CountByCollection($this, $differentiator, $argumentTemplate);
     }
 
     /**
      * Returns a lazy collection by changing keys of this collection for each item to the result of $indexer for that key/value.
      *
      * @param callable $indexer
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function indexBy(callable $indexer)
+    public function indexBy(callable $indexer, array $argumentTemplate = [])
     {
         $callback = new Callback($indexer);
 
@@ -278,7 +287,8 @@ class Collection implements Iterator
             function ($k, $v) use ($callback) {
                 yield $callback->executeWithKeyAndValue($k, $v);
                 yield $v;
-            }
+            },
+            $argumentTemplate
         );
     }
 
@@ -286,11 +296,12 @@ class Collection implements Iterator
      * Returns true if $predicament returns true for every item in this collection, false otherwise.
      *
      * @param callable $predicament
+     * @param array $argumentTemplate
      * @return bool
      */
-    public function every(callable $predicament)
+    public function every(callable $predicament, array $argumentTemplate = [])
     {
-        $callback = new Callback($predicament);
+        $callback = new Callback($predicament, $argumentTemplate);
 
         foreach ($this as $k => $v) {
             if (!$callback->executeWithKeyAndValue($k, $v)) {
@@ -305,11 +316,12 @@ class Collection implements Iterator
      * Returns true if $predicament returns true for at least one item in this collection, false otherwise.
      *
      * @param callable $predicament
+     * @param array $argumentTemplate
      * @return bool
      */
-    public function some(callable $predicament)
+    public function some(callable $predicament, array $argumentTemplate = [])
     {
-        $callback = new Callback($predicament);
+        $callback = new Callback($predicament, $argumentTemplate);
 
         foreach ($this as $k => $v) {
             if ($callback->executeWithKeyAndValue($k, $v)) {
@@ -348,11 +360,12 @@ class Collection implements Iterator
      *
      * @param mixed $startValue
      * @param callable $reduction Must take 2 arguments, intermediate value and item from the iterator.
+     * @param array $argumentTemplate
      * @return mixed
      */
-    public function reduceRight($startValue, callable $reduction)
+    public function reduceRight($startValue, callable $reduction, array $argumentTemplate = [])
     {
-        return $this->reverse()->reduce($startValue, $reduction);
+        return $this->reverse()->reduce($startValue, $reduction, $argumentTemplate);
     }
 
     /**
@@ -393,11 +406,12 @@ class Collection implements Iterator
      * If you wish to pass the key, you must yield 2 values from $iterator, first is key, second is item.
      *
      * @param callable $iterator
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function iterate(callable $iterator)
+    public function iterate(callable $iterator, array $argumentTemplate = [])
     {
-        return new IteratingCollection($this, $iterator);
+        return new IteratingCollection($this, $iterator, $argumentTemplate);
     }
 
     /**
@@ -405,11 +419,12 @@ class Collection implements Iterator
      *
      * @param callable $filter
      * @param mixed|null $ifNotFound
+     * @param array $argumentTemplate
      * @return mixed
      */
-    public function findCollection(callable $filter, $ifNotFound = null)
+    public function findCollection(callable $filter, $ifNotFound = null, array $argumentTemplate = [])
     {
-        $found = $this->find($filter, $ifNotFound);
+        $found = $this->find($filter, $ifNotFound, $argumentTemplate);
 
         return new Collection($found);
     }
@@ -432,15 +447,16 @@ class Collection implements Iterator
      * Returns a lazy collection without elements matched by $filter. If you wish to work with keys, pass a callable that has 2 input values ($key, $value).
      *
      * @param callable $filter
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function reject(callable $filter)
+    public function reject(callable $filter, array $argumentTemplate = [])
     {
         $callback = new Callback($filter);
 
         return $this->filter(function ($k, $v) use ($callback) {
             return !$callback->executeWithKeyAndValue($k, $v);
-        });
+        }, $argumentTemplate);
     }
 
     /**
@@ -555,9 +571,10 @@ class Collection implements Iterator
      * Returns a lazy collection by removing items from this collection until first item for which $predicament returns false.
      *
      * @param callable $predicament
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function dropWhile(callable $predicament)
+    public function dropWhile(callable $predicament, array $argumentTemplate = [])
     {
         $callback = new Callback($predicament);
         $failedAlready = false;
@@ -570,27 +587,29 @@ class Collection implements Iterator
             }
 
             return false;
-        });
+        }, $argumentTemplate);
     }
 
     /**
      * Returns a lazy collection which is a result of calling map($mapper) and then flatten(1)
      *
      * @param callable $mapper
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function mapcat(callable $mapper)
+    public function mapcat(callable $mapper, array $argumentTemplate = [])
     {
-        return $this->map($mapper)->flatten(1);
+        return $this->map($mapper, $argumentTemplate)->flatten(1);
     }
 
     /**
      * Returns a lazy collection of items from the start of the collection until the first item for which $predicament returns false.
      *
      * @param callable $predicament
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function takeWhile(callable $predicament)
+    public function takeWhile(callable $predicament, array $argumentTemplate = [])
     {
         $callback = new Callback($predicament);
         $failedAlready = false;
@@ -603,7 +622,7 @@ class Collection implements Iterator
             }
 
             return false;
-        });
+        }, $argumentTemplate);
     }
 
     /**
@@ -621,11 +640,15 @@ class Collection implements Iterator
      * Returns a collection of [takeWhile($predicament), dropWhile($predicament]
      *
      * @param callable $predicament
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function splitWith(callable $predicament)
+    public function splitWith(callable $predicament, array $argumentTemplate = [])
     {
-        return new Collection([$this->takeWhile($predicament), $this->dropWhile($predicament)]);
+        return new Collection([
+            $this->takeWhile($predicament, $argumentTemplate),
+            $this->dropWhile($predicament, $argumentTemplate)
+        ]);
     }
 
     /**
@@ -654,15 +677,16 @@ class Collection implements Iterator
      *
      * @param mixed $startValue
      * @param callable $reduction
+     * @param array $argumentTemplate
      * @return Collection
      */
-    public function reductions($startValue, callable $reduction)
+    public function reductions($startValue, callable $reduction, array $argumentTemplate = [])
     {
         return $this->map(function ($item) use (&$startValue, $reduction) {
             $startValue = $reduction($startValue, $item);
 
             return $startValue;
-        });
+        }, $argumentTemplate);
     }
 
     /**
@@ -724,11 +748,12 @@ class Collection implements Iterator
      * Creates a lazy collection of collections created by partitioning this collection every time $partitioning will return different result.
      *
      * @param callable $partitioning
+     * @param array $argumentTemplate
      * @return PartitionedByCollection
      */
-    public function partitionBy(callable $partitioning)
+    public function partitionBy(callable $partitioning, array $argumentTemplate = [])
     {
-        return new PartitionedByCollection($this, $partitioning);
+        return new PartitionedByCollection($this, $partitioning, $argumentTemplate);
     }
 
     /**

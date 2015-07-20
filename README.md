@@ -74,9 +74,7 @@ $result = $collection
 echo $result; //6
 ```
 
-### Arguments passed to callbacks typehinted as Collection are converted automatically
-Prettified basic map reduce from before.
-
+### Callback arguments typehinted as Collection are converted automatically
 ```php
 $collection = new Collection([[1, 2], [3, 4, 5]]);
 $result = $collection
@@ -88,6 +86,14 @@ $result = $collection
     });
         
 echo $result; //5
+```
+
+### Can execute callback with argument templates
+```php
+$collection = new Collection([[1, 2], [3, 4, 5]]);
+$result = $collection
+    ->map('implode', ['', Argument::item()])
+    ->toArray(); //[12, 345]        
 ```
 
 ### Collections are immutable
@@ -807,10 +813,5 @@ $collection->toArray(); //[1, 3, 3, 2]
 
 ## Todo    
 - multiple collections can be passed to lets say concat
-- implement something like this (in a function executor object?):
-    ```php
-        $a = new Collection(['as as', 'as ds']);
-        $a->mapcat('explode', [' ', Arg::value()])
-        $a->toArray() == ['as','as','as','ds'];
-    ```
+- test/spec argument templates for Collection methods
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code

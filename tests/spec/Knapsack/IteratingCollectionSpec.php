@@ -2,11 +2,11 @@
 
 namespace spec\Knapsack;
 
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\Exceptions\NoMoreItems;
 use Knapsack\IteratingCollection;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 /**
  * @mixin IteratingCollection
@@ -107,5 +107,40 @@ class IteratingCollectionSpec extends ObjectBehavior
         $this->current()->shouldReturn([1, 2]);
         $this->next();
         $this->valid()->shouldReturn(false);
+    }
+
+    function it_will_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith(
+            [[1]],
+            function (Collection $i) {
+                return [$i->get(0) + 1];
+            }
+        );
+
+        $this
+            ->take(3)
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([[1], [2], [3]]);
+    }
+
+    function it_can_work_with_argument_template()
+    {
+        $function = function ($item, $delta) {
+            return $item + $delta;
+        };
+
+        $this->beConstructedWith(
+            [1],
+            $function,
+            [Argument::item(), 1]
+        );
+
+        $this
+            ->take(3)
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([1, 2, 3]);
     }
 }

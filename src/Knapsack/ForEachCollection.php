@@ -15,11 +15,12 @@ class ForEachCollection extends Collection
     /**
      * @param array|Traversable $input
      * @param callable $callback
+     * @param array $argumentTemplate
      */
-    public function __construct($input, callable $callback)
+    public function __construct($input, callable $callback, array $argumentTemplate = [])
     {
         parent::__construct($input);
-        $this->callback = new Callback($callback);
+        $this->callback = new Callback($callback, $argumentTemplate);
     }
 
     public function current()

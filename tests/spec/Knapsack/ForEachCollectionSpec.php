@@ -3,10 +3,10 @@
 namespace spec\Knapsack;
 
 use DOMXPath;
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\ForEachCollection;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 /**
  * @mixin ForEachCollection
@@ -47,5 +47,32 @@ class ForEachCollectionSpec extends ObjectBehavior
 
         $this->xpath->query('0asd')->shouldBeCalled();
         $this->toArray()->shouldReturn([$this->xpath]);
+    }
+
+    function it_will_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith(
+            [[1, 2], [3, 4, 5], [6]],
+            function (Collection $i) {
+                $i->size();
+            }
+        );
+    }
+
+    function it_can_work_with_argument_template(DOMXPath $xpath)
+    {
+        $xpath->evaluate(1)->shouldBeCalled();
+
+        $function = function (DOMXPath $item, $delta) {
+            return $item->evaluate($delta);
+        };
+
+        $this->beConstructedWith(
+            [$xpath],
+            $function,
+            [Argument::item(), 1]
+        );
+
+        $this->toArray();
     }
 }

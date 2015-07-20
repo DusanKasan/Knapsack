@@ -2,10 +2,10 @@
 
 namespace spec\Knapsack;
 
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\SortedCollection;
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
 
 /**
  * @mixin SortedCollection
@@ -41,5 +41,38 @@ class SortedCollectionSpec extends ObjectBehavior
 
         $this->toArray()
             ->shouldReturn([2 => 2, 1 => 1, 0 => 3]);
+    }
+
+    function it_will_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith(
+            [[1, 2], [3, 4, 5], [6]],
+            function (Collection $a, Collection $b) {
+                return $a->size() > $b->size();
+            }
+        );
+
+        $this
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([[6], [1, 2], [3, 4, 5]]);
+    }
+
+    function it_can_work_with_argument_template()
+    {
+        $function = function ($a, $b, $delta) {
+            return $a + $delta < $b;
+        };
+
+        $this->beConstructedWith(
+            [1, 2, 3, 4],
+            $function,
+            [Argument::item(), Argument::secondItem(), 2]
+        );
+
+        $this
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([4, 3, 2, 1]);
     }
 }
