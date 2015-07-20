@@ -53,10 +53,11 @@ class CallbackArgument
      */
     public function setValue($value)
     {
+
         $class = $this->reflectionParameter->getClass();
         if (
             $class &&
-            $class->getName() == Collection::class &&
+            $class->name == Collection::class &&
             !($value instanceof Argument)
         ) {
             $value = new Collection($value);
@@ -72,7 +73,7 @@ class CallbackArgument
     public function getClassName()
     {
         return $this->reflectionParameter->getClass() ?
-            $this->reflectionParameter->getClass()->getName() :
+            $this->reflectionParameter->getClass()->name :
             null;
     }
 }
