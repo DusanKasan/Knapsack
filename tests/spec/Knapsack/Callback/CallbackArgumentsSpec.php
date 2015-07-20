@@ -64,7 +64,7 @@ class CallbackArgumentsSpec extends ObjectBehavior
 
     function it_can_resolve_arguments_to_template()
     {
-        $this->applyTemplate([2, Argument::KEY()]);
+        $this->applyTemplate([2, Argument::key()]);
         $this->resolve([Argument::KEY => 1])->shouldReturn([2, 1]);
     }
 }

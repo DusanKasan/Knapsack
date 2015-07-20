@@ -11,17 +11,17 @@ class MappedCollection extends Collection
     /**
      * @var Callback
      */
-    private $mapping;
+    protected $mapping;
 
     /**
      * @var mixed
      */
-    private $key;
+    protected $key;
 
     /**
      * @var mixed
      */
-    private $item;
+    protected $item;
 
     /**
      * @param array|Traversable $input
@@ -48,7 +48,7 @@ class MappedCollection extends Collection
      * @param mixed $key
      * @param mixed $item
      */
-    private function executeMapping($key, $item)
+    protected function executeMapping($key, $item)
     {
         $mapped = $this->mapping->executeWithKeyAndValue($key, $item);
 
@@ -64,7 +64,7 @@ class MappedCollection extends Collection
      * @param mixed $key
      * @param Generator $mapped
      */
-    private function resolveGeneratorMapping($key, Generator $mapped)
+    protected function resolveGeneratorMapping($key, Generator $mapped)
     {
         $arr = iterator_to_array($mapped);
 

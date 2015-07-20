@@ -51,6 +51,6 @@ class FilteredCollectionSpec extends ObjectBehavior
         };
         $this->beConstructedWith($input, $filter);
 
-        $this->toArray()->shouldReturn([[1,2]]);
+        $this->toArray()->shouldReturn([[1, 2]]);
     }
 }

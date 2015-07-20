@@ -26,7 +26,7 @@ class Argument
     /**
      * @return Argument
      */
-    public static function KEY()
+    public static function key()
     {
         return new self(self::KEY);
     }
@@ -34,7 +34,7 @@ class Argument
     /**
      * @return Argument
      */
-    public static function ITEM()
+    public static function item()
     {
         return new self(self::ITEM);
     }
@@ -42,7 +42,7 @@ class Argument
     /**
      * @return Argument
      */
-    public static function SECOND_KEY()
+    public static function secondKey()
     {
         return new self(self::SECOND_KEY);
     }
@@ -50,7 +50,7 @@ class Argument
     /**
      * @return Argument
      */
-    public static function SECOND_ITEM()
+    public static function secondItem()
     {
         return new self(self::SECOND_ITEM);
     }
@@ -58,7 +58,7 @@ class Argument
     /**
      * @return Argument
      */
-    public static function INTERMEDIATE_VALUE()
+    public static function intermediateValue()
     {
         return new self(self::INTERMEDIATE_VALUE);
     }

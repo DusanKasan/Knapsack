@@ -30,5 +30,5 @@ build_failure_conditions:
     - 'elements.rating(<= B).exists'                # No classes/methods with a rating of B or worse
     - 'issues.label("coding-style").exists'         # No coding style issues allowed
     - 'issues.severity(>= INFO).exists'             # New issues of major or higher severity
-    - 'project.metric("scrutinizer.quality", < 10)' # Code Quality Rating drops below 10
+    - 'project.metric("scrutinizer.quality", < 8.5)' # Code Quality Rating drops below 8.5
     - 'project.metric("scrutinizer.test_coverage", < 1)' # Code Coverage drops below 100%

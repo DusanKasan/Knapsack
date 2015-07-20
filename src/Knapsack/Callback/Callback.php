@@ -27,6 +27,38 @@ class Callback
     }
 
     /**
+     * @param callable $callback
+     * @return \ReflectionParameter[]
+     */
+    private function getArguments(callable $callback)
+    {
+        if (is_array($callback) && count($callback) == 2) {
+            return (new ReflectionMethod($callback[0], $callback[1]))->getParameters();
+        } else {
+            return (new ReflectionFunction($callback))->getParameters();
+        }
+    }
+
+    /**
+     * @param CallbackArguments $arguments
+     * @return array
+     */
+    private function guessTemplate(CallbackArguments $arguments)
+    {
+        return $this->getArgumentsCount() == 1 ?
+            [Argument::item()] :
+            [Argument::key(), Argument::item()];
+    }
+
+    /**
+     * @return int
+     */
+    public function getArgumentsCount()
+    {
+        return $this->arguments->count();
+    }
+
+    /**
      * @param mixed $key
      * @param mixed $value
      * @return mixed
@@ -58,37 +90,5 @@ class Callback
     public function setArgumentTemplate(array $template)
     {
         $this->arguments->applyTemplate($template);
-    }
-
-    /**
-     * @return int
-     */
-    public function getArgumentsCount()
-    {
-        return $this->arguments->count();
-    }
-
-    /**
-     * @param callable $callback
-     * @return \ReflectionParameter[]
-     */
-    private function getArguments(callable $callback)
-    {
-        if (is_array($callback) && count($callback) == 2) {
-            return (new ReflectionMethod($callback[0], $callback[1]))->getParameters();
-        } else {
-            return (new ReflectionFunction($callback))->getParameters();
-        }
-    }
-
-    /**
-     * @param CallbackArguments $arguments
-     * @return array
-     */
-    private function guessTemplate(CallbackArguments $arguments)
-    {
-        return $this->getArgumentsCount() == 1 ?
-            [Argument::ITEM()] :
-            [Argument::KEY(), Argument::ITEM()];
     }
 }

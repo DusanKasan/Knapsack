@@ -42,8 +42,8 @@ class SortedCollection extends Collection
     {
         $callback = new Callback($sortCallback);
         $template = $callback->getArgumentsCount() == 4 ?
-            [Argument::KEY(), Argument::ITEM(), Argument::SECOND_KEY(), Argument::SECOND_ITEM()] :
-            [Argument::ITEM(), Argument::SECOND_ITEM()];
+            [Argument::key(), Argument::item(), Argument::secondKey(), Argument::secondItem()] :
+            [Argument::item(), Argument::secondItem()];
         $callback->setArgumentTemplate($template);
 
         $mapped = $this

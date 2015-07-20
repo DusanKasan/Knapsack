@@ -8,8 +8,6 @@ use Knapsack\Callback\Argument;
 use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\InvalidArgument;
 use RecursiveArrayIterator;
-use ReflectionFunction;
-use ReflectionMethod;
 use stdClass;
 use Traversable;
 
@@ -138,8 +136,8 @@ class Collection implements Iterator
     {
         $callback = new Callback($reduction);
         $template = $callback->getArgumentsCount() == 3 ?
-            [Argument::INTERMEDIATE_VALUE(), Argument::KEY(), Argument::ITEM()] :
-            [Argument::INTERMEDIATE_VALUE(), Argument::ITEM()];
+            [Argument::intermediateValue(), Argument::key(), Argument::item()] :
+            [Argument::intermediateValue(), Argument::item()];
         $callback->setArgumentTemplate($template);
 
         foreach ($this as $key => $item) {
@@ -412,6 +410,7 @@ class Collection implements Iterator
     public function findCollection(callable $filter, $ifNotFound = null)
     {
         $found = $this->find($filter, $ifNotFound);
+
         return new Collection($found);
     }
 
@@ -425,6 +424,7 @@ class Collection implements Iterator
     public function getCollection($key, $ifNotFound = null)
     {
         $found = $this->get($key, $ifNotFound);
+
         return new Collection($found);
     }
 
@@ -598,6 +598,7 @@ class Collection implements Iterator
         return $this->filter(function ($k, $v) use ($callback, &$failedAlready) {
             if (!$failedAlready) {
                 $failedAlready = $callback->executeWithKeyAndValue($k, $v);
+
                 return $failedAlready;
             }
 

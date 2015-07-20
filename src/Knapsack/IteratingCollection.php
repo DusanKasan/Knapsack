@@ -2,12 +2,11 @@
 
 namespace Knapsack;
 
-use Generator;
 use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\NoMoreItems;
 use Traversable;
 
-class IteratingCollection extends Collection
+class IteratingCollection extends MappedCollection
 {
     /**
      * @var Callback
@@ -15,22 +14,12 @@ class IteratingCollection extends Collection
     private $followedCallback;
 
     /**
-     * @var mixed
-     */
-    private $key;
-
-    /**
-     * @var mixed
-     */
-    private $item;
-
-    /**
      * @param array|Traversable $input
      * @param callable $followedCallback
      */
     public function __construct($input, callable $followedCallback)
     {
-        parent::__construct($input);
+        parent::__construct($input, $followedCallback);
         $this->followedCallback = new Callback($followedCallback);
     }
 
@@ -48,48 +37,5 @@ class IteratingCollection extends Collection
         }
 
         return true;
-    }
-
-    /**
-     * @param mixed $key
-     * @param mixed $item
-     */
-    private function executeMapping($key, $item)
-    {
-        $mapped = $this->followedCallback->executeWithKeyAndValue($key, $item);
-
-        if ($mapped instanceof Generator) {
-            $this->resolveGeneratorMapping($key, $mapped);
-        } else {
-            $this->key = $key;
-            $this->item = $mapped;
-        }
-    }
-
-    /**
-     * @param mixed $key
-     * @param Generator $mapped
-     */
-    private function resolveGeneratorMapping($key, Generator $mapped)
-    {
-        $arr = iterator_to_array($mapped);
-
-        if (count($arr) == 1) {
-            $this->key = $key;
-            $this->item = $arr[0];
-        } else {
-            $this->key = $arr[0];
-            $this->item = $arr[1];
-        }
-    }
-
-    public function current()
-    {
-        return $this->item;
-    }
-
-    public function key()
-    {
-        return $this->key;
     }
 }
