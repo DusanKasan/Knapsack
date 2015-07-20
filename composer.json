@@ -12,7 +12,8 @@
   },
   "autoload": {
     "psr-4": {
-      "": "src/"
+      "": "src/",
+      "tests\\helpers\\Knapsack\\": "tests/helpers/Knapsack/"
     }
   }
 }

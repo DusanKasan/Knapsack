@@ -6,6 +6,7 @@ use Knapsack\Collection;
 use Knapsack\MappedCollection;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use tests\helpers\Knapsack\PlusOneAdder;
 
 /**
  * @mixin MappedCollection
@@ -65,27 +66,14 @@ class MappedCollectionSpec extends ObjectBehavior
 
     function it_can_use_instance_methods_as_filter()
     {
-        $instance = new TestClass();
+        $instance = new PlusOneAdder();
         $this->beConstructedWith([1, 2], [$instance, 'dynamicMethod']);
         $this->toArray()->shouldReturn([2, 3]);
     }
 
     function it_can_use_static_methods_as_filter()
     {
-        $this->beConstructedWith([1, 2], ['spec\Knapsack\TestClass', 'staticMethod']);
+        $this->beConstructedWith([1, 2], [PlusOneAdder::class, 'staticMethod']);
         $this->toArray()->shouldReturn([2, 3]);
-    }
-}
-
-class TestClass
-{
-    public function dynamicMethod($v)
-    {
-        return $v + 1;
-    }
-
-    public static function staticMethod($v)
-    {
-        return $v + 1;
     }
 }
