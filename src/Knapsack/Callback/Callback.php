@@ -45,7 +45,7 @@ class Callback
      */
     private function guessTemplate(CallbackArguments $arguments)
     {
-        return $this->getArgumentsCount() == 1 ?
+        return $arguments->count() == 1 ?
             [Argument::item()] :
             [Argument::key(), Argument::item()];
     }

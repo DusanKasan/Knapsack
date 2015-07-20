@@ -25,7 +25,7 @@ class ForEachCollection extends Collection
     public function current()
     {
         $current = parent::current();
-        $this->callback->executeWithKeyAndValue(parent::key(), $current);
+        $this->callback->executeWithKeyAndValue($this->key(), $current);
 
         return $current;
     }

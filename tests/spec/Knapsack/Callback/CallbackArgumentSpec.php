@@ -15,11 +15,6 @@ use ReflectionParameter;
 class CallbackArgumentSpec extends ObjectBehavior
 {
     /**
-     * @var mixed
-     */
-    private $defaultValue;
-
-    /**
      * @var ReflectionParameter
      */
     private $reflectionParameter;
