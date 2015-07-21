@@ -138,10 +138,14 @@ class Collection implements Iterator
     public function reduce($startValue, callable $reduction, array $argumentTemplate = [])
     {
         $callback = new Callback($reduction, $argumentTemplate);
-        $template = $callback->getArgumentsCount() == 3 ?
-            [Argument::intermediateValue(), Argument::key(), Argument::item()] :
-            [Argument::intermediateValue(), Argument::item()];
-        $callback->setArgumentTemplate($template);
+
+        if (empty($argumentTemplate)) {
+            $template = $callback->getArgumentsCount() == 3 ?
+                [Argument::intermediateValue(), Argument::key(), Argument::item()] :
+                [Argument::intermediateValue(), Argument::item()];
+            $callback->setArgumentTemplate($template);
+        }
+
 
         foreach ($this as $key => $item) {
             $startValue = $callback->execute([
@@ -280,15 +284,14 @@ class Collection implements Iterator
      */
     public function indexBy(callable $indexer, array $argumentTemplate = [])
     {
-        $callback = new Callback($indexer);
+        $callback = new Callback($indexer, $argumentTemplate);
 
         return new MappedCollection(
             $this,
             function ($k, $v) use ($callback) {
                 yield $callback->executeWithKeyAndValue($k, $v);
                 yield $v;
-            },
-            $argumentTemplate
+            }
         );
     }
 
@@ -682,11 +685,25 @@ class Collection implements Iterator
      */
     public function reductions($startValue, callable $reduction, array $argumentTemplate = [])
     {
-        return $this->map(function ($item) use (&$startValue, $reduction) {
-            $startValue = $reduction($startValue, $item);
+        $callback = new Callback($reduction, $argumentTemplate);
+
+        if (!$argumentTemplate) {
+            $argumentTemplate = $callback->getArgumentsCount() == 2 ?
+                [Argument::intermediateValue(), Argument::item()] :
+                [Argument::intermediateValue(), Argument::item()];
+
+            $callback->setArgumentTemplate($argumentTemplate);
+        }
+
+        return $this->map(function ($key, $item) use (&$startValue, $callback) {
+            $startValue = $callback->execute([
+                Argument::INTERMEDIATE_VALUE => $startValue,
+                Argument::KEY => $key,
+                Argument::ITEM => $item
+            ]);
 
             return $startValue;
-        }, $argumentTemplate);
+        });
     }
 
     /**

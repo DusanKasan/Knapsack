@@ -11,7 +11,7 @@ class SortedCollection extends Collection
     /**
      * @var callable
      */
-    private $sortCallback;
+    private $callback;
 
     /**
      * @var bool
@@ -21,31 +21,34 @@ class SortedCollection extends Collection
     /**
      * @param array|Traversable $input
      * @param callable $sortCallback
+     * @param array $argumentTemplate
      */
-    public function __construct($input, callable $sortCallback)
+    public function __construct($input, callable $sortCallback, array $argumentTemplate = [])
     {
         parent::__construct($input);
-        $this->sortCallback = $sortCallback;
+
+        $this->callback = new Callback($sortCallback, $argumentTemplate);
+
+        if (!$argumentTemplate) {
+            $argumentTemplate = $this->callback->getArgumentsCount() == 4 ?
+                [Argument::key(), Argument::item(), Argument::secondKey(), Argument::secondItem()] :
+                [Argument::item(), Argument::secondItem()];
+            $this->callback->setArgumentTemplate($argumentTemplate);
+        }
     }
 
     public function rewind()
     {
         if (!$this->isSorting) {
             $this->isSorting = true;
-            $this->executeSort($this->sortCallback);
+            $this->executeSort($this->callback);
             $this->isSorting = false;
         }
         parent::rewind();
     }
 
-    private function executeSort($sortCallback)
+    private function executeSort(Callback $sortCallback)
     {
-        $callback = new Callback($sortCallback);
-        $template = $callback->getArgumentsCount() == 4 ?
-            [Argument::key(), Argument::item(), Argument::secondKey(), Argument::secondItem()] :
-            [Argument::item(), Argument::secondItem()];
-        $callback->setArgumentTemplate($template);
-
         $mapped = $this
             ->map(function ($k, $v) {
                 return [$k, $v];
@@ -55,7 +58,7 @@ class SortedCollection extends Collection
 
         uasort(
             $mapped,
-            function ($a, $b) use ($callback) {
+            function ($a, $b) use ($sortCallback) {
                 $templateArguments = [
                     Argument::KEY => $a[0],
                     Argument::ITEM => $a[1],
@@ -63,7 +66,7 @@ class SortedCollection extends Collection
                     Argument::SECOND_ITEM => $b[1],
                 ];
 
-                return $callback->execute($templateArguments);
+                return $sortCallback->execute($templateArguments);
             }
         );
 

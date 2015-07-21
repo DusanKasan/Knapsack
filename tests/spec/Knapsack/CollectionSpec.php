@@ -6,6 +6,7 @@ use ArrayIterator;
 use DOMXPath;
 use Iterator;
 use IteratorAggregate;
+use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\Exceptions\InvalidArgument;
 use PhpSpec\ObjectBehavior;
@@ -42,37 +43,61 @@ class CollectionSpec extends ObjectBehavior
         $this->toArray()->shouldReturn([1, 2]);
     }
 
-    function it_will_throw_when_passed_something_other_than_array_or_traversable()
-    {
-        $this->shouldThrow(InvalidArgument::class)->during('__construct', [1]);
-    }
-
     function it_can_iterate_correctly_when_passed_array()
     {
         $this->beConstructedWith([1, 2, 3]);
         $this->toArray()->shouldReturn([1, 2, 3]);
     }
 
+    function it_will_throw_when_passed_something_other_than_array_or_traversable()
+    {
+        $this->shouldThrow(InvalidArgument::class)->during('__construct', [1]);
+    }
+
     function it_can_filter()
     {
-        $this->filter(
-            function ($item) {
+        $this
+            ->filter(function ($item) {
                 return $item > 2;
             })
             ->toArray()
             ->shouldReturn([1 => 3, 2 => 3]);
 
-        $this->filter(
-            function ($key, $item) {
-                return $key > 2;
+        $this
+            ->filter(function ($key, $item) {
+                return $key > 2 && $item < 3;
             })
             ->toArray()
             ->shouldReturn([3 => 2]);
+
+        $this
+            ->filter(
+                function ($item, $delta) {
+                    return $item + $delta < 3;
+                },
+                [Argument::item(), 1]
+            )
+            ->toArray()
+            ->shouldReturn([1]);
+    }
+
+    function it_can_filter_and_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3, 4, 5]]);
+        $this
+            ->filter(function (Collection $i) {
+                return $i->size() == 2;
+            })
+            ->toArray()
+            ->shouldReturn([[1, 2]]);
     }
 
     function it_can_distinct()
     {
-        $this->distinct()->toArray()->shouldReturn([1, 3, 3 => 2]);
+        $this
+            ->distinct()
+            ->toArray()
+            ->shouldReturn([1, 3, 3 => 2]);
     }
 
     function it_can_concat()
@@ -85,43 +110,94 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_map()
     {
-        $this->map(function ($item) {
-            return $item + 1;
-        })
+        $this
+            ->map(function ($item) {
+                return $item + 1;
+            })
             ->toArray()
             ->shouldReturn([2, 4, 4, 3]);
 
-        $this->map(function ($key, $item) {
-            yield $key + 1;
-            yield $item;
-        })
+        $this
+            ->map(function ($key, $item) {
+                yield $key + 1;
+                yield $item;
+            })
             ->toArray()
             ->shouldReturn([1 => 1, 2 => 3, 3 => 3, 4 => 2]);
 
-        $this->map(function ($item) {
-            yield $item + 1;
-        })
+        $this
+            ->map(function ($item) {
+                yield $item + 1;
+            })
+            ->toArray()
+            ->shouldReturn([2, 4, 4, 3]);
+
+        $this
+            ->map(
+                function ($item, $delta) {
+                    yield $item + $delta;
+                },
+                [Argument::item(), 1]
+            )
             ->toArray()
             ->shouldReturn([2, 4, 4, 3]);
     }
 
+    function it_can_map_and_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3, 4, 5]]);
+        $this
+            ->map(function (Collection $i) {
+                return $i->size();
+            })
+            ->toArray()
+            ->shouldReturn([2, 3]);
+    }
+
     function it_can_reduce()
     {
-        $this->reduce(
-            0,
-            function ($temp, $item) {
-                return $temp + $item;
-            }
-        )
+        $this
+            ->reduce(
+                0,
+                function ($temp, $item) {
+                    return $temp + $item;
+                }
+            )
             ->shouldReturn(9);
 
-        $this->reduce(
-            0,
-            function ($temp, $key, $item) {
-                return $temp + $key + $item;
-            }
-        )
+        $this
+            ->reduce(
+                0,
+                function ($temp, $key, $item) {
+                    return $temp + $key + $item;
+                }
+            )
             ->shouldReturn(15);
+
+        $this
+            ->reduce(
+                0,
+                function ($temp, $item, $delta) {
+                    return $temp + $delta + $item;
+                },
+                [Argument::intermediateValue(), Argument::item(), 1]
+            )
+            ->shouldReturn(13);
+    }
+
+    function it_can_reduce_and_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3, 4, 5]]);
+        $this
+            ->reduce(
+                new Collection([]),
+                function (Collection $temp, Collection $item) {
+                    return $temp->concat($item);
+                }
+            )
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([1, 2, 3, 4, 5]);
     }
 
     function it_can_flatten()
@@ -134,49 +210,143 @@ class CollectionSpec extends ObjectBehavior
     function it_can_sort()
     {
         $this->beConstructedWith([3, 1, 2]);
-        $this->sort(
-            function ($a, $b) {
+
+        $this
+            ->sort(function ($a, $b) {
                 return $a > $b;
             })
             ->toArray()
             ->shouldReturn([1 => 1, 2 => 2, 0 => 3]);
 
-        $this->sort(
-            function ($k1, $v1, $k2, $v2) {
-                return $k1 < $k2;
+        $this
+            ->sort(function ($k1, $v1, $k2, $v2) {
+                return $k1 < $k2 || $v1 < $v2;
             })
             ->toArray()
-            ->shouldReturn([2 => 2, 1 => 1, 0 => 3]);
+            ->shouldReturn([2 => 2, 0 => 3, 1 => 1]);
+
+        $this
+            ->sort(
+                function ($a, $b, $delta) {
+                    return $a > ($b / $delta);
+                },
+                [Argument::item(), Argument::secondItem(), 2]
+            )
+            ->toArray()
+            ->shouldReturn([1 => 1, 0 => 3, 2 => 2]);
+    }
+
+    function it_can_sort_and_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3, 4, 5]]);
+        $this
+            ->sort(function (Collection $a, Collection $b) {
+                return $a->size() < $b->size();
+            })
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([[3, 4, 5], [1, 2]]);
     }
 
     function it_can_slice()
     {
         $this->beConstructedWith([1, 2, 3, 4, 5]);
-        $this->slice(2, 4)->toArray()->shouldReturn([1 => 2, 2 => 3, 3 => 4]);
 
-        $this->slice(4)->toArray()->shouldReturn([3 => 4, 4 => 5]);
+        $this
+            ->slice(2, 4)
+            ->toArray()
+            ->shouldReturn([1 => 2, 2 => 3, 3 => 4]);
+
+        $this
+            ->slice(4)
+            ->toArray()
+            ->shouldReturn([3 => 4, 4 => 5]);
     }
 
     function it_can_group_by()
     {
         $this->beConstructedWith([1, 2, 3, 4, 5]);
-        $this->groupBy(function ($i) {
-            return $i % 2;
-        })
+
+        $this
+            ->groupBy(function ($i) {
+                return $i % 2;
+            })
             ->toArray()
             ->shouldReturn([1 => [1, 3, 5], 0 => [2, 4]]);
+
+        $this
+            ->groupBy(function ($k, $i) {
+                return ($k + $i) % 3;
+            })
+            ->toArray()
+            ->shouldReturn([1 => [1, 4], 0 => [2, 5], 2 => [3]]);
+
+        $this
+            ->groupBy(
+                function ($i, $delta) {
+                    return $i % $delta;
+                },
+                [Argument::item(), 2]
+            )
+            ->toArray()
+            ->shouldReturn([1 => [1, 3, 5], 0 => [2, 4]]);
+    }
+
+    function it_can_group_by_and_convert_arguments_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3, 4, 5], [6, 7]]);
+
+        $this
+            ->groupBy(function (Collection $i) {
+                return $i->size();
+            })
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([[[1, 2], [6, 7]], [[3, 4, 5]]]);
     }
 
     function it_can_execute_callback_for_each_item(DOMXPath $a)
     {
         $a->query('asd')->shouldBeCalled();
-
         $this->beConstructedWith([$a]);
-        $this->each(function (DOMXPath $i) {
-            $i->query('asd');
-        })
+
+        $this
+            ->each(function (DOMXPath $i) {
+                $i->query('asd');
+            })
             ->toArray()
             ->shouldReturn([$a]);
+    }
+
+    function it_can_execute_callback_using_argument_template_for_each_item(DOMXPath $a)
+    {
+        $a->query('asd1')->shouldBeCalled();
+        $this->beConstructedWith([$a]);
+
+        $this
+            ->each(
+                function (DOMXPath $i, $value) {
+                    $i->query('asd' . $value);
+                },
+                [Argument::item(), 1]
+            )
+            ->toArray()
+            ->shouldReturn([$a]);
+    }
+
+    function it_can_execute_callback_and_convert_to_collection_for_each_item(Collection $a)
+    {
+        $a->rewind()->shouldBeCalled();
+        $a->valid()->willReturn(false);
+        $a->current()->shouldBeCalled();
+        $this->beConstructedWith([$a]);
+
+        $this
+            ->each(function (Collection $i) {
+                $i->current();
+            })
+            ->toArray()
+            ->shouldReturn([[]]);
     }
 
     function it_can_get_size()
@@ -191,85 +361,241 @@ class CollectionSpec extends ObjectBehavior
         $this->get(5, 'not found')->shouldReturn('not found');
     }
 
-    function it_can_find_key()
+    function it_can_find()
     {
-        $this->find(function ($v) {
-            return $v < 3;
-        })->shouldReturn(1);
-        $this->find(function ($k, $v) {
-            return $v < 3 && $k > 1;
-        })->shouldReturn(2);
-        $this->find(function ($v) {
-            return $v < 0;
-        })->shouldReturn(null);
-        $this->find(function ($v) {
-            return $v < 0;
-        },
-            'not found')->shouldReturn('not found');
+        $this
+            ->find(function ($v) {
+                return $v < 3;
+            })
+            ->shouldReturn(1);
+
+        $this
+            ->find(function ($k, $v) {
+                return $v < 3 && $k > 1;
+            })
+            ->shouldReturn(2);
+
+        $this
+            ->find(function ($v) {
+                return $v < 0;
+            })
+            ->shouldReturn(null);
+
+        $this
+            ->find(
+                function ($v) {
+                    return $v < 0;
+                },
+                'not found'
+            )
+            ->shouldReturn('not found');
+
+        $this
+            ->find(
+                function ($v, $delta) {
+                    return ($v + $delta) > 1;
+                },
+                null,
+                [Argument::item(), 1]
+            )
+            ->shouldReturn(1);
+    }
+
+    function it_can_find_and_convert_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3], [4]]);
+
+        $this
+            ->find(function (Collection $i) {
+                return $i->size() < 2;
+            })
+            ->shouldReturn([3]);
     }
 
     function it_can_count_by()
     {
-        $this->countBy(function ($v) {
-            return $v % 2 == 0 ? 'even' : 'odd';
-        })
+        $this
+            ->countBy(function ($v) {
+                return $v % 2 == 0 ? 'even' : 'odd';
+            })
             ->toArray()
             ->shouldReturn(['odd' => 3, 'even' => 1]);
+
+        $this
+            ->countBy(function ($k, $v) {
+                return ($k + $v) % 2 == 0 ? 'even' : 'odd';
+            })
+            ->toArray()
+            ->shouldReturn(['odd' => 3, 'even' => 1]);
+
+        $this
+            ->countBy(
+                function ($k, $delta) {
+                    return ($k + $delta) % 2 == 0 ? 'even' : 'odd';
+                },
+                [Argument::item(), 1])
+            ->toArray()
+            ->shouldReturn(['even' => 3, 'odd' => 1]);
+    }
+
+    function it_can_count_by_and_convert_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3], [4]]);
+
+        $this
+            ->countBy(function (Collection $i) {
+                return $i->size();
+            })
+            ->toArray()
+            ->shouldReturn([2 => 1, 1 => 2]);
     }
 
     function it_can_index_by()
     {
-        $this->indexBy(
-            function ($v) {
+        $this
+            ->indexBy(function ($v) {
                 return $v;
             })
             ->toArray()
             ->shouldReturn([1 => 1, 3 => 3, 2 => 2]);
 
-        $this->indexBy(
-            function ($k, $v) {
-                return $k . 'a';
+        $this
+            ->indexBy(function ($k, $v) {
+                return $k . $v;
             })
             ->toArray()
-            ->shouldReturn(['0a' => 1, '1a' => 3, '2a' => 3, '3a' => 2]);
+            ->shouldReturn(['01' => 1, '13' => 3, '23' => 3, '32' => 2]);
+
+        $this
+            ->indexBy(
+                function ($k, $delta) {
+                    return $k . $delta;
+                },
+                [Argument::key(), 1]
+            )
+            ->toArray()
+            ->shouldReturn(['01' => 1, '11' => 3, '21' => 3, '31' => 2]);
+    }
+
+    function it_can_index_by_and_convert_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3], [4, 5, 6]]);
+
+        $this
+            ->indexBy(function (Collection $i) {
+                return $i->size();
+            })
+            ->toArray()
+            ->shouldReturn([
+                2 => [1, 2],
+                1 => [3],
+                3 => [4, 5, 6]
+            ]);
     }
 
     function it_can_check_if_every_item_passes_predicament_test()
     {
-        $this->every(function ($v) {
-            return $v > 0;
-        })->shouldReturn(true);
-        $this->every(function ($v) {
-            return $v > 1;
-        })->shouldReturn(false);
-        $this->every(function ($k, $v) {
-            return $v > 0 && $k >= 0;
-        })->shouldReturn(true);
-        $this->every(function ($k, $v) {
-            return $v > 0 && $k > 0;
-        })->shouldReturn(false);
+        $this
+            ->every(function ($v) {
+                return $v > 0;
+            })
+            ->shouldReturn(true);
+
+        $this
+            ->every(function ($v) {
+                return $v > 1;
+            })
+            ->shouldReturn(false);
+
+        $this
+            ->every(function ($k, $v) {
+                return $v > 0 && $k >= 0;
+            })
+            ->shouldReturn(true);
+
+        $this
+            ->every(function ($k, $v) {
+                return $v > 0 && $k > 0;
+            })
+            ->shouldReturn(false);
+
+        $this
+            ->every(
+                function ($v, $delta) {
+                    return $v < $delta;
+                },
+                [Argument::item(), 5]
+            )
+            ->shouldReturn(true);
+    }
+
+    function it_can_check_if_every_item_passes_predicament_and_convert_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3], [4, 5, 6]]);
+
+        $this
+            ->every(function (Collection $i) {
+                return $i->size() < 5;
+            })
+            ->shouldReturn(true);
     }
 
     function it_can_check_if_some_items_pass_predicament_test()
     {
-        $this->some(function ($v) {
-            return $v < -1;
-        })->shouldReturn(false);
-        $this->some(function ($k, $v) {
-            return $v > 0 && $k < -1;
-        })->shouldReturn(false);
-        $this->some(function ($v) {
-            return $v < 2;
-        })->shouldReturn(true);
-        $this->some(function ($k, $v) {
-            return $v > 0 && $k > 0;
-        })->shouldReturn(true);
+        $this
+            ->some(function ($v) {
+                return $v < -1;
+            })
+            ->shouldReturn(false);
+
+        $this
+            ->some(function ($k, $v) {
+                return $v > 0 && $k < -1;
+            })
+            ->shouldReturn(false);
+
+        $this
+            ->some(function ($v) {
+                return $v < 2;
+            })
+            ->shouldReturn(true);
+
+        $this
+            ->some(function ($k, $v) {
+                return $v > 0 && $k > 0;
+            })
+            ->shouldReturn(true);
+
+        $this
+            ->some(
+                function ($v, $delta) {
+                    return $v < $delta;
+                },
+                [Argument::item(), 2]
+            )
+            ->shouldReturn(true);
+    }
+
+    function it_can_check_if_some_item_passes_predicament_and_convert_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3], [4, 5, 6]]);
+
+        $this
+            ->some(function (Collection $i) {
+                return $i->size() < 2;
+            })
+            ->shouldReturn(true);
     }
 
     function it_can_check_if_it_contains_a_value()
     {
-        $this->contains(3)->shouldReturn(true);
-        $this->contains(true)->shouldReturn(false);
+        $this
+            ->contains(3)
+            ->shouldReturn(true);
+
+        $this
+            ->contains(true)
+            ->shouldReturn(false);
     }
 
     function it_can_reverse()
@@ -298,21 +624,46 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_reduce_from_right()
     {
-        $this->reduceRight(
-            '',
-            function ($temp, $e) {
-                return $temp . $e;
-            }
-        )
+        $this
+            ->reduceRight(
+                '',
+                function ($temp, $e) {
+                    return $temp . $e;
+                }
+            )
             ->shouldReturn('2331');
 
-        $this->reduceRight(
-            0,
-            function ($temp, $key, $item) {
-                return $temp + $key + $item;
-            }
-        )
+        $this
+            ->reduceRight(
+                0,
+                function ($temp, $key, $item) {
+                    return $temp + $key + $item;
+                }
+            )
             ->shouldReturn(15);
+
+        $this
+            ->reduceRight(
+                '',
+                function ($temp, $e, $delta) {
+                    return $temp . $e . $delta;
+                },
+                [Argument::intermediateValue(), Argument::item(), '-']
+            )
+            ->shouldReturn('2-3-3-1-');
+    }
+
+    function it_can_reduce_right_and_convert_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3], [4, 5, 6]]);
+
+        $this
+            ->reduceRight(
+                0,
+                function ($tmp, Collection $i) {
+                    return $tmp + $i->size();
+                })
+            ->shouldReturn(6);
     }
 
     function it_can_return_only_first_x_elements()
@@ -383,57 +734,104 @@ class CollectionSpec extends ObjectBehavior
         $it->next();
         $it->valid()->shouldReturn(true);
         $it->current()->shouldReturn([2, 3]);
+
+        $this
+            ->iterate(
+                function ($v, $temp) {
+                    return [$v[0] + $temp];
+                },
+                [Argument::item(), 1])
+            ->take(2)
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([[1, 1], [2]]);
+
+        $this
+            ->iterate(function (Collection $v) {
+                return [$v->size(), 1];
+            })
+            ->take(2)
+            ->resetKeys()
+            ->toArray()
+            ->shouldReturn([[1, 1], [2, 1]]);
     }
 
     function it_can_find_item_and_return_it_as_a_collection()
     {
         $this->beConstructedWith([[1, 2], [2, 3]]);
 
-        $this->findCollection(function ($v) {
-            return $v[0] + $v[1] > 4;
-        })
+        $this
+            ->findCollection(function ($v) {
+                return $v[0] + $v[1] > 4;
+            })
             ->toArray()
             ->shouldReturn([2, 3]);
 
-        $this->findCollection(function ($k, $v) {
-            return $k > 0;
-        })
+        $this
+            ->findCollection(function ($k, $v) {
+                return $k > 0 && $v > 0;
+            })
             ->toArray()
             ->shouldReturn([2, 3]);
+
+        $this
+            ->findCollection(
+                function ($v, $delta) {
+                    return $v[0] + $v[1] > $delta;
+                },
+                null,
+                [Argument::item(), 4]
+            )
+            ->toArray()
+            ->shouldReturn([2, 3]);
+
+        $this
+            ->findCollection(function (Collection $v) {
+                return $v->size() < 4;
+            })
+            ->toArray()
+            ->shouldReturn([1, 2]);
     }
 
     function it_can_get_item_by_its_key_and_return_it_as_a_collection()
     {
         $this->beConstructedWith(['a' => [1, 2], 'b' => [2, 3]]);
 
-        $this->getCollection('b')
+        $this
+            ->getCollection('b')
             ->toArray()
             ->shouldReturn([2, 3]);
     }
 
     function it_can_remove_elements_from_collection()
     {
-        $this->reject(function ($v) {
-            return $v == 3;
-        })
+        $this
+            ->reject(function ($v) {
+                return $v == 3;
+            })
             ->toArray()
             ->shouldReturn([1, 3 => 2]);
 
-        $this->reject(function ($k, $v) {
-            return $k == 2 && $v == 3;
-        })
+        $this
+            ->reject(function ($k, $v) {
+                return $k == 2 && $v == 3;
+            })
             ->toArray()
             ->shouldReturn([1, 3, 3 => 2]);
     }
 
     function it_can_get_keys()
     {
-        $this->keys()->toArray()->shouldReturn([0, 1, 2, 3]);
+        $this
+            ->keys()
+            ->toArray()
+            ->shouldReturn([0, 1, 2, 3]);
     }
 
     function it_can_interpose()
     {
-        $this->interpose('a')
+        $this
+            ->interpose('a')
             ->resetKeys()
             ->toArray()
             ->shouldReturn([1, 'a', 3, 'a', 3, 'a', 2]);
@@ -441,13 +839,21 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_drop_elements_from_end_of_the_collection()
     {
-        $this->dropLast()->toArray()->shouldReturn([1, 3, 3]);
-        $this->dropLast(2)->toArray()->shouldReturn([1, 3]);
+        $this
+            ->dropLast()
+            ->toArray()
+            ->shouldReturn([1, 3, 3]);
+
+        $this
+            ->dropLast(2)
+            ->toArray()
+            ->shouldReturn([1, 3]);
     }
 
     function it_can_interleave_elements()
     {
-        $this->interleave(['a', 'b', 'c', 'd', 'e'])
+        $this
+            ->interleave(['a', 'b', 'c', 'd', 'e'])
             ->resetKeys()
             ->toArray()
             ->shouldReturn([1, 'a', 3, 'b', 3, 'c', 2, 'd', 'e']);
@@ -455,7 +861,8 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_repeat_items_of_collection_infinitely()
     {
-        $this->cycle()
+        $this
+            ->cycle()
             ->take(8)
             ->resetKeys()
             ->toArray()
@@ -464,7 +871,8 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_prepend_item()
     {
-        $this->prepend(1)
+        $this
+            ->prepend(1)
             ->resetKeys()
             ->toArray()
             ->shouldReturn([1, 1, 3, 3, 2]);
@@ -472,14 +880,16 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_prepend_item_with_key()
     {
-        $this->prependWithKey('a', 1)
+        $this
+            ->prependWithKey('a', 1)
             ->toArray()
             ->shouldReturn(['a' => 1, 0 => 1, 1 => 3, 2 => 3, 3 => 2]);
     }
 
     function it_can_append_item()
     {
-        $this->append(1)
+        $this
+            ->append(1)
             ->resetKeys()
             ->toArray()
             ->shouldReturn([1, 3, 3, 2, 1]);
@@ -487,91 +897,157 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_append_item_with_key()
     {
-        $this->appendWithKey('a', 1)
+        $this
+            ->appendWithKey('a', 1)
             ->toArray()
             ->shouldReturn([1, 3, 3, 2, 'a' => 1,]);
     }
 
     function it_can_drop_items_while_predicament_is_true()
     {
-        $this->dropWhile(function ($v) {
-            return $v < 3;
-        })
+        $this
+            ->dropWhile(function ($v) {
+                return $v < 3;
+            })
             ->toArray()
             ->shouldReturn([1 => 3, 2 => 3, 3 => 2]);
 
-        $this->dropWhile(function ($k, $v) {
-            return $k < 2 && $v < 3;
-        })
+        $this
+            ->dropWhile(function ($k, $v) {
+                return $k < 2 && $v < 3;
+            })
             ->toArray()
             ->shouldReturn([1 => 3, 2 => 3, 3 => 2]);
     }
 
     function it_can_map_and_then_concatenate_a_collection()
     {
-        $this->mapcat(function ($v) {
-            return [[$v]];
-        })
+        $this
+            ->mapcat(function ($v) {
+                return [[$v]];
+            })
             ->resetKeys()
             ->toArray()
             ->shouldReturn([[1], [3], [3], [2]]);
 
-        $this->mapcat(function ($k, $v) {
-            return [[$k]];
-        })
+        $this
+            ->mapcat(function ($k, $v) {
+                return [[$k + $v]];
+            })
             ->resetKeys()
             ->toArray()
-            ->shouldReturn([[0], [1], [2], [3]]);
+            ->shouldReturn([[1], [4], [5], [5]]);
     }
 
     function it_can_take_items_while_predicament_is_true()
     {
-        $this->takeWhile(function ($v) {
-            return $v < 3;
-        })
+        $this
+            ->takeWhile(function ($v) {
+                return $v < 3;
+            })
             ->toArray()
             ->shouldReturn([1]);
 
-        $this->takeWhile(function ($k, $v) {
-            return $k < 2 && $v < 3;
-        })
+        $this
+            ->takeWhile(function ($k, $v) {
+                return $k < 2 && $v < 3;
+            })
             ->toArray()
             ->shouldReturn([1]);
     }
 
     function it_can_split_the_collection_at_nth_item()
     {
-        $this->splitAt(2)->toArray()->shouldReturn([[1, 3], [2 => 3, 3 => 2]]);
+        $this
+            ->splitAt(2)
+            ->toArray()
+            ->shouldReturn([[1, 3], [2 => 3, 3 => 2]]);
     }
 
     function it_can_split_the_collection_with_predicament()
     {
-        $this->splitWith(function ($v) {
-            return $v < 3;
-        })
+        $this
+            ->splitWith(function ($v) {
+                return $v < 3;
+            })
             ->toArray()
             ->shouldReturn([[1], [1 => 3, 2 => 3, 3 => 2]]);
 
-        $this->splitWith(function ($k, $v) {
-            return $k < 2 && $v < 3;
-        })
+        $this
+            ->splitWith(function ($k, $v) {
+                return $k < 2 && $v < 3;
+            })
             ->toArray()
             ->shouldReturn([[1], [1 => 3, 2 => 3, 3 => 2]]);
+
+        $this
+            ->splitWith(
+                function ($v, $delta) {
+                    return $v + $delta < 4;
+                },
+                [Argument::item(), 1]
+            )
+            ->toArray()
+            ->shouldReturn([[1], [1 => 3, 2 => 3, 3 => 2]]);
+    }
+
+    function it_can_split_and_convert_argument_to_collection()
+    {
+        $this->beConstructedWith([[1, 2], [3, 4, 5], [6]]);
+
+        $this
+            ->splitWith(function (Collection $v) {
+                return $v->size() > 2;
+            })
+            ->toArray()
+            ->shouldReturn([[1 => [3, 4, 5]], [[1, 2], 2 => [6]]]);
     }
 
     function it_can_replace_items_by_items_from_another_collection()
     {
-        $this->replace([3 => 'a'])->toArray()->shouldReturn([1, 'a', 'a', 2]);
+        $this
+            ->replace([3 => 'a'])
+            ->toArray()
+            ->shouldReturn([1, 'a', 'a', 2]);
     }
 
     function it_can_get_reduction_steps()
     {
-        $this->reductions(0,
-            function ($tmp, $i) {
-                return $tmp + $i;
-            })
+        $this
+            ->reductions(
+                0,
+                function ($tmp, $i) {
+                    return $tmp + $i;
+                }
+            )
             ->toArray()
             ->shouldReturn([1, 4, 7, 9]);
+
+        $this
+            ->reductions(
+                0,
+                function ($tmp, $i, $delta) {
+                    return $tmp + $i + $delta;
+                },
+                [Argument::intermediateValue(), Argument::item(), 1]
+            )
+            ->toArray()
+            ->shouldReturn([2, 6, 10, 13]);
+    }
+
+    function it_can_convert_to_collection_and_get_reduction_steps()
+    {
+        $this->beConstructedWith([[1], [1, 2], [1, 2, 3]]);
+
+        $this
+            ->reductions(
+                0,
+                function ($tmp, Collection $i) {
+                    return $tmp + $i->size();
+                }
+            )
+            ->toArray()
+            ->shouldReturn([1, 3, 6]);
     }
 
     function it_can_return_every_nth_item()
@@ -583,7 +1059,8 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_shuffle_itself()
     {
-        $this->shuffle()
+        $this
+            ->shuffle()
             ->reduce(0,
                 function ($tmp, $i) {
                     return $tmp + $i;
@@ -593,23 +1070,58 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_partition()
     {
-        $this->partition(3, 2, [0, 1])->toArray()->shouldReturn([[1, 3, 3], [2 => 3, 3 => 2, 0 => 0]]);
-        $this->partition(3, 2)->toArray()->shouldReturn([[1, 3, 3], [2 => 3, 3 => 2]]);
-        $this->partition(3)->toArray()->shouldReturn([[1, 3, 3], [3 => 2]]);
+        $this
+            ->partition(3, 2, [0, 1])
+            ->toArray()
+            ->shouldReturn([[1, 3, 3], [2 => 3, 3 => 2, 0 => 0]]);
+
+        $this
+            ->partition(3, 2)
+            ->toArray()
+            ->shouldReturn([[1, 3, 3], [2 => 3, 3 => 2]]);
+
+        $this
+            ->partition(3)
+            ->toArray()
+            ->shouldReturn([[1, 3, 3], [3 => 2]]);
     }
 
     function it_can_partition_by()
     {
-        $this->partitionBy(function ($v) {
-            return $v % 3 == 0;
-        })
+        $this
+            ->partitionBy(function ($v) {
+                return $v % 3 == 0;
+            })
             ->toArray()
             ->shouldReturn([[1], [1 => 3, 2 => 3], [3 => 2]]);
 
-        $this->partitionBy(function ($k, $v) {
-            return $k - $v;
-        })
+        $this
+            ->partitionBy(function ($k, $v) {
+                return $k - $v;
+            })
             ->toArray()->shouldReturn([[1], [1 => 3], [2 => 3], [3 => 2]]);
+
+        $this
+            ->partitionBy(
+                function ($v, $delta) {
+                    return $v % $delta == 0;
+                },
+                [Argument::item(), 3]
+            )
+            ->toArray()
+            ->shouldReturn([[1], [1 => 3, 2 => 3], [3 => 2]]);
+    }
+
+    function it_can_convert_to_collection_and_partition_by()
+    {
+        $this->beConstructedWith([[1], [1, 2], [2, 3], [4]]);
+
+        $this
+            ->partitionBy(function (Collection $v) {
+                return $v->size();
+            })
+            ->toArray()
+            ->shouldReturn([[[1]], [1 => [1, 2], 2 => [2, 3]], [3 => [4]]]);
     }
 
     function it_can_check_if_it_is_not_empty()
@@ -628,6 +1140,9 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_frequency_of_distinct_items()
     {
-        $this->frequencies()->toArray()->shouldReturn([1 => 1, 3 => 2, 2 => 1]);
+        $this
+            ->frequencies()
+            ->toArray()
+            ->shouldReturn([1 => 1, 3 => 2, 2 => 1]);
     }
 }

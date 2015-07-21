@@ -21,11 +21,12 @@ class PartitionedByCollection extends Collection
     /**
      * @param array|Traversable $input
      * @param callable $partitioning
+     * @param array $argumentTemplate
      */
-    public function __construct($input, callable $partitioning)
+    public function __construct($input, callable $partitioning, array $argumentTemplate = [])
     {
         parent::__construct($input);
-        $this->partitioning = new Callback($partitioning);
+        $this->partitioning = new Callback($partitioning, $argumentTemplate);
     }
 
     public function rewind()

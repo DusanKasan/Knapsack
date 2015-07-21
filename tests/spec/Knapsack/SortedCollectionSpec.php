@@ -61,7 +61,7 @@ class SortedCollectionSpec extends ObjectBehavior
     function it_can_work_with_argument_template()
     {
         $function = function ($a, $b, $delta) {
-            return $a + $delta < $b;
+            return ($a + $delta) < $b;
         };
 
         $this->beConstructedWith(
@@ -73,6 +73,6 @@ class SortedCollectionSpec extends ObjectBehavior
         $this
             ->resetKeys()
             ->toArray()
-            ->shouldReturn([4, 3, 2, 1]);
+            ->shouldReturn([1, 2, 3, 4]);
     }
 }
