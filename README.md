@@ -75,6 +75,7 @@ echo $result; //6
 ```
 
 ### Callback arguments typehinted as Collection are converted automatically
+This behaviour works for all callables passed to Collection
 ```php
 $collection = new Collection([[1, 2], [3, 4, 5]]);
 $result = $collection
@@ -89,6 +90,17 @@ echo $result; //5
 ```
 
 ### Can execute callback with argument templates
+This behaviour works for all callables passed to Collection. 
+
+There are 5 named constructor for the Argument class:
+ 
+ - Argument::key()
+ - Argument::item() 
+ - Argument::secondKey() used in comparisons
+ - Argument::secondItem() used in comparisons
+ - Argument::intermediateValue() used in reductions
+ 
+Use these in template and Collection will know how to replace these on each iteration. 
 ```php
 $collection = new Collection([[1, 2], [3, 4, 5]]);
 $result = $collection
@@ -813,5 +825,5 @@ $collection->toArray(); //[1, 3, 3, 2]
 
 ## Todo    
 - multiple collections can be passed to lets say concat
-- test/spec argument templates for Collection methods
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
+- performance tests/comparison
