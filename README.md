@@ -102,8 +102,7 @@ $result = $collection
 ```
 This is available for all Collection methods that accept callable as argument. The argument template always goes after the callable argument.
 
-There are 5 named constructor for the Argument class:
-
+##### There are 5 named constructor for the Argument class: #####
  - Argument::key()
  - Argument::item() 
  - Argument::secondKey() used in comparisons
