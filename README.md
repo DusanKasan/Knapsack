@@ -37,8 +37,12 @@ echo $result; //6
 ```php
 $collection = new Collection([[1,1]]);
 $result = $collection
-    ->iterate(function($v) {return [$v[1], $v[0]+$v[1]];})
-    ->map(function($v) {return $v[0];})
+    ->iterate(function($v) {
+        return [$v[1], $v[0] + $v[1]]; //[1, 2], [2, 3] ...
+    })
+    ->map(function($v) {
+        return $v[0];
+    })
     ->take(5);
     
 foreach ($result as $item) {
@@ -75,7 +79,6 @@ echo $result; //6
 ```
 
 ### Callback arguments typehinted as Collection are converted automatically
-This behaviour works for all callables passed to Collection
 ```php
 $collection = new Collection([[1, 2], [3, 4, 5]]);
 $result = $collection
@@ -88,25 +91,25 @@ $result = $collection
         
 echo $result; //5
 ```
+This behaviour works for all callables passed to Collection. No need to convert your arrays to Collection inside your callbacks.
 
 ### Can execute callback with argument templates
-This behaviour works for all callables passed to Collection. 
+```php
+$collection = new Collection([[1, 2], [3, 4, 5]]);
+$result = $collection
+    ->map('implode', ['', Argument::item()]) //implode with empty string
+    ->toArray(); //[12, 345]        
+```
+This is available for all Collection methods that accept callable as argument. The argument template always goes after the callable argument.
 
 There are 5 named constructor for the Argument class:
- 
  - Argument::key()
  - Argument::item() 
  - Argument::secondKey() used in comparisons
  - Argument::secondItem() used in comparisons
  - Argument::intermediateValue() used in reductions
  
-Use these in template and Collection will know how to replace these on each iteration. 
-```php
-$collection = new Collection([[1, 2], [3, 4, 5]]);
-$result = $collection
-    ->map('implode', ['', Argument::item()])
-    ->toArray(); //[12, 345]        
-```
+Use these in template and Collection will know how to replace these on each iteration. This is useful for calling native functions which do not have the footprint that Collection can guess - (item) or (key, item). 
 
 ### Collections are immutable
 ```php
