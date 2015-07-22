@@ -29,7 +29,7 @@ class SortedCollection extends Collection
 
         $this->callback = new Callback($sortCallback, $argumentTemplate);
 
-        if (!$argumentTemplate) {
+        if (emppty($argumentTemplate)) {
             $argumentTemplate = $this->callback->getArgumentsCount() == 4 ?
                 [Argument::key(), Argument::item(), Argument::secondKey(), Argument::secondItem()] :
                 [Argument::item(), Argument::secondItem()];
@@ -39,7 +39,7 @@ class SortedCollection extends Collection
 
     public function rewind()
     {
-        if (empty($this->isSorting)) {
+        if (!$this->isSorting) {
             $this->isSorting = true;
             $this->executeSort($this->callback);
             $this->isSorting = false;
