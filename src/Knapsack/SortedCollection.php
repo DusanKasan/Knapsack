@@ -29,7 +29,7 @@ class SortedCollection extends Collection
 
         $this->callback = new Callback($sortCallback, $argumentTemplate);
 
-        if (emppty($argumentTemplate)) {
+        if (empty($argumentTemplate)) {
             $argumentTemplate = $this->callback->getArgumentsCount() == 4 ?
                 [Argument::key(), Argument::item(), Argument::secondKey(), Argument::secondItem()] :
                 [Argument::item(), Argument::secondItem()];
