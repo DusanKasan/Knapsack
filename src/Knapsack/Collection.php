@@ -687,10 +687,10 @@ class Collection implements Iterator
     {
         $callback = new Callback($reduction, $argumentTemplate);
 
-        if (!$argumentTemplate) {
+        if (empty($argumentTemplate)) {
             $argumentTemplate = $callback->getArgumentsCount() == 2 ?
                 [Argument::intermediateValue(), Argument::item()] :
-                [Argument::intermediateValue(), Argument::item()];
+                [Argument::intermediateValue(), Argument::key(), Argument::item()];
 
             $callback->setArgumentTemplate($argumentTemplate);
         }
@@ -774,7 +774,7 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns true if this collection is empty. False otherwise.
+     * Returns true if this collection is empty. False otherwise.!$
      *
      * @return bool
      */

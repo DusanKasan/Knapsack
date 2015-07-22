@@ -9,7 +9,7 @@ use Traversable;
 class SortedCollection extends Collection
 {
     /**
-     * @var callable
+     * @var Callback
      */
     private $callback;
 
@@ -39,7 +39,7 @@ class SortedCollection extends Collection
 
     public function rewind()
     {
-        if (!$this->isSorting) {
+        if (empty($this->isSorting)) {
             $this->isSorting = true;
             $this->executeSort($this->callback);
             $this->isSorting = false;
