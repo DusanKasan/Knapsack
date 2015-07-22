@@ -116,12 +116,12 @@ Use these in template and Collection will know how to replace these on each iter
 ```php
 function multiplyBy2($v)
 {
-    return $v*2;
+    return $v * 2;
 }
 
 function multiplyBy3($v)
 {
-    return $v*3;
+    return $v * 3;
 }
 
 function add($a, $b)
@@ -831,3 +831,4 @@ $collection->toArray(); //[1, 3, 3, 2]
 - multiple collections can be passed to lets say concat
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
 - performance tests/comparison
+- more scenarios
