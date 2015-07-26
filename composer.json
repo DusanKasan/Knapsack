@@ -8,7 +8,8 @@
     "squizlabs/php_codesniffer": "~2.0",
     "phpmd/phpmd" : "2.2.1",
     "ciaranmcnulty/phpspec-typehintedmethods": "~1.1",
-    "phpunit/phpunit": "4.5.*"
+    "phpunit/phpunit": "4.5.*",
+    "symfony/console": "~2.7"
   },
   "autoload": {
     "psr-4": {
