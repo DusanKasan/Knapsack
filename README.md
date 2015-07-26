@@ -169,7 +169,7 @@ foreach ($result as $key => $item) {
 Currently Knapsack uses Callback abstraction which takes care of converting callable's arguments to Collections and resolving argument templates. It is also responsible of at least 40% of execution time. This should be watched closesly and if it won't be used that much it can be abandoned in pursuit of performance improvements.
 
 ### PHP 5.6
-```
+```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
@@ -182,7 +182,7 @@ Currently Knapsack uses Callback abstraction which takes care of converting call
 ```
 
 ### PHP 7 beta 2
-```
+```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
@@ -195,7 +195,7 @@ Currently Knapsack uses Callback abstraction which takes care of converting call
 ```
 
 ### PHP 7 beta 2, Callback abstraction disabled - test build
-```
+```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
