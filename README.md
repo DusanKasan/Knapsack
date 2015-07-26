@@ -165,6 +165,48 @@ foreach ($result as $key => $item) {
 //1:4
 ```
 
+## Performance tests
+Currently Knapsack uses Callback abstraction which takes care of converting callable's arguments to Collections and resolving argument templates. It is also responsible of at least 40% of execution time. This should be watched closesly and if it won't be used that much it can be abandoned in pursuit of performance improvements.
+
+### PHP 5.6
+```
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+| operation details                                                                  | native execution time | collection execution time | difference (percent) |
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+| array_map vs Collection::map on 1000 integers (addition)                           | 0.0030951976776123s   | 0.034346175193787s        | 1109%                |
+| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0035692930221558s   | 0.035529708862305s        | 995%                 |
+| array_map vs Collection::map on 1000 object (object to field value)                | 0.0033452987670898s   | 0.03433084487915s         | 1026%                |
+| array_map vs Collection::map on 1000 md5 invocations                               | 0.0045573949813843s   | 0.036618542671204s        | 803%                 |
+| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.06009886264801s     | 0.091361713409424s        | 152%                 |
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+```
+
+### PHP 7 beta 2
+```
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+| operation details                                                                  | native execution time | collection execution time | difference (percent) |
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+| array_map vs Collection::map on 1000 integers (addition)                           | 0.00012121200561523s  | 0.0029430627822876s       | 2428%                |
+| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.00016176700592041s  | 0.0023923873901367s       | 1478%                |
+| array_map vs Collection::map on 1000 object (object to field value)                | 0.00014028549194336s  | 0.0024723529815674s       | 1762%                |
+| array_map vs Collection::map on 1000 md5 invocations                               | 0.00045738220214844s  | 0.0031296968460083s       | 684%                 |
+| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.015933513641357s    | 0.015382480621338s        | 96%                  |
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+```
+
+### PHP 7 beta 2, Callback abstraction disabled - test build
+```
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+| operation details                                                                  | native execution time | collection execution time | difference (percent) |
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+| array_map vs Collection::map on 1000 integers (addition)                           | 9.4985961914062E-5s   | 0.0010921478271484s       | 1149%                |
+| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.00012743473052979s  | 0.0011455297470093s       | 898%                 |
+| array_map vs Collection::map on 1000 object (object to field value)                | 0.00010819435119629s  | 0.0011794567108154s       | 1090%                |
+| array_map vs Collection::map on 1000 md5 invocations                               | 0.00042428970336914s  | 0.0014571905136108s       | 343%                 |
+| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.020593905448914s    | 0.019808888435364s        | 96%                  |
++------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+```
+
 ## Operations
 These are the operations (methods) provided by Collection class.
 
@@ -832,3 +874,4 @@ $collection->toArray(); //[1, 3, 3, 2]
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
 - performance tests/comparison
 - more scenarios
+- think about removing the Callback abstraction - execution overhead of ~100%
