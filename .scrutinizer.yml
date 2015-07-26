@@ -22,7 +22,9 @@ tools:
             ruleset: ci/phpmd.xml
 
 checks:
-    php: true
+    php:
+        code_rating: true
+        duplication: true
 
 build_failure_conditions:
     - 'issues.label("coding-style").exists'         # No coding style issues allowed
