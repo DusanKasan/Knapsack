@@ -22,12 +22,13 @@ tools:
             ruleset: ci/phpmd.xml
 
 checks:
-    php:
-        code_rating: true
-        duplication: true
+    php: true
 
 build_failure_conditions:
     - 'issues.label("coding-style").exists'         # No coding style issues allowed
     - 'issues.severity(>= MINOR).exists'             # New issues of major or higher severity
     - 'project.metric("scrutinizer.quality", < 8)' # Code Quality Rating drops below 8.5
     - 'project.metric("scrutinizer.test_coverage", < 1)' # Code Coverage drops below 100%
+filter:
+    excluded_paths:
+        - tests/performance/*
