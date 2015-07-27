@@ -1,7 +1,18 @@
 {
-  "name": "dusan-kasan/boilerplate-php",
-  "description": "Boilerplate for new projects",
+  "name": "dusank/knapsack",
   "license": "MIT",
+  "type": "library",
+  "description": "Collection library for PHP",
+  "keywords": ["collections","sequences", "map", "reduce"],
+  "homepage": "https://github.com/DusanKasan/Knapsack",
+  "authors": [
+    {
+      "name": "Dusan Kasan",
+      "email": "dusan@kasan.sk",
+      "homepage": "http://kasan.sk",
+      "role": "Developer"
+    }
+  ],
   "require-dev": {
     "phpspec/phpspec": "~2.0",
     "henrikbjorn/phpspec-code-coverage": "~1.0",
@@ -10,6 +21,9 @@
     "ciaranmcnulty/phpspec-typehintedmethods": "~1.1",
     "phpunit/phpunit": "4.5.*",
     "symfony/console": "~2.7"
+  },
+  "require": {
+    "php": ">=5.5.0"
   },
   "autoload": {
     "psr-4": {
