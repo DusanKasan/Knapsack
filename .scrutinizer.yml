@@ -5,18 +5,18 @@ build:
   tests:
     override:
       -
-        command: 'vendor/bin/phpspec run -c ci/phpspec-with-coverage.yml'
+        command: 'vendor/bin/phpspec run -c ci/phpspec-with-coverage.yml -vvv'
         coverage:
           file: 'coverage.clover'
           format: 'php-clover'
       -
         command: 'vendor/bin/phpunit'
       -
-        command: 'phpenv global 5.5.25 && vendor/bin/phpspec run'
+        command: 'phpenv global 5.5.25 && vendor/bin/phpspec run -vvv'
       -
         command: 'phpenv global 5.5.25 vendor/bin/phpunit'
       -
-        command: 'phpenv global hhvm && vendor/bin/phpspec run'
+        command: 'phpenv global hhvm && vendor/bin/phpspec run -vvv'
       -
         command: 'phpenv global hhvm vendor/bin/phpunit'
 
