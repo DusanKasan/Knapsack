@@ -228,7 +228,7 @@ class CollectionSpec extends ObjectBehavior
         $this
             ->sort(
                 function ($a, $b, $delta) {
-                    return $a > ($b * $delta);
+                    return $a >= ($b + $delta);
                 },
                 [Argument::item(), Argument::secondItem(), 2]
             )
