@@ -223,7 +223,7 @@ class CollectionSpec extends ObjectBehavior
                 return $k1 < $k2 || $v1 < $v2;
             })
             ->toArray()
-            ->shouldReturn([2 => 2, 0 => 3, 1 => 1]);
+            ->shouldReturn([2 => 2, 1 => 1, 0 => 3]);
 
         $this
             ->sort(

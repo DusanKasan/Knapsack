@@ -16,7 +16,7 @@ build:
       -
         command: 'phpenv global 5.5.25 vendor/bin/phpunit'
       -
-        command: 'phpenv global hhvm && vendor/bin/phpspec run -vvv'
+        command: 'phpenv global hhvm && vendor/bin/phpspec run'
       -
         command: 'phpenv global hhvm vendor/bin/phpunit'
 
