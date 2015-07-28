@@ -10,7 +10,16 @@ build:
           file: 'coverage.clover'
           format: 'php-clover'
       -
-        command: 'vendor/bin/phpunit --bootstrap vendor/autoload.php tests/scenarios/'
+        command: 'vendor/bin/phpunit'
+      -
+        command: 'phpenv global 5.5.0 && vendor/bin/phpspec run'
+      -
+        command: 'phpenv global 5.5.0 vendor/bin/phpunit'
+      -
+        command: 'phpenv global hhvm && vendor/bin/phpspec run'
+      -
+        command: 'phpenv global hhvm vendor/bin/phpunit'
+
 
 tools:
     php_code_sniffer:
@@ -31,6 +40,7 @@ build_failure_conditions:
     - 'issues.severity(>= MINOR).exists'             # New issues of major or higher severity
     - 'project.metric("scrutinizer.quality", < 8)' # Code Quality Rating drops below 8.5
     - 'project.metric("scrutinizer.test_coverage", < 1)' # Code Coverage drops below 100%
+
 filter:
     excluded_paths:
         - tests/performance/*
