@@ -228,12 +228,12 @@ class CollectionSpec extends ObjectBehavior
         $this
             ->sort(
                 function ($a, $b, $delta) {
-                    return $a >= ($b + $delta);
+                    return $a > ($b + $delta);
                 },
-                [Argument::item(), Argument::secondItem(), 2]
+                [Argument::item(), Argument::secondItem(), 0]
             )
             ->toArray()
-            ->shouldReturn([2 => 2, 1 => 1, 0 => 3]);
+            ->shouldReturn([1 => 1, 2 => 2, 0 => 3]);
     }
 
     function it_can_sort_and_convert_arguments_to_collection()
