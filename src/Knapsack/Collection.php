@@ -238,20 +238,59 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $ifNotFound.
+     * Returns value at the key $key. If multiple values have this key, return first. If no value has
+     * this key, throw ItemNotFound.
      *
      * @param mixed $key
-     * @param mixed|null $ifNotFound
      * @return mixed
      */
-    public function get($key, $ifNotFound = null)
+    public function get($key)
     {
-        return $this->find(
+        $ifNotFound = new stdClass;
+
+        $result = $this->find(
             function ($k, $v) use ($key) {
                 return $k == $key;
             },
             $ifNotFound
         );
+
+        if ($result === $ifNotFound) {
+            throw new ItemNotFound;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns item at the key $key. If multiple items have this key, return first. If no item has
+     * this key, return $ifNotFound.
+     *
+     * @param mixed $key
+     * @param mixed $ifNotFound
+     * @return mixed
+     */
+    public function getOrDefault($key, $ifNotFound = null)
+    {
+        try {
+            $return = $this->get($key);
+        } catch (ItemNotFound $e) {
+            $return = $ifNotFound;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Returns item at the key $key converted to Collection if possible (i.e. if it is Traversable or array). If
+     * multiple values have this key, return first. If no value has this key, throw ItemNotFound.
+     *
+     * @param mixed $key
+     * @return mixed
+     */
+    public function getCollection($key)
+    {
+        return new Collection($this->get($key));
     }
 
     /**
@@ -438,20 +477,6 @@ class Collection implements Iterator
     public function findCollection(callable $filter, $ifNotFound = null, array $argumentTemplate = [])
     {
         $found = $this->find($filter, $ifNotFound, $argumentTemplate);
-
-        return new Collection($found);
-    }
-
-    /**
-     * Returns item at the key $key converted to Collection if possible (i.e. if it is Traversable or array). If multiple values have this key, return first. If no value has this key, return $ifNotFound.
-     *
-     * @param mixed $key
-     * @param mixed|null $ifNotFound
-     * @return mixed
-     */
-    public function getCollection($key, $ifNotFound = null)
-    {
-        $found = $this->get($key, $ifNotFound);
 
         return new Collection($found);
     }
@@ -676,7 +701,7 @@ class Collection implements Iterator
         $ifNotNullIdentifier = new stdClass();
 
         return $this->map(function ($v) use ($replacementMap, $ifNotNullIdentifier) {
-            $result = $replacementMap->get($v, $ifNotNullIdentifier);
+            $result = $replacementMap->getOrDefault($v, $ifNotNullIdentifier);
             if ($result !== $ifNotNullIdentifier) {
                 $v = $result;
             }

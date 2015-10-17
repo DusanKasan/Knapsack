@@ -421,14 +421,23 @@ Collection::from([1, 3, 3, 2])
     ->toArray(); //[1 => 1, 3 => 2, 2 => 1]
 ```
 
-#### get(mixed $key, mixed $ifNotFound = null) : mixed
+#### get(mixed $key) : mixed
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`.
+```php
+Collection::from([1, 3, 3, 2])->get(2); //3
+Collection::from([1, 3, 3, 2])->get(5); //throws ItemNotFound
+```
+
+#### getOrDefault(mixed $key, mixed $ifNotFound = null) : mixed
 Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $ifNotFound.
 ```php
 Collection::from([1, 3, 3, 2])->get(2); //3
+Collection::from([1, 3, 3, 2])->get(5); //null
+Collection::from([1, 3, 3, 2])->get(5, 'asd'); //'asd'
 ```
 
-#### getCollection(mixed $key, $ifNotFound = null) : Collection
-Like get, but converts the return value to Collection if possible (i.e. if it's an array).
+#### getCollection(mixed $key) : Collection
+Like get, but converts the return value to Collection if possible (i.e. if it's an array). If the key is not found, throws an `ItemNotFound` exception.
 ```php
 Collection::from(['a' => [1, 2], 'b' => [2, 3]])
     ->getCollection('a')
@@ -826,7 +835,7 @@ Converts the collection to array recursively. Obviously this is not lazy since a
 Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 ```
 
-## Todo    
+## Planned    
 - multiple collections can be passed to lets say concat
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
 - more scenarios

@@ -357,9 +357,17 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_get_item_by_key()
     {
+        $this->beConstructedWith([1, 2, 3]);
         $this->get(0)->shouldReturn(1);
-        $this->get(5)->shouldReturn(null);
-        $this->get(5, 'not found')->shouldReturn('not found');
+        $this->shouldThrow(new ItemNotFound)->during('get', [5]);
+    }
+
+    function it_can_get_item_by_key_or_return_default()
+    {
+        $this->beConstructedWith([1, 2, 3]);
+        $this->getOrDefault(0)->shouldReturn(1);
+        $this->getOrDefault(5)->shouldReturn(null);
+        $this->getOrDefault(5, 'not found')->shouldReturn('not found');
     }
 
     function it_can_find()
@@ -802,6 +810,8 @@ class CollectionSpec extends ObjectBehavior
             ->getCollection('b')
             ->toArray()
             ->shouldReturn([2, 3]);
+
+        $this->shouldThrow(new ItemNotFound)->during('getCollection', ['c']);
     }
 
     function it_can_remove_elements_from_collection()
