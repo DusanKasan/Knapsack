@@ -7,6 +7,9 @@ use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use RuntimeException;
 
+/**
+ * @mixin InvalidArgument
+ */
 class InvalidArgumentSpec extends ObjectBehavior
 {
     function it_is_initializable()

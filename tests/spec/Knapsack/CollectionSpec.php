@@ -9,6 +9,7 @@ use IteratorAggregate;
 use Knapsack\Callback\Argument;
 use Knapsack\Collection;
 use Knapsack\Exceptions\InvalidArgument;
+use Knapsack\Exceptions\ItemNotFound;
 use PhpSpec\ObjectBehavior;
 
 /**
@@ -1145,4 +1146,38 @@ class CollectionSpec extends ObjectBehavior
             ->toArray()
             ->shouldReturn([1 => 1, 3 => 2, 2 => 1]);
     }
+
+    function it_can_be_constructed_statically()
+    {
+        $this->beConstructedThrough('from', [[1, 2, 3]]);
+        $this->toArray()->shouldReturn([1, 2, 3]);
+    }
+
+    function it_can_get_first_item()
+    {
+        $this->beConstructedWith([1, 2, 3]);
+        $this->first()->shouldReturn(1);
+    }
+
+    function it_will_throw_when_trying_to_get_first_item_of_empty_collection()
+    {
+        $this->beConstructedWith([]);
+        $this->shouldThrow(ItemNotFound::class)->during('first');
+    }
+
+    function it_can_get_last_item()
+    {
+        $this->beConstructedWith([1, 2, 3]);
+        $this->last()->shouldReturn(3);
+    }
+
+    function it_will_throw_when_trying_to_get_last_item_of_empty_collection()
+    {
+        $this->beConstructedWith([]);
+        $this->shouldThrow(ItemNotFound::class)->during('last');
+    }
+
+    //todo: get should throw and get => getOrDefault
+
+    //todo: firstOrDefault, lastOrDefault
 }

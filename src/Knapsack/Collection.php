@@ -7,6 +7,7 @@ use IteratorAggregate;
 use Knapsack\Callback\Argument;
 use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\InvalidArgument;
+use Knapsack\Exceptions\ItemNotFound;
 use RecursiveArrayIterator;
 use stdClass;
 use Traversable;
@@ -33,6 +34,15 @@ class Collection implements Iterator
 
         $input->rewind();
         $this->input = $input;
+    }
+
+    /**
+     * @param $input
+     * @return Collection
+     */
+    public static function from($input)
+    {
+        return new self($input);
     }
 
     /**
@@ -805,5 +815,35 @@ class Collection implements Iterator
         return $this->countBy(function ($v) {
             return $v;
         });
+    }
+
+    /**
+     * Returns first item of this collection. If the collection is empty, throws exception
+     *
+     * @throws ItemNotFound
+     * @return mixed
+     */
+    public function first()
+    {
+        if ($this->isEmpty()) {
+            throw new ItemNotFound;
+        }
+
+        return $this->resetKeys()->get(0);
+    }
+
+    /**
+     * Returns last item of this collection. If the collection is empty, throws exception
+     *
+     * @throws ItemNotFound
+     * @return mixed
+     */
+    public function last()
+    {
+        if ($this->isEmpty()) {
+            throw new ItemNotFound;
+        }
+
+        return $this->reverse()->resetKeys()->get(0);
     }
 }
