@@ -41,7 +41,7 @@ echo $result; //6
 
 ### Get first 5 items of Fibonacci's sequence
 ```php
-$result = Collection::from([[1,1]]);
+$result = Collection::from([[1,1]])
     ->iterate(function($v) {
         return [$v[1], $v[0] + $v[1]]; //[1, 2], [2, 3] ...
     })
@@ -75,7 +75,7 @@ function add($a, $b)
     return $a + $b;
 }
 
-$result = Collection::from([1, 2]);
+$result = Collection::from([1, 2])
     ->map('multiplyBy2')
     ->reduce(0, 'add');
     
@@ -84,7 +84,7 @@ echo $result; //6
 
 ### Callback arguments typehinted as Collection are converted automatically
 ```php
-$result = Collection::from([[1, 2], [3, 4, 5]]);
+$result = Collection::from([[1, 2], [3, 4, 5]])
     ->map(function (Collection $i) {
         return $i->size();
     })
@@ -98,7 +98,7 @@ This behaviour works for all callables passed to Collection. No need to convert 
 
 ### Can execute callback with argument templates
 ```php
-$result = Collection::from([[1, 2], [3, 4, 5]]);
+$result = Collection::from([[1, 2], [3, 4, 5]])
     ->map('implode', ['', Argument::item()]) //implode with empty string
     ->toArray(); //[12, 345]        
 ```
@@ -131,7 +131,7 @@ function add($a, $b)
     return $a + $b;
 }
 
-$result = Collection::from([1, 2]);
+$result = Collection::from([1, 2])
     ->map('multiplyBy2')
     ->reduce(0, 'add');
     
@@ -225,7 +225,7 @@ Collection::from([1, 3, 3, 2])
 #### appendWithKey(mixed $key, mixed $item) : Collection
 Returns a lazy collection of items of this collection with $item added as last element. Its key will be $key.
 ```php
-Collection::from([1, 3, 3, 2]);
+Collection::from([1, 3, 3, 2])
     ->appendWithKey('a', 1)
     ->toArray(); //[1, 3, 3, 2, 'a' => 1]
 ```
@@ -233,7 +233,7 @@ Collection::from([1, 3, 3, 2]);
 #### concat(Traversable|array) : Collection
 Returns a lazy collection with items from this collection followed by items from $collection.
 ```php
-Collection::from([1, 3, 3, 2]);
+Collection::from([1, 3, 3, 2])
     ->concat([4,5])
     ->resetKeys() //If we would convert to array here, we would loose 2 items because of same keys
     ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
@@ -248,7 +248,7 @@ Collection::from([1, 3, 3, 2])->contains(2); //true
 #### countBy(callable $differentiator) : Collection
 Returns a collection of items whose keys are the return values of $differentiator and values are the number of items in this collection for which the $differentiator returned this value. $differentiator could take 1 argument (the item) or 2 arguments (key, item).
 ```php
-Collection::from([1, 2, 3, 4, 5]);
+Collection::from([1, 2, 3, 4, 5])
     ->countBy(function ($i) {
         return $v % 2 == 0 ? 'even' : 'odd';
     })
@@ -258,7 +258,7 @@ Collection::from([1, 2, 3, 4, 5]);
 #### cycle() : Collection
 Returns an infinite lazy collection of items in this collection repeated infinitely.
 ```php
-Collection::from([1, 3, 3, 2]);
+Collection::from([1, 3, 3, 2])
     ->cycle()
     ->take(8) //we take just 8 items, since this collection is infinite
     ->resetKeys()
@@ -268,7 +268,7 @@ Collection::from([1, 3, 3, 2]);
 #### distinct() : Collection
 Returns a lazy collection of distinct items. The comparison whether the item is in the collection or not is the same as in in_array.
 ```php
-Collection::from([1, 3, 3, 2]);
+Collection::from([1, 3, 3, 2])
     ->distinct()
     ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
 ```
@@ -276,7 +276,7 @@ Collection::from([1, 3, 3, 2]);
 #### drop(int $numberOfItems) : Collection
 A form of slice that returns all but first $numberOfItems items.
 ```php
-Collection::from([1, 2, 3, 4, 5]);
+Collection::from([1, 2, 3, 4, 5])
     ->drop(4)
     ->toArray(); //[4 => 5]
 ```
@@ -284,12 +284,12 @@ Collection::from([1, 2, 3, 4, 5]);
 #### dropLast($numberOfItems = 1) : Collection
 Returns a lazy collection with last $numberOfItems items skipped. These are still realized, just skipped.
 ```php
-Collection::from([1, 2, 3]);
+Collection::from([1, 2, 3])
     ->dropLast()
     ->toArray(); //[1, 2]
 ```
 ```php
-Collection::from([1, 2, 3]);
+Collection::from([1, 2, 3])
 $collection
     ->dropLast(2)
     ->toArray(); //[1]
@@ -298,15 +298,14 @@ $collection
 #### dropWhile(callable $predicament) : Collection
 Returns a lazy collection by removing items from this collection until first item for which $predicament returns false. $predicament could take 1 argument (the item) or 2 arguments (key, item).
 ```php
-Collection::from([1, 3, 3, 2]);
-$collection
+Collection::from([1, 3, 3, 2])
     ->dropWhile(function ($v) {
         return $v < 3;
     })
     ->toArray(); //[1 => 3, 2 => 3, 3 => 2])
 ```
 ```php
-Collection::from([1, 3, 3, 2]);
+Collection::from([1, 3, 3, 2])
     ->dropWhile(function ($k, $v) {
         return $k < 2 && $v < 3;
     })
@@ -316,7 +315,7 @@ Collection::from([1, 3, 3, 2]);
 #### each(callable $callback) : Collection
 Returns a lazy collection in which $callback is executed for each item. $callback could take 1 argument (the item) or 2 arguments (key, item).
 ```php
-Collection::from([1, 2, 3, 4, 5]);
+Collection::from([1, 2, 3, 4, 5])
     ->each(function ($i) {
         echo $i . PHP_EOL;
     })
@@ -677,7 +676,7 @@ Collection::from([1, 3, 3, 2])
 #### resetKeys() : Collection
 Returns collection of items from this collection but with keys being numerical from 0 upwards.
 ```php
-Collection::from(['asd' => 1]);
+Collection::from(['asd' => 1])
     ->resetKeys()
     ->toArray(); //[1]
 ```
@@ -685,7 +684,7 @@ Collection::from(['asd' => 1]);
 #### reverse() : Collection
 Returns collection of items in this collection in reverse order.
 ```php
-Collection::from([1, 2, 3]);
+Collection::from([1, 2, 3])
     ->reverse()
     ->toArray(); //[2 => 3, 1 => 2, 0 => 1]
 ```
@@ -693,7 +692,7 @@ Collection::from([1, 2, 3]);
 #### shuffle() : Collection
 Returns a collection of shuffled items from this collection
 ```php
-Collection::from([1, 3, 3, 2]);
+Collection::from([1, 3, 3, 2])
     ->shuffle()
     ->toArray(); //something like [2 => 3, 0 => 1, 3 => 2, 1 => 3]
 ```
