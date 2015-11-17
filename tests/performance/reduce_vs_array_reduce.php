@@ -31,7 +31,7 @@ function getIntegerReport()
 
         $collection = new Collection($array);
         $collectionMapStart = microtime(true);
-        $collection->reduce(0, $mapper);
+        $collection->reduce($mapper, 0);
         $collectionMapDeltas += microtime(true) - $collectionMapStart;
     }
 
@@ -67,7 +67,7 @@ function getStringReport()
         $array = $fixtureProvider();
         $collection = new Collection($array);
         $collectionMapStart = microtime(true);
-        $collection->reduce('', $mapper);
+        $collection->reduce($mapper, '');
         $collectionMapDeltas += microtime(true) - $collectionMapStart;
     }
 
@@ -105,7 +105,7 @@ function getObjectReport()
         $array = $fixtureProvider();
         $collection = new Collection($array);
         $collectionMapStart = microtime(true);
-        $collection->reduce(0, $mapper);
+        $collection->reduce($mapper, 0);
         $collectionMapDeltas += microtime(true) - $collectionMapStart;
     }
 
@@ -146,7 +146,7 @@ function getComplexOperationReport()
         $array = $fixtureProvider();
         $collection = new Collection($array);
         $collectionMapStart = microtime(true);
-        $collection->reduce(0, $mapper);
+        $collection->reduce($mapper, 0);
         $collectionMapDeltas += microtime(true) - $collectionMapStart;
     }
 
@@ -182,7 +182,7 @@ function getHashReport()
         $array = $fixtureProvider();
         $collection = new Collection($array);
         $collectionMapStart = microtime(true);
-        $collection->reduce('', $mapper);
+        $collection->reduce($mapper, '');
         $collectionMapDeltas += microtime(true) - $collectionMapStart;
     }
 

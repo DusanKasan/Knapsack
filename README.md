@@ -41,13 +41,10 @@ echo $result; //6
 
 ### Get first 5 items of Fibonacci's sequence
 ```php
-$result = Collection::from([[1,1]])
-    ->iterate(function($v) {
+$result = Collection::iterate([1,1], function($v) {
         return [$v[1], $v[0] + $v[1]]; //[1, 2], [2, 3] ...
     })
-    ->map(function($v) {
-        return $v[0];
-    })
+    ->map('\Knapsack\first')
     ->take(5);
     
 foreach ($result as $item) {
@@ -82,38 +79,6 @@ $result = Collection::from([1, 2])
 echo $result; //6
 ```
 
-### Callback arguments typehinted as Collection are converted automatically
-```php
-$result = Collection::from([[1, 2], [3, 4, 5]])
-    ->map(function (Collection $i) {
-        return $i->size();
-    })
-    ->reduce(0, function($tmp, $v) {
-        return $tmp+$v;
-    });
-        
-echo $result; //5
-```
-This behaviour works for all callables passed to Collection. No need to convert your arrays to Collection inside your callbacks.
-
-### Can execute callback with argument templates
-```php
-$result = Collection::from([[1, 2], [3, 4, 5]])
-    ->map('implode', ['', Argument::item()]) //implode with empty string
-    ->toArray(); //[12, 345]        
-```
-This is available for all Collection methods that accept callable as argument. The argument template always goes after the callable argument.
-
-##### There are 5 named constructor for the Argument class: ######
-
- - Argument::key()
- - Argument::item() 
- - Argument::secondKey() used in comparisons
- - Argument::secondItem() used in comparisons
- - Argument::intermediateValue() used in reductions
- 
-Use these in template and Collection will know how to replace these on each iteration. This is useful for calling native functions which do not have the footprint that Collection can guess - (item) or (key, item). 
-
 ### Collections are immutable
 ```php
 function multiplyBy2($v)
@@ -146,13 +111,13 @@ echo $differentResult; //9
 ```
 
 ### Keys are not unique by design
-It would harm performance. This is only a problem if you need to call toArray(), then you should call resetKeys() before.
+It would harm performance. This is only a problem if you need to call toArray(), then you should call values() before.
 ```php
 $result = Collection::from([1, 2])->concat([3,4]);
     
 //arrays have unique keys
 $result->toArray(); //[3,4]
-$result->resetKeys()->toArray(); //[1, 2, 3, 4]
+$result->values()->toArray(); //[1, 2, 3, 4]
 
 //When iterating, you can have multiple keys.
 foreach ($result as $key => $item) {
@@ -166,7 +131,6 @@ foreach ($result as $key => $item) {
 ```
 
 ## Performance tests
-Currently Knapsack uses Callback abstraction which takes care of converting callable's arguments to Collections and resolving argument templates. It is also responsible of at least 40% of execution time. This should be watched closesly and if it won't be used that much it can be abandoned in pursuit of performance improvements.
 
 ### PHP 5.6
 ```php
@@ -218,7 +182,7 @@ Returns a lazy collection of items of this collection with $item added as last e
 ```php
 Collection::from([1, 3, 3, 2])
     ->append(1)
-    ->resetKeys() //both 1 have 0 key
+    ->values() //both 1 have 0 key
     ->toArray(); //[1, 3, 3, 2, 1]
 ```
 
@@ -235,7 +199,7 @@ Returns a lazy collection with items from this collection followed by items from
 ```php
 Collection::from([1, 3, 3, 2])
     ->concat([4,5])
-    ->resetKeys() //If we would convert to array here, we would loose 2 items because of same keys
+    ->values() //If we would convert to array here, we would loose 2 items because of same keys
     ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
 ```
 
@@ -261,7 +225,7 @@ Returns an infinite lazy collection of items in this collection repeated infinit
 Collection::from([1, 3, 3, 2])
     ->cycle()
     ->take(8) //we take just 8 items, since this collection is infinite
-    ->resetKeys()
+    ->values()
     ->toArray(); //[1, 3, 3, 2, 1, 3, 3, 2]
 ```
 
@@ -403,13 +367,13 @@ Returns a lazy collection with one or multiple levels of nesting flattened. Remo
 ```php
 Collection::from([1,[2, [3]]])
     ->flatten()
-    ->resetKeys() //1, 2 and 3 have all key 0
+    ->values() //1, 2 and 3 have all key 0
     ->toArray() //[1, 2, 3]
 ```
 ```php
 Collection::from([1,[2, [3]]])
     ->flatten(1)
-    ->resetKeys() //1, 2 and 3 have all key 0
+    ->values() //1, 2 and 3 have all key 0
     ->toArray() //[1, 2, [3]]
 ```
 
@@ -469,7 +433,7 @@ Returns a lazy collection of first item from first collection, first item from s
 ```php
 Collection::from([1, 3, 3, 2])
     ->interleave(['a', 'b', 'c', 'd', 'e'])
-    ->resetKeys()
+    ->values()
     ->toArray(); //[1, 'a', 3, 'b', 3, 'c', 2, 'd', 'e']
 ```
 
@@ -478,7 +442,7 @@ Returns a lazy collection of items of this collection separated by $separator it
 ```php
 Collection::from([1, 2, 3])
     ->interpose('a')
-    ->resetKeys() // we must reset the keys, because each 'a' has undecided key
+    ->values() // we must reset the keys, because each 'a' has undecided key
     ->toArray(); //[1, 'a', 2, 'a', 3]
 ```
 
@@ -617,7 +581,7 @@ Returns a lazy collection of items of this collection with $item added as first 
 ```php
 Collection::from([1, 3, 3, 2])
     ->prepend(1)
-    ->resetKeys() //both 1 have 0 key
+    ->values() //both 1 have 0 key
     ->toArray(); //[1, 1, 3, 3, 2]
 ```
 
@@ -682,11 +646,11 @@ Collection::from([1, 3, 3, 2])
     ->toArray(); //[1, 'a', 'a', 2]
 ```
 
-#### resetKeys() : Collection
+#### values() : Collection
 Returns collection of items from this collection but with keys being numerical from 0 upwards.
 ```php
 Collection::from(['asd' => 1])
-    ->resetKeys()
+    ->values()
     ->toArray(); //[1]
 ```
 
@@ -840,3 +804,5 @@ Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 - rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
 - more scenarios
 - think about removing the Callback abstraction - execution overhead of ~100%
+- rewrite to functions with yields and use those in Collection class
+- no key changes in map

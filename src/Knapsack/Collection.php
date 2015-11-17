@@ -20,24 +20,37 @@ class Collection implements Iterator
     protected $input;
 
     /**
-     * @param array|Traversable $input
+     * @var callable
+     */
+    private $generatorFactory;
+
+    /**
+     * @param callable|array|Traversable $input If callable is passed, it must be a generator factory function
      */
     public function __construct($input)
     {
         if (is_array($input)) {
             $input = new RecursiveArrayIterator($input);
+            $this->input = $input;
         } elseif ($input instanceof IteratorAggregate) {
             $input = $input->getIterator();
-        } elseif (!($input instanceof Iterator)) {
+            $this->input = $input;
+        } elseif (is_callable($input)) {
+            $this->generatorFactory = $input;
+            $this->input = $input();
+        } elseif ($input instanceof Iterator) {
+            $this->input = $input;
+        } else {
             throw new InvalidArgument;
         }
 
-        $input->rewind();
-        $this->input = $input;
+        $this->rewind();
     }
 
     /**
-     * @param $input
+     * Static alias of normal constructor.
+     *
+     * @param array|Traversable $input
      * @return Collection
      */
     public static function from($input)
@@ -46,30 +59,59 @@ class Collection implements Iterator
     }
 
     /**
-     * @return array
+     * Returns lazy collection of values, where first value is $input and all subsequent values are computed by applying
+     * $function to the last value in the collection. By default this produces an infinite collection. However you can
+     * end the collection by throwing a NoMoreItems exception.
+     *
+     * @param array|Traversable $input
+     * @param callable $function
+     * @return Collection
      */
-    public function toArray()
+    public static function iterate($input, callable $function)
     {
-        $toArrayRecursive = function ($item) use (&$toArrayRecursive) {
-            $result = $item;
-            if ($item instanceof Traversable) {
-                $result = [];
-                foreach ($item as $key => $value) {
-                    $result[$key] = $toArrayRecursive($value);
-                }
-            }
-
-            return $result;
+        $generatorFactory = function () use ($input, $function) {
+            return iterate($input, $function);
         };
 
-        return $toArrayRecursive($this);
+        return new self($generatorFactory);
+    }
+
+    /**
+     * Returns a lazy collection of $value repeated $times times. If $times is not provided the collection is infinite.
+     *
+     * @param mixed $value
+     * @param int $times
+     * @return Collection
+     */
+    public static function repeat($value, $times = -1)
+    {
+        $generatorFactory = function () use ($value, $times) {
+            return repeat($value, $times);
+        };
+
+        return new self($generatorFactory);
+    }
+
+    /**
+     * Returns a lazy collection of numbers starting at $start, incremented by $step until $end is reached.
+     *
+     * @param int $start
+     * @param int|null $end
+     * @param int $step
+     * @return Collection
+     */
+    public static function range($start = 0, $end = null, $step = 1)
+    {
+        $generatorFactory = function () use ($start, $end, $step) {
+            return \Knapsack\range($start, $end, $step);
+        };
+
+        return new self($generatorFactory);
     }
 
     public function current()
     {
-        $current = $this->input->current();
-
-        return $current;
+        return $this->input->current();
     }
 
     public function next()
@@ -89,29 +131,48 @@ class Collection implements Iterator
 
     public function rewind()
     {
+        if ($this->generatorFactory) {
+            $this->input = call_user_func($this->generatorFactory);
+        }
+
         $this->input->rewind();
     }
 
     /**
-     * Returns a lazy collection of items for which $filter returned true.
-     *
-     * @param callable $filter
-     * @param array $argumentTemplate
-     * @return Collection
+     * @return array
      */
-    public function filter(callable $filter, array $argumentTemplate = [])
+    public function toArray()
     {
-        return new FilteredCollection($this, $filter, $argumentTemplate);
+        return toArray($this);
     }
 
     /**
-     * Returns a lazy collection of distinct items. The comparison whether the item is in the collection or not is the same as in in_array.
+     * Returns a lazy collection of items for which $function returned true.
+     *
+     * @param callable $function ($value, $key)
+     * @return Collection
+     */
+    public function filter(callable $function)
+    {
+        $generatorFactory = function () use ($function) {
+            return filter($this, $function);
+        };
+
+        return new self($generatorFactory);
+    }
+
+    /**
+     * Returns a lazy collection of distinct items. The comparison is the same as in in_array.
      *
      * @return Collection
      */
     public function distinct()
     {
-        return new DistinctCollection($this);
+        $generatorFactory = function () {
+            return distinct($this);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
@@ -122,109 +183,118 @@ class Collection implements Iterator
      */
     public function concat($collection)
     {
-        return new ConcatenatedCollection($this, $collection);
+        $generatorFactory = function () use ($collection) {
+            return concat($this, $collection);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns collection where each key/item is changed to the output of executing $mapping on each key/item. If you wish to modify keys, yield 2 values in $mapping. First is key, second is item.
+     * Returns collection where each item is changed to the output of executing $function on each key/item.
      *
-     * @param callable $mapping
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return Collection
      */
-    public function map(callable $mapping, array $argumentTemplate = [])
+    public function map(callable $function)
     {
-        return new MappedCollection($this, $mapping, $argumentTemplate);
+        $generatorFactory = function () use ($function) {
+            return map($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Reduces the collection to single value by iterating over the collection and calling $reduction while passing $startValue and current key/item as parameters. The output of $reduction is used as $startValue in next iteration. The output of $reduction on last element is the return value of this function.
+     * Reduces the collection to single value by iterating over the collection and calling $function while
+     * passing $startValue and current key/item as parameters. The output of $function is used as $startValue in
+     * next iteration. The output of $function on last element is the return value of this function. If the return
+     * value is a collection (array|Traversable) an instance of Collection will be returned.
      *
      * @param mixed $startValue
-     * @param callable $reduction Must take 2 arguments, intermediate value and item from the iterator.
-     * @param array $argumentTemplate
-     * @return mixed
+     * @param callable $function ($tmpValue, $value, $key)
+     * @return mixed|Collection
      */
-    public function reduce($startValue, callable $reduction, array $argumentTemplate = [])
+    public function reduce(callable $function, $startValue)
     {
-        $callback = new Callback($reduction, $argumentTemplate);
+        $result = reduce($this, $function, $startValue);
 
-        if (empty($argumentTemplate)) {
-            $template = $callback->getArgumentsCount() == 3 ?
-                [Argument::intermediateValue(), Argument::key(), Argument::item()] :
-                [Argument::intermediateValue(), Argument::item()];
-            $callback->setArgumentTemplate($template);
-        }
-
-
-        foreach ($this as $key => $item) {
-            $startValue = $callback->execute([
-                Argument::INTERMEDIATE_VALUE => $startValue,
-                Argument::KEY => $key,
-                Argument::ITEM => $item,
-            ]);
-        }
-
-        return $startValue;
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
-     * Returns a lazy collection with one or multiple levels of nesting flattened. Removes all nesting when no value is passed.
+     * Returns a lazy collection with one or multiple levels of nesting flattened. Removes all nesting when no value
+     * is passed.
      *
      * @param int $depth How many levels should be flatten, default (-1) is infinite.
      * @return Collection
      */
     public function flatten($depth = -1)
     {
-        return new FlattenedCollection($this, $depth);
+        $generatorFactory = function () use ($depth) {
+            return flatten($this, $depth);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns collection sorted using $sortCallback($item1, $item2). $sortCallback should return true if first item is larger than the second and false otherwise.
+     * Returns a non-lazy collection sorted using $function($item1, $item2, $key1, $key2 ). $function should
+     * return true if first item is larger than the second and false otherwise.
      *
-     * @param callable $sortCallback
-     * @param array $argumentTemplate
+     * @param callable $function ($value1, $value2, $key1, $key2)
      * @return Collection
      */
-    public function sort(callable $sortCallback, array $argumentTemplate = [])
+    public function sort(callable $function)
     {
-        return new SortedCollection($this, $sortCallback, $argumentTemplate);
+        $generatorFactory = function () use ($function) {
+            return \Knapsack\sort($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns lazy collection items of which are part of the original collection from item number $from to item number $to inclusive. The items before $from are also iterated over, just not returned.
+     * Returns lazy collection items of which are part of the original collection from item number $from to item
+     * number $to. The items before $from are also iterated over, just not returned.
      *
      * @param int $from
      * @param int $to If omitted, will slice until end
      * @return Collection
      */
-    public function slice($from, $to = 0)
+    public function slice($from, $to = -1)
     {
-        return new SlicedCollection($this, $from, $to);
+        $generatorFactory = function () use ($from, $to) {
+            return slice($this, $from, $to);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns collection which items are separated into groups indexed by the return value of $grouping.
+     * Returns collection which items are separated into groups indexed by the return value of $function.
      *
-     * @param callable $differentiator
-     * @param array $argumentTemplate
+     * @param callable $function ($value, $key)
      * @return Collection
      */
-    public function groupBy(callable $differentiator, array $argumentTemplate = [])
+    public function groupBy(callable $function)
     {
-        return new GroupedCollection($this, $differentiator, $argumentTemplate);
+        return new self(groupBy($this, $function));
     }
 
     /**
-     * Returns a lazy collection in which ca$callback is executed for each item. $callback could take 1 argument (the item) or 2 arguments (key, item).
+     * Returns a lazy collection in which $function is executed for each item.
      *
-     * @param callable $callback
-     * @param array $argumentTemplate
+     * @param callable $function ($value, $key)
      * @return Collection
      */
-    public function each(callable $callback, array $argumentTemplate = [])
+    public function each(callable $function)
     {
-        return new ForEachCollection($this, $callback, $argumentTemplate);
+        $generatorFactory = function () use ($function) {
+            return \Knapsack\each($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
@@ -234,190 +304,161 @@ class Collection implements Iterator
      */
     public function size()
     {
-        return iterator_count($this);
+        return size($this);
     }
 
     /**
      * Returns value at the key $key. If multiple values have this key, return first. If no value has
-     * this key, throw ItemNotFound.
+     * this key, throw ItemNotFound.If the return value is a collection (array|Traversable) an instance of Collection
+     * will be returned.
      *
      * @param mixed $key
-     * @return mixed
+     * @return mixed|Collection
      */
     public function get($key)
     {
-        $ifNotFound = new stdClass;
+        $result = get($this, $key);
 
-        $result = $this->find(
-            function ($k, $v) use ($key) {
-                return $k == $key;
-            },
-            $ifNotFound
-        );
-
-        if ($result === $ifNotFound) {
-            throw new ItemNotFound;
-        }
-
-        return $result;
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
      * Returns item at the key $key. If multiple items have this key, return first. If no item has
-     * this key, return $ifNotFound.
+     * this key, return $ifNotFound. If the return value is a collection (array|Traversable) an instance of Collection
+     * will be returned.
      *
      * @param mixed $key
-     * @param mixed $ifNotFound
-     * @return mixed
+     * @param mixed $default
+     * @return mixed|Collection
      */
-    public function getOrDefault($key, $ifNotFound = null)
+    public function getOrDefault($key, $default = null)
     {
-        try {
-            $return = $this->get($key);
-        } catch (ItemNotFound $e) {
-            $return = $ifNotFound;
-        }
+        $result = getOrDefault($this, $key, $default);
 
-        return $return;
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
-     * Returns item at the key $key converted to Collection if possible (i.e. if it is Traversable or array). If
-     * multiple values have this key, return first. If no value has this key, throw ItemNotFound.
+     * Returns nth item in the collection starting from 0. If the size of this collection is smaller than $position,
+     * throw ItemNotFound. If the return value is a collection (array|Traversable) an instance of Collection
+     * will be returned.
      *
-     * @param mixed $key
-     * @return mixed
+     * @param int $position
+     * @return mixed|Collection
      */
-    public function getCollection($key)
+    public function getNth($position)
     {
-        return new Collection($this->get($key));
+        $result = getNth($this, $position);
+
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
-     * Returns first value matched by $filter. If no value matches, return $ifNotFound.
+     * Returns first value matched by $function. If no value matches, return $default. If the return value is a
+     * collection (array|Traversable) an instance of Collection will be returned.
      *
-     * @param callable $filter
-     * @param mixed|null $ifNotFound
-     * @param array $argumentTemplate
-     * @return mixed
+     * @param callable $function
+     * @param mixed|null $default
+     * @return mixed|Collection
      */
-    public function find(callable $filter, $ifNotFound = null, array $argumentTemplate = [])
+    public function find(callable $function, $default = null)
     {
-        $filtered = new FilteredCollection($this, $filter, $argumentTemplate);
+        $result = find($this, $function, $default);
 
-        foreach ($filtered as $item) {
-            return $item;
-        }
-
-        return $ifNotFound;
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
-     * Returns a collection of items whose keys are the return values of $differentiator and values are the number of items in this collection for which the $differentiator returned this value.
+     * Returns a non-lazy collection of items whose keys are the return values of $function and values are the number of
+     * items in this collection for which the $function returned this value.
      *
-     * @param callable $differentiator
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return Collection
      */
-    public function countBy(callable $differentiator, array $argumentTemplate = [])
+    public function countBy(callable $function)
     {
-        return new CountByCollection($this, $differentiator, $argumentTemplate);
+        $generatorFactory = function () use ($function) {
+            return countBy($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection by changing keys of this collection for each item to the result of $indexer for that key/value.
+     * Returns a lazy collection by changing keys of this collection for each item to the result of $function for
+     * that item.
      *
-     * @param callable $indexer
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return Collection
      */
-    public function indexBy(callable $indexer, array $argumentTemplate = [])
+    public function indexBy(callable $function)
     {
-        $callback = new Callback($indexer, $argumentTemplate);
+        $generatorFactory = function () use ($function) {
+            return indexBy($this, $function);
+        };
 
-        return new MappedCollection(
-            $this,
-            function ($k, $v) use ($callback) {
-                yield $callback->executeWithKeyAndValue($k, $v);
-                yield $v;
-            }
-        );
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns true if $predicament returns true for every item in this collection, false otherwise.
+     * Returns true if $function returns true for every item in this collection, false otherwise.
      *
-     * @param callable $predicament
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return bool
      */
-    public function every(callable $predicament, array $argumentTemplate = [])
+    public function every(callable $function)
     {
-        $callback = new Callback($predicament, $argumentTemplate);
-
-        foreach ($this as $k => $v) {
-            if (!$callback->executeWithKeyAndValue($k, $v)) {
-                return false;
-            }
-        }
-
-        return true;
+        return every($this, $function);
     }
 
     /**
-     * Returns true if $predicament returns true for at least one item in this collection, false otherwise.
+     * Returns true if $function returns true for at least one item in this collection, false otherwise.
      *
-     * @param callable $predicament
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return bool
      */
-    public function some(callable $predicament, array $argumentTemplate = [])
+    public function some(callable $function)
     {
-        $callback = new Callback($predicament, $argumentTemplate);
-
-        foreach ($this as $k => $v) {
-            if ($callback->executeWithKeyAndValue($k, $v)) {
-                return true;
-            }
-        }
-
-        return false;
+        return some($this, $function);
     }
 
     /**
-     * Returns true if $needle is present in the collection.
+     * Returns true if $value is present in the collection.
      *
-     * @param mixed $needle
+     * @param mixed $value
      * @return bool
      */
-    public function contains($needle)
+    public function contains($value)
     {
-        return $this->some(function ($v) use ($needle) {
-            return $v === $needle;
-        });
+        return contains($this, $value);
     }
 
     /**
      * Returns collection of items in this collection in reverse order.
      *
-     * @return ReversedCollection
+     * @return Collection
      */
     public function reverse()
     {
-        return new ReversedCollection($this);
+        $generatorFactory = function () {
+            return reverse($this);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
      * Reduce the collection to single value. Walks from right to left.
      *
+     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
      * @param mixed $startValue
-     * @param callable $reduction Must take 2 arguments, intermediate value and item from the iterator.
-     * @param array $argumentTemplate
-     * @return mixed
+     * @return mixed|Collection
      */
-    public function reduceRight($startValue, callable $reduction, array $argumentTemplate = [])
+    public function reduceRight(callable $function, $startValue)
     {
-        return $this->reverse()->reduce($startValue, $reduction, $argumentTemplate);
+        $result = reduceRight($this, $function, $startValue);
+
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
@@ -428,7 +469,11 @@ class Collection implements Iterator
      */
     public function take($numberOfItems)
     {
-        return $this->slice(0, $numberOfItems);
+        $generatorFactory = function () use ($numberOfItems) {
+            return take($this, $numberOfItems);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
@@ -439,62 +484,40 @@ class Collection implements Iterator
      */
     public function drop($numberOfItems)
     {
-        return $this->slice($numberOfItems + 1);
+        $generatorFactory = function () use ($numberOfItems) {
+            return drop($this, $numberOfItems);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns collection of items from this collection but with keys being numerical from 0 upwards.
+     * Returns collection of values from this collection but with keys being numerical from 0 upwards.
      *
      * @return Collection
      */
-    public function resetKeys()
+    public function values()
     {
-        return new ResetKeysCollection($this);
+        $generatorFactory = function () {
+            return values($this);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns lazy collection which is infinite passing last item of this collection to the $iterator and using its return value(s) as next item (and key).
+     * Returns a lazy collection without elements matched by $function.
      *
-     * If you wish to pass the key, you must yield 2 values from $iterator, first is key, second is item.
-     *
-     * @param callable $iterator
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return Collection
      */
-    public function iterate(callable $iterator, array $argumentTemplate = [])
+    public function reject(callable $function)
     {
-        return new IteratingCollection($this, $iterator, $argumentTemplate);
-    }
+        $generatorFactory = function () use ($function) {
+            return reject($this, $function);
+        };
 
-    /**
-     * Returns first item matched by $filter, converted to Collection if possible (i.e. if it is Traversable or array). If no value matches, return $ifNotFound.
-     *
-     * @param callable $filter
-     * @param mixed|null $ifNotFound
-     * @param array $argumentTemplate
-     * @return mixed
-     */
-    public function findCollection(callable $filter, $ifNotFound = null, array $argumentTemplate = [])
-    {
-        $found = $this->find($filter, $ifNotFound, $argumentTemplate);
-
-        return new Collection($found);
-    }
-
-    /**
-     * Returns a lazy collection without elements matched by $filter. If you wish to work with keys, pass a callable that has 2 input values ($key, $value).
-     *
-     * @param callable $filter
-     * @param array $argumentTemplate
-     * @return Collection
-     */
-    public function reject(callable $filter, array $argumentTemplate = [])
-    {
-        $callback = new Callback($filter);
-
-        return $this->filter(function ($k, $v) use ($callback) {
-            return !$callback->executeWithKeyAndValue($k, $v);
-        }, $argumentTemplate);
+        return new self($generatorFactory);
     }
 
     /**
@@ -504,241 +527,214 @@ class Collection implements Iterator
      */
     public function keys()
     {
-        return $this
-            ->map(function ($k, $v) {
-                return $k;
-            })
-            ->resetKeys();
+        $generatorFactory = function () {
+            return keys($this);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
      * Returns a lazy collection of items of this collection separated by $separator
      *
      * @param mixed $separator
-     * @return DropLastCollection
+     * @return Collection
      */
     public function interpose($separator)
     {
-        return $this
-            ->map(function ($v) use ($separator) {
-                return [$v, $separator];
-            })
-            ->flatten(1)
-            ->dropLast();
+        $generatorFactory = function () use ($separator) {
+            return interpose($this, $separator);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
      * Returns a lazy collection with last $numberOfItems items skipped. These are still iterated over, just skipped.
      *
      * @param int $numberOfItems
-     * @return DropLastCollection
+     * @return Collection
      */
     public function dropLast($numberOfItems = 1)
     {
-        return new DropLastCollection($this, $numberOfItems);
+        $generatorFactory = function () use ($numberOfItems) {
+            return dropLast($this, $numberOfItems);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection of first item from first collection, first item from second, second from first and so on.
+     * Returns a lazy collection of first item from first collection, first item from second, second from first and
+     * so on.
      *
      * @param Traversable|array $collection
-     * @return InterleavedCollection
+     * @return Collection
      */
     public function interleave($collection)
     {
-        return new InterleavedCollection($this, $collection);
+        $generatorFactory = function () use ($collection) {
+            return interleave($this, $collection);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
      * Returns an infinite lazy collection of items in this collection repeated infinitely.
      *
-     * @return CycledCollection
+     * @return Collection
      */
     public function cycle()
     {
-        return new CycledCollection($this);
+        $generatorFactory = function () {
+            return cycle($this);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection of items of this collection with $item added as first element. Its key will be 0.
+     * Returns a lazy collection of items of this collection with $value added as first element. If $key is not provided
+     * it will be next integer index.
      *
-     * @param mixed $item
+     * @param mixed $value
+     * @param mixed|null $key
      * @return Collection
      */
-    public function prepend($item)
+    public function prepend($value, $key = null)
     {
-        return $this->prependWithKey(0, $item);
+        $generatorFactory = function () use ($value, $key) {
+            return prepend($this, $value, $key);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection of items of this collection with $item added as first element. Its key will be $key.
+     * Returns a lazy collection of items of this collection with $value added as last element. If $key is not provided
+     * it will be next integer index.
      *
+     * @param mixed $value
      * @param mixed $key
-     * @param mixed $item
      * @return Collection
      */
-    public function prependWithKey($key, $item)
+    public function append($value, $key = null)
     {
-        return (new Collection([$key => $item]))->concat($this);
+        $generatorFactory = function () use ($value, $key) {
+            return append($this, $value, $key);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection of items of this collection with $item added as last element. Its key will be 0.
+     * Returns a lazy collection by removing items from this collection until first item for which $function returns
+     * false.
      *
-     * @param mixed $item
+     * @param callable $function
      * @return Collection
      */
-    public function append($item)
+    public function dropWhile(callable $function)
     {
-        return $this->appendWithKey(0, $item);
+        $generatorFactory = function () use ($function) {
+            return dropWhile($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection of items of this collection with $item added as last element. Its key will be $key.
+     * Returns a lazy collection which is a result of calling map($function) and then flatten(1)
      *
-     * @param mixed $key
-     * @param mixed $item
+     * @param callable $function
      * @return Collection
      */
-    public function appendWithKey($key, $item)
+    public function mapcat(callable $function)
     {
-        return $this->concat([$key => $item]);
+        $generatorFactory = function () use ($function) {
+            return mapcat($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection by removing items from this collection until first item for which $predicament returns false.
+     * Returns a lazy collection of items from the start of the ollection until the first item for which $function
+     * returns false.
      *
-     * @param callable $predicament
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return Collection
      */
-    public function dropWhile(callable $predicament, array $argumentTemplate = [])
+    public function takeWhile(callable $function)
     {
-        $callback = new Callback($predicament);
-        $failedAlready = false;
+        $generatorFactory = function () use ($function) {
+            return takeWhile($this, $function);
+        };
 
-        return $this->reject(function ($k, $v) use (&$failedAlready, $callback) {
-            if (!$failedAlready) {
-                $failedAlready = $callback->executeWithKeyAndValue($k, $v);
-
-                return $failedAlready;
-            }
-
-            return false;
-        }, $argumentTemplate);
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection which is a result of calling map($mapper) and then flatten(1)
-     *
-     * @param callable $mapper
-     * @param array $argumentTemplate
-     * @return Collection
-     */
-    public function mapcat(callable $mapper, array $argumentTemplate = [])
-    {
-        return $this->map($mapper, $argumentTemplate)->flatten(1);
-    }
-
-    /**
-     * Returns a lazy collection of items from the start of the collection until the first item for which $predicament returns false.
-     *
-     * @param callable $predicament
-     * @param array $argumentTemplate
-     * @return Collection
-     */
-    public function takeWhile(callable $predicament, array $argumentTemplate = [])
-    {
-        $callback = new Callback($predicament);
-        $failedAlready = false;
-
-        return $this->filter(function ($k, $v) use ($callback, &$failedAlready) {
-            if (!$failedAlready) {
-                $failedAlready = $callback->executeWithKeyAndValue($k, $v);
-
-                return $failedAlready;
-            }
-
-            return false;
-        }, $argumentTemplate);
-    }
-
-    /**
-     * Returns a collection of [take($position), drop($position]
+     * Returns a collection of [take($position), drop($position)]
      *
      * @param int $position
      * @return Collection
      */
     public function splitAt($position)
     {
-        return new Collection([$this->take($position), $this->drop($position)]);
+        $generatorFactory = function () use ($position) {
+            return splitAt($this, $position);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
      * Returns a collection of [takeWhile($predicament), dropWhile($predicament]
      *
-     * @param callable $predicament
-     * @param array $argumentTemplate
+     * @param callable $function
      * @return Collection
      */
-    public function splitWith(callable $predicament, array $argumentTemplate = [])
+    public function splitWith(callable $function)
     {
-        return new Collection([
-            $this->takeWhile($predicament, $argumentTemplate),
-            $this->dropWhile($predicament, $argumentTemplate)
-        ]);
+        $generatorFactory = function () use ($function) {
+            return splitWith($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a lazy collection with items from this collection equal to any key in $replacementMap replaced for their value.
+     * Returns a lazy collection with items from this collection but values that are found in keys of $replacementMap
+     * are replaced by their values.
      *
      * @param Traversable|array $replacementMap
      * @return Collection
      */
     public function replace($replacementMap)
     {
-        $replacementMap = new Collection($replacementMap);
-        $ifNotNullIdentifier = new stdClass();
+        $generatorFactory = function () use ($replacementMap) {
+            return replace($this, $replacementMap);
+        };
 
-        return $this->map(function ($v) use ($replacementMap, $ifNotNullIdentifier) {
-            $result = $replacementMap->getOrDefault($v, $ifNotNullIdentifier);
-            if ($result !== $ifNotNullIdentifier) {
-                $v = $result;
-            }
-
-            return $v;
-        });
+        return new self($generatorFactory);
     }
 
     /**
      * Returns a lazy collection of reduction steps.
      *
+     * @param callable $function
      * @param mixed $startValue
-     * @param callable $reduction
-     * @param array $argumentTemplate
      * @return Collection
      */
-    public function reductions($startValue, callable $reduction, array $argumentTemplate = [])
+    public function reductions(callable $function, $startValue)
     {
-        $callback = new Callback($reduction, $argumentTemplate);
+        $generatorFactory = function () use ($function, $startValue) {
+            return reductions($this, $function, $startValue);
+        };
 
-        if (empty($argumentTemplate)) {
-            $argumentTemplate = $callback->getArgumentsCount() == 2 ?
-                [Argument::intermediateValue(), Argument::item()] :
-                [Argument::intermediateValue(), Argument::key(), Argument::item()];
-
-            $callback->setArgumentTemplate($argumentTemplate);
-        }
-
-        return $this->map(function ($key, $item) use (&$startValue, $callback) {
-            $startValue = $callback->execute([
-                Argument::INTERMEDIATE_VALUE => $startValue,
-                Argument::KEY => $key,
-                Argument::ITEM => $item
-            ]);
-
-            return $startValue;
-        });
+        return new self($generatorFactory);
     }
 
     /**
@@ -749,34 +745,25 @@ class Collection implements Iterator
      */
     public function takeNth($step)
     {
-        $counter = 0;
+        $generatorFactory = function () use ($step) {
+            return takeNth($this, $step);
+        };
 
-        return $this->filter(function () use (&$counter, $step) {
-            return $counter++ % $step == 0;
-        });
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns a collection of shuffled items from this collection
+     * Returns a non-collection of shuffled items from this collection
      *
      * @return Collection
      */
     public function shuffle()
     {
-        $shuffledArray = $this
-            ->map(function ($k, $v) {
-                return [$k, $v];
-            })
-            ->resetKeys()
-            ->toArray();
+        $generatorFactory = function () {
+            return shuffle($this);
+        };
 
-        shuffle($shuffledArray);
-
-        return (new Collection($shuffledArray))
-            ->map(function ($v) {
-                yield $v[0];
-                yield $v[1];
-            });
+        return new self($generatorFactory);
     }
 
     /**
@@ -789,35 +776,41 @@ class Collection implements Iterator
      * @param int $numberOfItems
      * @param int $step
      * @param array $padding
-     * @return PartitionedCollection
+     * @return Collection
      */
     public function partition($numberOfItems, $step = 0, $padding = [])
     {
-        return new PartitionedCollection($this, $numberOfItems, $step, $padding);
+        $generatorFactory = function () use ($numberOfItems, $step, $padding) {
+            return partition($this, $numberOfItems, $step, $padding);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Creates a lazy collection of collections created by partitioning this collection every time $partitioning will return different result.
+     * Creates a lazy collection of collections created by partitioning this collection every time $function will
+     * return different result.
      *
-     * @param callable $partitioning
-     * @param array $argumentTemplate
-     * @return PartitionedByCollection
+     * @param callable $function
+     * @return Collection
      */
-    public function partitionBy(callable $partitioning, array $argumentTemplate = [])
+    public function partitionBy(callable $function)
     {
-        return new PartitionedByCollection($this, $partitioning, $argumentTemplate);
+        $generatorFactory = function () use ($function) {
+            return partitionBy($this, $function);
+        };
+
+        return new self($generatorFactory);
     }
 
     /**
-     * Returns true if this collection is empty. False otherwise.!$
+     * Returns true if this collection is empty. False otherwise.
      *
      * @return bool
      */
     public function isEmpty()
     {
-        $this->rewind();
-
-        return !$this->valid();
+        return isEmpty($this);
     }
 
     /**
@@ -827,48 +820,52 @@ class Collection implements Iterator
      */
     public function isNotEmpty()
     {
-        return !$this->isEmpty();
+        return isNotEmpty($this);
     }
 
     /**
-     * Returns a collection where keys are distinct items from this collection and their values are number of occurrences of each value.
+     * Returns a collection where keys are distinct items from this collection and their values are number of
+     * occurrences of each value.
      *
      * @return Collection
      */
     public function frequencies()
     {
-        return $this->countBy(function ($v) {
-            return $v;
-        });
+        return new self(frequencies($this));
     }
 
     /**
      * Returns first item of this collection. If the collection is empty, throws exception
      *
      * @throws ItemNotFound
-     * @return mixed
+     * @return mixed|Collection
      */
     public function first()
     {
-        if ($this->isEmpty()) {
-            throw new ItemNotFound;
-        }
-
-        return $this->resetKeys()->get(0);
+        $result = first($this);
+        return isCollection($result) ? new self($result) : $result;
     }
 
     /**
      * Returns last item of this collection. If the collection is empty, throws exception
      *
      * @throws ItemNotFound
-     * @return mixed
+     * @return mixed|Collection
      */
     public function last()
     {
-        if ($this->isEmpty()) {
-            throw new ItemNotFound;
-        }
+        $result = last($this);
+        return isCollection($result) ? new self($result) : $result;
+    }
 
-        return $this->reverse()->resetKeys()->get(0);
+    /**
+     * Returns a lazy collection by picking a $key key from each sub-collection of $collection.
+     *
+     * @param mixed $key
+     * @return Collection
+     */
+    public function pluck($key)
+    {
+        return new self(pluck($this, $key));
     }
 }

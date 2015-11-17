@@ -68,10 +68,10 @@ class GroupingFlightsTest extends PHPUnit_Framework_TestCase
                 return $f['cancelled'];
             })
             ->reduce(
-                0,
                 function ($tmp, $f) {
                     return $tmp + $f['delay'];
-                }
+                },
+                0
             );
 
         return [

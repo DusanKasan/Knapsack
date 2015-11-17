@@ -10,25 +10,14 @@ class CallableFunctionNamesTest extends PHPUnit_Framework_TestCase
 {
     public function testIt()
     {
-        $collection = new Collection([true, 1, new stdClass(), 2]);
+        $collection = new Collection([2, 1]);
         $result = $collection
-            ->reject('is_bool')
-            ->reject('is_object')
             ->concat([3, 4])
-            ->resetKeys()
-            ->splitAt(2)
+            ->sort('\Knapsack\compare')
+            ->values()
             ->toArray();
 
-        $expected = [
-            [
-                1,
-                2,
-            ],
-            [
-                2 => 3,
-                3 => 4,
-            ]
-        ];
+        $expected = [1, 2, 3, 4];
 
         $this->assertEquals($expected, $result);
     }
