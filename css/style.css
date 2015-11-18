@@ -142,8 +142,12 @@ h5 {
 .operations-title {
     font-size: 1.2em;
     font-weight: bold;
-    padding-bottom: 0.5em;
+    padding-top: 0.5em;
     display: inline-block;
+}
+
+.operations-title:first-of-type {
+    padding-top: 0;
 }
 
 #header {
