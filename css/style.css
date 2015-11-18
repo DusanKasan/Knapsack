@@ -191,8 +191,17 @@ pre {
     display: inline-block;
 }
 
+.navbar>li>span {
+
+}
+
 #operations-list-dropdown {
     padding: 5px;
+}
+
+#operations-list-dropdown .operations-title {
+    font-size: 1em;
+    padding: 10px 15px;
 }
 
 .navbar li a:hover {

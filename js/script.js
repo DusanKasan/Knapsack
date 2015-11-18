@@ -38,11 +38,32 @@ function highlightPhpCode() {
 function fillOperationLists()
 {
 	var list = _.chain($('h4'))
-		.indexBy(function(item) {return 'operation-'+item.innerHTML.split('(')[0].trim();})
-		.each(function(item, key) {item.id = key;})
-		.map(function(item, key) {return '<li><a href="#'+key+'">'+key.substring(10)+'</a></li>'})
-		.sort()
-		.reduce(function(memo, item) {return memo+item;})
+		.groupBy(function (h4) {
+			return $(h4).prevAll('h2:first').text();
+		})
+		.map(function(section, sectionName) {
+			var html = _.chain(section)
+				.indexBy(function(h4) {
+					var section = $(h4).prevAll('h2:first').text().replace(' ', '-');
+					return section + '-' + h4.innerHTML.split('(')[0].trim();
+				})
+				.each(function(h4, key) {h4.id = key;})
+				.map(function (h4, key) {
+					return '<li><a href="#' + key + '">' + key.split('-').pop() + '</a></li>'
+				})
+				.reduce(function (temp, listItem) {
+					return temp + listItem;
+				})
+				.value();
+
+			return {
+				title: '<li><span class="operations-title">'+sectionName+'</span></li>',
+				html: html
+			};
+		})
+		.reduce(function(temp, sectionData) {
+			return temp + sectionData.title + sectionData.html;
+		}, '')
 		.value();
 
 	$('#operations-list-sidebar, #operations-list-dropdown').html(list);
