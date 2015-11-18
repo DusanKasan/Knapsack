@@ -147,11 +147,11 @@ foreach ($result as $key => $item) {
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 1000 integers (addition)                           | 0.0030951976776123s   | 0.034346175193787s        | 1109%                |
-| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0035692930221558s   | 0.035529708862305s        | 995%                 |
-| array_map vs Collection::map on 1000 object (object to field value)                | 0.0033452987670898s   | 0.03433084487915s         | 1026%                |
-| array_map vs Collection::map on 1000 md5 invocations                               | 0.0045573949813843s   | 0.036618542671204s        | 803%                 |
-| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.06009886264801s     | 0.091361713409424s        | 152%                 |
+| array_map vs Collection::map on 1000 integers (addition)                           | 0.0026963949203491s   | 0.017051982879639s        | 632%                 |
+| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0028762340545654s   | 0.019258499145508s        | 669%                 |
+| array_map vs Collection::map on 1000 object (object to field value)                | 0.0030517101287842s   | 0.017919874191284s        | 587%                 |
+| array_map vs Collection::map on 1000 md5 invocations                               | 0.0038059234619141s   | 0.01975724697113s         | 519%                 |
+| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.052967953681946s    | 0.072820711135864s        | 137%                 |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 
@@ -160,11 +160,11 @@ foreach ($result as $key => $item) {
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 1000 integers (addition)                           | 0.00012121200561523s  | 0.0029430627822876s       | 2428%                |
-| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.00016176700592041s  | 0.0023923873901367s       | 1478%                |
-| array_map vs Collection::map on 1000 object (object to field value)                | 0.00014028549194336s  | 0.0024723529815674s       | 1762%                |
-| array_map vs Collection::map on 1000 md5 invocations                               | 0.00045738220214844s  | 0.0031296968460083s       | 684%                 |
-| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.015933513641357s    | 0.015382480621338s        | 96%                  |
+| array_map vs Collection::map on 1000 integers (addition)                           | 9.7393989562988E-5s   | 0.0013259887695313s       | 1361%                |
+| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0001237154006958s   | 0.0013420820236206s       | 1084%                |
+| array_map vs Collection::map on 1000 object (object to field value)                | 0.00011978149414062s  | 0.0014124155044556s       | 1179%                |
+| array_map vs Collection::map on 1000 md5 invocations                               | 0.00045244693756104s  | 0.0019778966903687s       | 437%                 |
+| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.011838340759277s    | 0.013077282905579s        | 110%                 |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 
@@ -1003,6 +1003,7 @@ Returns value of $value decremented by one.
 
 ```php
 decrement(2) === 1; //true
+
 
 ## Planned    
 - multiple collections can be passed to lets say concat
