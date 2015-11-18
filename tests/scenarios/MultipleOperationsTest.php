@@ -32,7 +32,8 @@ class MultipleOperationsTest extends PHPUnit_Framework_TestCase
             ->groupBy(function ($v) {
                 return $v % 2 == 0 ? 'even' : 'odd';
             })
-            ->get('even');
+            ->get('even')
+            ->toArray();
 
         $this->assertEquals([2], $result);
     }
