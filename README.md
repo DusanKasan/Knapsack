@@ -113,7 +113,7 @@ $result = Collection::from([1, 2])
 echo $result; //6
 
 //On the same collection
-$differentResult = $collection
+$differentResult = Collection::from([1, 2])
     ->map('multiplyBy3')
     ->reduce(0, 'add');
     
@@ -145,7 +145,7 @@ foreach ($result as $key => $item) {
 ### PHP 5.6
 ```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| operation details                                                                  | native execution time | collection execution time | difference (percent) |
+| operation details                                                                  | native execution time | collection execution time | difference           |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | array_map vs Collection::map on 1000 integers (addition)                           | 0.0026963949203491s   | 0.017051982879639s        | 632%                 |
 | array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0028762340545654s   | 0.019258499145508s        | 669%                 |
@@ -158,7 +158,7 @@ foreach ($result as $key => $item) {
 ### PHP 7 beta 2
 ```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| operation details                                                                  | native execution time | collection execution time | difference (percent) |
+| operation details                                                                  | native execution time | collection execution time | difference           |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | array_map vs Collection::map on 1000 integers (addition)                           | 9.7393989562988E-5s   | 0.0013259887695313s       | 1361%                |
 | array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0001237154006958s   | 0.0013420820236206s       | 1084%                |
@@ -250,6 +250,7 @@ Collection::from([1, 3, 3, 2])
 Collection::from([1, 3, 3, 2])
     ->append(1, 'key')
     ->toArray(); //[1, 3, 3, 2, 'key' => 1]
+```    
 ```php    
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
@@ -383,7 +384,7 @@ Collection::from([1, 2, 3, 4, 5])
 //5
 ```
 ```php
-each([1, 2, 3, 4, 5], function ($v) {echo $v . PHPE_EOL;});
+each([1, 2, 3, 4, 5], function ($v) {echo $v . PHP_EOL;});
 
 //1
 //2
@@ -511,6 +512,7 @@ toArray(frequencies([1, 3, 3, 2])); //[1 => 1, 3 => 2, 2 => 1]
 Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`. Converts return value to Collection if possible.
 ```php
 Collection::from([1, 3, 3, 2])->get(2); //3
+```
 ```php
 Collection::from([1, [1, 2]])->get(1)->toArray(); //[1, 2]
 ```
@@ -525,6 +527,7 @@ get([1, 3, 3, 2], 2); //3
 Returns value at $position position in collection. If that position does not exist, throws `ItemNotFound`. Converts return value to Collection if possible.
 ```php
 Collection::from([1, 3, 3, 2])->getNth(0); //1
+```
 ```php
 Collection::from([1, [1, 2]])->getNth(1)->toArray(); //[1, 2]
 ```
@@ -747,7 +750,7 @@ Collection::from([1, 3, 3, 2])
        return $tmp + $i;
     }, 0); //9
 ```
-```
+```php
 reduce([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
@@ -759,7 +762,7 @@ Collection::from([1, 3, 3, 2])
        return $tmp + $i;
     }, 0); //9
 ```
-```
+```php
 reduceRight([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
@@ -803,7 +806,7 @@ Collection::from([1, 3, 3, 2])
     ->replace([3 => 'a'])
     ->toArray(); //[1, 'a', 'a', 2]
 ```
-```
+```php
 toArray(replace([1, 3, 3, 2], [3 => 'a'])); //[1, 'a', 'a', 2]
 ```
 
@@ -1003,7 +1006,7 @@ Returns value of $value decremented by one.
 
 ```php
 decrement(2) === 1; //true
-
+```
 
 ## Planned    
 - multiple collections can be passed to lets say concat
