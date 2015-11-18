@@ -3,13 +3,13 @@
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/5fcb3dc2-2061-4da3-853b-a5e2a35a35fb/mini.png)](https://insight.sensiolabs.com/projects/5fcb3dc2-2061-4da3-853b-a5e2a35a35fb) [![Code Coverage](https://scrutinizer-ci.com/g/DusanKasan/Knapsack/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/DusanKasan/Knapsack/?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DusanKasan/Knapsack/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DusanKasan/Knapsack/?branch=master)
 
-Knapsack is a [collection pipeline](http://martinfowler.com/articles/collection-pipeline/) library implementing most of the sequence operations proposed by [Clojures sequences](http://clojure.org/sequences)
+Knapsack is a collection library that implements most of the sequence operations proposed by [Clojures sequences](http://clojure.org/sequences) plus some additional ones. All its features are available as functions (for functional programming) and as a [collection pipeline](http://martinfowler.com/articles/collection-pipeline/) object methods.
 
-The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Knapsack/Collection.php). It is an iterator implementor that accepts Traversable object or array as constructor argument. It provides most of Clojures sequence function plus some extra ones. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
+The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Knapsack/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/Knapsack/collection_functions.php). Collection is an iterator implementor that accepts Traversable object, array or even a callable that produces a Generator object as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
  
 Most of the methods of Collection return lazy collections (such as filter/map/etc.). However, some return non-lazy collections (reverse) or simple values (count). For these operations all of the items in the collection must be iterated over (and realized). There are also operations (drop) that iterate over some items of the collection but do not affect/return them in the result. This behaviour as well as laziness is noted for each of the operations.  
 
-If you want more example usage beyond what is provided here, check the [specs](https://github.com/DusanKasan/Knapsack/tree/master/tests/spec/Knapsack) and/or [scenarios](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios) 
+If you want more example usage beyond what is provided here, check the [specs](https://github.com/DusanKasan/Knapsack/tree/master/tests/spec/Knapsack) and/or [scenarios](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios). There are also [performance tests](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios) you can run on your machine and see the computation time impact of this library (the output of these is included below).
 
 Feel free to report any [issues](https://github.com/DusanKasan/Knapsack/issues) you find. I will do my best to fix them as soon as possible, but community [pull requests](https://github.com/DusanKasan/Knapsack/pulls) to fix them are more than welcome.
 
@@ -24,18 +24,39 @@ $collection1 = new Collection([1, 2, 3]);
 $collection2 = Collection::from([1, 2, 3]); //preferred since you can call methods on its result directly.
 ```
 
-### Work with arrays or Traversable objects
+### Work with arrays, Traversable objects or callables that produce Generators
 ```php
 $collection1 = Collection::from([1, 2, 3]);
 $collection2 = Collection::from(new ArrayIterator([1, 2, 3]);
+
+//Used because Generator can not be rewound
+$collection2 = Collection::from(function() { //must have 0 arguments
+    foreach ([1, 2, 3] as $value) {
+        yield $value;
+    }
+});
 ```
 
 ### Basic map/reduce
 ```php
 $result = Collection::from([1, 2])
     ->map(function($v) {return $v*2;})
-    ->reduce(0, function($tmp, $v) {return $tmp+$v;});
+    ->reduce(function($tmp, $v) {return $tmp+$v;}, 0);
     
+echo $result; //6
+```
+
+### The same map/reduce using Knapsack's collection functions
+```php
+$result = reduce(
+    map(
+        [1, 2], 
+        function($v) {return $v*2;}
+    ),
+    function($tmp, $v) {return $tmp+$v;},
+    0
+);
+
 echo $result; //6
 ```
 
@@ -44,7 +65,7 @@ echo $result; //6
 $result = Collection::iterate([1,1], function($v) {
         return [$v[1], $v[0] + $v[1]]; //[1, 2], [2, 3] ...
     })
-    ->map('\Knapsack\first')
+    ->map('\Knapsack\first') //one of the collection functions
     ->take(5);
     
 foreach ($result as $item) {
@@ -58,26 +79,15 @@ foreach ($result as $item) {
 //5
 ```
 
-### You can pass any callable as argument to most methods
-Prettified basic map reduce from before.
-
+### If array or Traversable would be returned, it is converted to Collection
 ```php
-function multiplyBy2($v)
-{
-    return $v*2;
-}
-
-function add($a, $b)
-{
-    return $a + $b;
-}
-
-$result = Collection::from([1, 2])
-    ->map('multiplyBy2')
-    ->reduce(0, 'add');
+$result = Collection::from([[1]])
+    ->first()
+    ->first();
     
-echo $result; //6
+echo $result; //1
 ```
+
 
 ### Collections are immutable
 ```php
@@ -158,49 +168,102 @@ foreach ($result as $key => $item) {
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 
-### PHP 7 beta 2, Callback abstraction disabled - test build
+## Constructors
+These are ways how to create the Collection class. There is one default constructor and few named (static) ones.
+
+#### new(array|Traversable|callback $input)
+The default constructor accepts array, Traversable or a callable that takes no arguments and produces Generator. The Generator can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
+
 ```php
-+------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| operation details                                                                  | native execution time | collection execution time | difference (percent) |
-+------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 1000 integers (addition)                           | 9.4985961914062E-5s   | 0.0010921478271484s       | 1149%                |
-| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.00012743473052979s  | 0.0011455297470093s       | 898%                 |
-| array_map vs Collection::map on 1000 object (object to field value)                | 0.00010819435119629s  | 0.0011794567108154s       | 1090%                |
-| array_map vs Collection::map on 1000 md5 invocations                               | 0.00042428970336914s  | 0.0014571905136108s       | 343%                 |
-| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.020593905448914s    | 0.019808888435364s        | 96%                  |
-+------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
+$collection = new Collection([1, 2, 3]);
+```
+```php
+$collection = new Collection(new ArrayIterator([1, 2, 3]));
+```
+```php
+$generatorFactory = function () {
+    foreach ([1, 2] as $value) {
+        yield $value;
+    }
+};
+
+$collection = new Collection($generatorFactory);
+```
+
+#### from(array|Traversable|callback $input)
+Collection::from is a static alias of the default constructor.
+
+```php
+$collection = Collection::from([1, 2, 3]);
+```
+```php
+$collection = Collection::from(new ArrayIterator([1, 2, 3]));
+```
+```php
+$generatorFactory = function () {
+    foreach ([1, 2] as $value) {
+        yield $value;
+    }
+};
+
+$collection = Collection::from($generatorFactory);
+```
+
+#### iterate(mixed $input, callable $function)
+Returns lazy collection of values, where first value is $input and all subsequent values are computed by applying $function to the last value in the collection. By default this produces an infinite collection. However you can end the collection by throwing a NoMoreItems exception.
+
+```php
+$collection = Collection::iterate(1, function ($value) {return $value + 1;}); // 1, 2, 3, 4 ...
+```
+
+#### repeat(mixed $value, int $times = -1)
+Returns a lazy collection of $value repeated $times times. If $times is not provided the collection is infinite.
+
+```php
+Collection::repeat(1); //infinite collection of ones
+```
+
+```php
+Collection::repeat(1, 4)->toArray(); //[1, 1, 1, 1]
+```
+
+#### range(int $start = 0, int $end = null, int step = 1)
+Returns a lazy collection of numbers starting at $start, incremented by $step until $end is reached.
+```php
+Collection::range(0, 6, 2)->toArray(); //[0, 2, 4, 6]
 ```
 
 ## Operations
-These are the operations (methods) provided by Collection class.
+These are the operations (methods) provided by Collection class. For each one, there is a function with the same name in Knapsack namespace. The function has the same footprint as the method, except it has one extra argument prepended - the collection (array or Traversable).
 
 ### Standard Iterator methods
 It implements http://php.net/manual/en/class.iterator.php
 
-#### append(mixed $item) : Collection
-Returns a lazy collection of items of this collection with $item added as last element. Its key will be 0.
+#### append(mixed $item, mixed $key = null) : Collection
+Returns a lazy collection of items of this collection with $item added as last element. If $key is not provided, its key will be the next integer in the sequence.
 ```php
 Collection::from([1, 3, 3, 2])
     ->append(1)
-    ->values() //both 1 have 0 key
     ->toArray(); //[1, 3, 3, 2, 1]
 ```
-
-#### appendWithKey(mixed $key, mixed $item) : Collection
-Returns a lazy collection of items of this collection with $item added as last element. Its key will be $key.
-```php
+```php    
 Collection::from([1, 3, 3, 2])
-    ->appendWithKey('a', 1)
-    ->toArray(); //[1, 3, 3, 2, 'a' => 1]
+    ->append(1, 'key')
+    ->toArray(); //[1, 3, 3, 2, 'key' => 1]
+```php    
+toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
 #### concat(Traversable|array) : Collection
 Returns a lazy collection with items from this collection followed by items from $collection.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->concat([4,5])
-    ->values() //If we would convert to array here, we would loose 2 items because of same keys
-    ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
+    ->concat([4, 5]) //If we would convert to array here, we would loose 2 items because of same keys [4, 5, 3, 2]
+    ->values() 
+    ->toArray(); //[1, 3, 3, 2, 4, 5]
+```
+```php    
+toArray(values(concat([1, 3, 3, 2], [4, 5]))); //[1, 3, 3, 2, 4, 5]  
 ```
 
 #### contains(mixed $needle) : bool
@@ -208,15 +271,21 @@ Returns true if $needle is present in the collection.
 ```php
 Collection::from([1, 3, 3, 2])->contains(2); //true
 ```
+```php
+contains([1, 3, 3, 2], 2); //true
+```
 
-#### countBy(callable $differentiator) : Collection
-Returns a collection of items whose keys are the return values of $differentiator and values are the number of items in this collection for which the $differentiator returned this value. $differentiator could take 1 argument (the item) or 2 arguments (key, item).
+#### countBy(callable $function) : Collection
+Returns a collection of items whose keys are the return values of $function(value, key) and values are the number of items in this collection for which the $function returned this value.
 ```php
 Collection::from([1, 2, 3, 4, 5])
-    ->countBy(function ($i) {
-        return $v % 2 == 0 ? 'even' : 'odd';
+    ->countBy(function ($value) {
+        return $value % 2 == 0 ? 'even' : 'odd';
     })
-    ->toArray(); //['odd' => [1, 3, 5], 'even' => [2, 4]]
+    ->toArray(); //['odd' => [1, 3, 5], 'even' => [2, 4]]  
+```
+```php      
+toArray(countBy([1, 2, 3, 4, 5], function ($value) {return $value % 2 == 0 ? 'even' : 'odd';}));      
 ```
 
 #### cycle() : Collection
@@ -228,6 +297,9 @@ Collection::from([1, 3, 3, 2])
     ->values()
     ->toArray(); //[1, 3, 3, 2, 1, 3, 3, 2]
 ```
+```php    
+toArray(values(take(cycle([1, 3, 3, 2]), 8))); //[1, 3, 3, 2, 1, 3, 3, 2]
+```
 
 #### distinct() : Collection
 Returns a lazy collection of distinct items. The comparison whether the item is in the collection or not is the same as in in_array.
@@ -236,6 +308,9 @@ Collection::from([1, 3, 3, 2])
     ->distinct()
     ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
 ```
+```php    
+toArray(distinct([1, 3, 3, 2])); //[1, 3, 3 => 2] - each item has key of the first occurrence
+```
 
 #### drop(int $numberOfItems) : Collection
 A form of slice that returns all but first $numberOfItems items.
@@ -243,6 +318,9 @@ A form of slice that returns all but first $numberOfItems items.
 Collection::from([1, 2, 3, 4, 5])
     ->drop(4)
     ->toArray(); //[4 => 5]
+```    
+```php
+toArray(drop([1, 2, 3, 4, 5], 4)); //[4 => 5]    
 ```
 
 #### dropLast($numberOfItems = 1) : Collection
@@ -257,10 +335,13 @@ Collection::from([1, 2, 3])
 $collection
     ->dropLast(2)
     ->toArray(); //[1]
+```    
+```php    
+toArray(dropLast([1, 2, 3], 2)); //[1]    
 ```
 
-#### dropWhile(callable $predicament) : Collection
-Returns a lazy collection by removing items from this collection until first item for which $predicament returns false. $predicament could take 1 argument (the item) or 2 arguments (key, item).
+#### dropWhile(callable $function) : Collection
+Returns a lazy collection by removing items from this collection until first item for which $function(value, key) returns false.
 ```php
 Collection::from([1, 3, 3, 2])
     ->dropWhile(function ($v) {
@@ -270,14 +351,24 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->dropWhile(function ($k, $v) {
+    ->dropWhile(function ($v, $k) {
         return $k < 2 && $v < 3;
     })
     ->toArray(); //[1 => 3, 2 => 3, 3 => 2])
 ```
+```php
+Collection::from([1, 3, 3, 2])
+    ->dropWhile(function ($v, $k) {
+        return $k < 2 && $v < 3;
+    })
+    ->toArray(); //[1 => 3, 2 => 3, 3 => 2])
+```
+```php
+toArray(values(dropWhile([1, 3, 3, 2], function ($v) {return $v < 3;}))); // [3, 3, 2]
+```    
 
-#### each(callable $callback) : Collection
-Returns a lazy collection in which $callback is executed for each item. $callback could take 1 argument (the item) or 2 arguments (key, item).
+#### each(callable $function) : Collection
+Returns a lazy collection in which $function(value, key) is executed for each item.
 ```php
 Collection::from([1, 2, 3, 4, 5])
     ->each(function ($i) {
@@ -291,9 +382,18 @@ Collection::from([1, 2, 3, 4, 5])
 //4
 //5
 ```
+```php
+each([1, 2, 3, 4, 5], function ($v) {echo $v . PHPE_EOL;});
 
-#### every(callable $predicament) : bool
-Returns true if $predicament returns true for every item in this collection, false otherwise. $predicament could take 1 argument (the item) or 2 arguments (key, item).
+//1
+//2
+//3
+//4
+//5
+```
+
+#### every(callable $function) : bool
+Returns true if $function(value, key) returns true for every item in this collection, false otherwise.
 ```php
 Collection::from([1, 3, 3, 2])
     ->every(function ($v) {
@@ -302,64 +402,80 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($k, $v) {
+    ->find(function ($v. $k) {
        return $v < 4 && $k < 2;
     }, 10); //false
 ```
+```php
+every([1, 3, 3, 2], function ($v) {return $v < 5;}); //true
+```
 
-#### filter(callable $filter) : Collection
-Returns a lazy collection of items for which $filter returned true. $filter could take 1 argument (the item) or 2 arguments (key, item).
+#### filter(callable $function) : Collection
+Returns a lazy collection of items for which $function(value, key) returned true.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->filter(function ($item) {
-        return $item > 2;
+    ->filter(function ($value) {
+        return $value > 2;
     })
-    ->toArray() //[1 => 3, 2 => 3]
+    ->values()
+    ->toArray() //[3, 3]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->filter(function ($key, $item) {
-        return $item > 2 && $key > 1;
+    ->filter(function ($value, $key) {
+        return $value > 2 && $key > 1;
     })
     ->toArray() //[2 => 3]
 ```
+```php
+toArray(values(filter([1, 3, 3, 2], function ($value) {return $value > 2;}))); //[3, 3]
+```
 
-#### find(callable $filter, mixed $ifNotFound = null) : mixed
-Returns first value matched by callable. If no value matches, return $ifNotFound. $filter could take 1 argument (the item) or 2 arguments (key, item).
+#### find(callable $function, mixed $ifNotFound = null) : mixed|Collection
+Returns first value for which $function(value, key) returns true. If no item is matched, returns $ifNotFound.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($v) {
-       return $v < 3;
+    ->find(function ($value) {
+       return $value < 3;
     }); //1
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($v) {
-       return $v > 3;
+    ->find(function ($value) {
+       return $value > 3;
     }, 10); //10
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($k, $v) {
-      return $v < 3 && $k > 1;
+    ->find(function ($value, $key) {
+      return $value < 3 && $key > 1;
     }); //2
 ```
-     
-#### findCollection(callable $filter, $ifNotFound = null) : Collection
-Like find, but converts the return value to Collection if possible (i.e. if it's an array). $filter could take 1 argument (the item) or 2 arguments (key, item).
 ```php
-Collection::from([[1, 2], [2, 3]])
-    ->findCollection(function ($v) {
-        return $v[0] + $v[1] > 4;
+//if the output can be converted to Collection (it's array or Traversable), it will be.
+Collection::from([1, [4, 5], 3, 2])
+    ->find(function ($value) {
+      return is_array($value);
     })
-    ->toArray(); //[2, 3]
+    ->size(); //2 
 ```
 ```php
-Collection::from([[1, 2], [2, 3]])
-    ->findCollection(function ($k, $v) {
-        return $k > 0;
-    })
-    ->toArray(); //[2, 3]
+find([1, 3, 3, 2], function ($value) {return $value > 2;}); //3
+```
+
+#### first() : mixed|Collection
+Returns first value in the collection or throws ItemNotFound if the collection is empty. If possible, converts return value to Collection.
+```php
+Collection::from([1, 2, 3])->first(); //1
+```
+```php
+Collection::from([[1], 2, 3])->first()->toArray(); //[1]
+```
+```php
+Collection::from([])->first(); //throws ItemNotFound
+```
+```php
+first([1, 2, 3]); //1
 ```
 
 #### flatten(int $depth = -1) : Collection
@@ -376,6 +492,9 @@ Collection::from([1,[2, [3]]])
     ->values() //1, 2 and 3 have all key 0
     ->toArray() //[1, 2, [3]]
 ```
+```php
+toArray(values(flatten([1, [2, [3]]]))); //[1, 2, 3]
+```
 
 #### frequencies() : Collection
 Returns a collection where keys are distinct items from this collection and their values are number of occurrences of each value.
@@ -384,48 +503,80 @@ Collection::from([1, 3, 3, 2])
     ->frequencies()
     ->toArray(); //[1 => 1, 3 => 2, 2 => 1]
 ```
+```php
+toArray(frequencies([1, 3, 3, 2])); //[1 => 1, 3 => 2, 2 => 1]
+```
 
-#### get(mixed $key) : mixed
-Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`.
+#### get(mixed $key) : mixed|Collection
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`. Converts return value to Collection if possible.
 ```php
 Collection::from([1, 3, 3, 2])->get(2); //3
+```php
+Collection::from([1, [1, 2]])->get(1)->toArray(); //[1, 2]
+```
+```php
 Collection::from([1, 3, 3, 2])->get(5); //throws ItemNotFound
 ```
-
-#### getOrDefault(mixed $key, mixed $ifNotFound = null) : mixed
-Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $ifNotFound.
 ```php
-Collection::from([1, 3, 3, 2])->get(2); //3
-Collection::from([1, 3, 3, 2])->get(5); //null
-Collection::from([1, 3, 3, 2])->get(5, 'asd'); //'asd'
+get([1, 3, 3, 2], 2); //3
 ```
 
-#### getCollection(mixed $key) : Collection
-Like get, but converts the return value to Collection if possible (i.e. if it's an array). If the key is not found, throws an `ItemNotFound` exception.
+#### getNth(int $position) : mixed|Collection
+Returns value at $position position in collection. If that position does not exist, throws `ItemNotFound`. Converts return value to Collection if possible.
 ```php
-Collection::from(['a' => [1, 2], 'b' => [2, 3]])
-    ->getCollection('a')
-    ->toArray(); //[1, 2]
+Collection::from([1, 3, 3, 2])->getNth(0); //1
+```php
+Collection::from([1, [1, 2]])->getNth(1)->toArray(); //[1, 2]
+```
+```php
+Collection::from([1, 3, 3, 2])->getNth(5); //throws ItemNotFound
+```
+```php
+getNth([1, 3, 3, 2], 2); //3
 ```
 
-#### groupBy(callable $differentiator) : Collection
-Returns collection which items are separated into groups indexed by the return value of $differentiator. $differentiator could take 1 argument (the item) or 2 arguments (key, item).
+#### getOrDefault(mixed $key, mixed $default = null) : mixed|Collection
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $default. Converts return value to Collection if possible.
+```php
+Collection::from([1, 3, 3, 2])->getOrDefault(2); //3
+```
+```php
+Collection::from([1, 3, 3, 2])->getOrDefault(5); //null
+```
+```php
+Collection::from([1, 3, 3, 2])->getOrDefault(5, 'asd'); //'asd'
+```
+```php
+Collection::from([1, 3, 3, 2])->getOrDefault(5, [1, 2])->toArray(); //[1, 2]
+```
+```php
+getOrDefault([1, 3, 3, 2], 5, 'asd'); //'asd'
+```
+
+#### groupBy(callable $function) : Collection
+Returns collection which items are separated into groups indexed by the return value of $function(value, key).
 ```php
 Collection::from([1, 2, 3, 4, 5])
-    ->groupBy(function ($i) {
-        return $i % 2;
+    ->groupBy(function ($value) {
+        return $value % 2;
     })
     ->toArray(); //[1 => [1, 3, 5], 0 => [2, 4]]
 ```
+```php
+toArray(groupBy([1, 2, 3, 4, 5], function ($value) {return $value % 2;})); //[1 => [1, 3, 5], 0 => [2, 4]]
+```
 
-#### indexBy(callable $indexer) : Collection
-Returns a lazy collection by changing keys of this collection for each item to the result of $indexer for that key/value. $indexer could take 1 argument (the item) or 2 arguments (key, item).
+#### indexBy(callable $function) : Collection
+Returns a lazy collection by changing keys of this collection for each item to the result of $function(value, key) for that key/value.
 ```php
 Collection::from([1, 3, 3, 2])
     ->indexBy(function ($v) {
         return $v;
     })
     ->toArray(); //[1 => 1, 3 => 3, 2 => 2]
+```
+```php
+toArray(indexBy([1, 3, 3, 2], '\Knapsack\identity')); //[1 => 1, 3 => 3, 2 => 2]
 ```
 
 #### interleave(Traversable|array $collection) : Collection
@@ -436,6 +587,9 @@ Collection::from([1, 3, 3, 2])
     ->values()
     ->toArray(); //[1, 'a', 3, 'b', 3, 'c', 2, 'd', 'e']
 ```
+```php
+toArray(interleave([1, 3, 3, 2], ['a', 'b', 'c', 'd', 'e'])); //[1, 'a', 3, 'b', 3, 'c', 2, 'd', 'e']
+```
 
 #### interpose(mixed $separator) : Collection
 Returns a lazy collection of items of this collection separated by $separator item.
@@ -445,11 +599,17 @@ Collection::from([1, 2, 3])
     ->values() // we must reset the keys, because each 'a' has undecided key
     ->toArray(); //[1, 'a', 2, 'a', 3]
 ```
+```php
+toArray(interpose([1, 3, 3, 2], 'a')); //[1, 'a', 2, 'a', 3] 
+```
 
 #### isEmpty() : bool
 Returns true if is collection is empty. False otherwise.
 ```php
 Collection::from([1, 3, 3, 2])->isEmpty(); //false
+```
+```php
+isEmpty([1]); //false
 ```
 
 #### isNotEmpty() : bool
@@ -457,45 +617,8 @@ Opposite of isEmpty
 ```php
 Collection::from([1, 3, 3, 2])>isNotEmpty(); //true
 ```
-
-#### iterate(callable $iterator) : Collection
-Returns lazy collection which is infinite passing last item of this collection to the $iterator and using its return value as next item (and key). If you wish to pass the key, you must yield 2 values from $iterator, first is key, second is item. $iterator could take 1 argument (the item) or 2 arguments (key, item). If you throw a NoMoreItems exception, you will mark the end of the collection.
 ```php
-Collection::from([1])
-    ->iterate(function ($v) {
-        return $v++;
-    });
-    
-$it->rewind();
-$it->valid() == true; //always true, we iterate to infinity
-$it->key();// == ?; Keys are undecided
-$it->current() == 1;
-$it->next();
-$it->valid() == true;
-$it->current() == 2;
-$it->next();
-$it->valid() == true;
-$it->current() == 3;
-```
-```php
-Collection::from([1])
-    ->iterate(function ($v) {
-        yield $v--; //key
-        yield $v++; //value
-    });
-    
-$it->rewind();
-$it->valid() == true; //always true, we iterate to infinity
-$it->key() == 0;
-$it->current() == 1;
-$it->next();
-$it->valid() == true;
-$it->key() == 1;
-$it->current() == 2;
-$it->next();
-$it->valid() == true;
-$it->key() == 2;
-$it->current() == 3;
+isNotEmpty([1]); //true
 ```
 
 #### keys() : Collection
@@ -505,48 +628,57 @@ Collection::from(['a' => [1, 2], 'b' => [2, 3]])
     ->keys()
     ->toArray(); //['a', 'b']
 ```
+```php
+toArray(keys(['a' => [1, 2], 'b' => [2, 3]])); //['a', 'b']
+```
 
-#### map(callable $mapper) : Collection
-Returns collection where each key/item is changed to the output of executing $mapper on each key/item. If you wish to modify keys, yield 2 values in the callable. First is key, second is item. $mapper could take 1 argument (the item) or 2 arguments (key, item).
+#### last() : mixed|Collection
+Returns last value in the collection or throws ItemNotFound if the collection is empty. If possible, converts return value to Collection.
+```php
+Collection::from([1, 2, 3])->last(); //3
+```
+```php
+Collection::from([1, 2, [3]])->last()->toArray(); //[1]
+```
+```php
+Collection::from([])->last(); //throws ItemNotFound
+```
+```php
+last([1, 2, 3]); //3
+```
+
+#### map(callable $function) : Collection
+Returns collection where each value is changed to the output of executing $function(value, key).
 ```php
 Collection::from([1, 3, 3, 2])
-    ->map(function ($item) {
-        return $item + 1;
+    ->map(function ($value) {
+        return $value + 1;
     })
     ->toArray() //[2, 4, 4, 3]
 ```
 ```php
-Collection::from([1, 3, 3, 2])
-    ->map(function ($key, $item) {
-        yield $key + 1;
-        yield $item;
-    })
-    ->toArray() //[1 => 1, 2 => 3, 3 => 3, 4 => 2]
-```
-```php
-Collection::from([1, 3, 3, 2])
-    ->map(function ($key, $item) {
-        yield $item + 1;
-    })
-    ->toArray() //[2, 4, 4, 3]
+toArray(map([1, 3, 3, 2], '\Knapsack\increment')); //[2, 4, 4, 3]
 ```
 
 #### mapcat(callable $mapper) : Collection
-Returns a lazy collection which is a result of calling map($mapper) and then flatten(1). $mapper could take 1 argument (the item) or 2 arguments (key, item).
+Returns a lazy collection which is a result of calling map($mapper(value, key)) and then flatten(1).
 ```php
 Collection::from([1, 3, 3, 2])
-    ->mapcat(function ($v) {
-        return [[$v]];
+    ->mapcat(function ($value) {
+        return [[$value]];
     })
     ->toArray(); //[[1], [3], [3], [2]]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->mapcat(function ($k, $v) {
-        return [[$k]];
+    ->mapcat(function ($key, $value) {
+        return [[$key]];
     })
     ->toArray(); //[[0], [1], [2], [3]]
 ```
+```php
+toArray(mapcat([1, 3, 3, 2], function ($value) {return [[$value]];})); //[[1], [3], [3], [2]]
+``` 
 
 #### partition(int $numberOfItems, int $step = 0, Traversable|array $padding = []) : Collection
 Returns a lazy collection of collections of $numberOfItems items each, at $step step apart. If $step is not supplied, defaults to $numberOfItems, i.e. the partitionsdo not overlap. If a $padding collection is supplied, use its elements asnecessary to complete last partition up to $numberOfItems items. In case there are not enough padding elements, return a partition with less than $numberOfItems items.
@@ -565,9 +697,12 @@ Collection::from([1, 3, 3, 2])
     ->partition(3)
     ->toArray(); //[[1, 3, 3], [3 => 2]]
 ```
+```php
+toArray(partition([1, 3, 3, 2], 3)); //[[1, 3, 3], [3 => 2]]
+```
 
-#### partitionBy(callable $partitioning) : Collection
-Creates a lazy collection of collections created by partitioning this collection every time $partitioning will return different result.
+#### partitionBy(callable $function) : Collection
+Creates a lazy collection of collections created by partitioning this collection every time $function(value, key) will return different result.
 ```php
 Collection::from([1, 3, 3, 2])
     ->partitionBy(function ($v) {
@@ -575,67 +710,90 @@ Collection::from([1, 3, 3, 2])
     })
     ->toArray(); //[[1], [1 => 3, 2 => 3], [3 => 2]]
 ```
+```php
+toArray(partitionBy([1, 3, 3, 2], function ($value) {return $value % 3 == 0;})); //[[1], [1 => 3, 2 => 3], [3 => 2]]
+```
 
-#### prepend(mixed $item) : Collection
-Returns a lazy collection of items of this collection with $item added as first element. Its key will be 0.
+#### pluck(mixed $key) : Collection
+Returns a lazy collection by picking a $key key from each sub-collection of $collection.
+```php
+Collection::from([['a' => 1], ['a' => 2,  'b' => 3]])
+    ->pluck('a')
+    ->toArray(); //[1, 2]
+```
+```php
+toArray(pluck([['a' => 1], ['a' => 2,  'b' => 3]], 'a')); //[1, 2]
+```
+
+#### prepend(mixed $item, mixed $key = null) : Collection
+Returns a lazy collection of items of this collection with $item added as first element. Its key will be $key. If $key is not provided, its key will be the next numerical index.
 ```php
 Collection::from([1, 3, 3, 2])
     ->prepend(1)
     ->values() //both 1 have 0 key
     ->toArray(); //[1, 1, 3, 3, 2]
 ```
-
-#### prependWithKey(mixed $key, mixed $item) : Collection
-Returns a lazy collection of items of this collection with $item added as first element. Its key will be $key.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->prependWithKey('a', 1)
+    ->prepend('a', 1)
     ->toArray(); //['a' => 1, 0 => 1, 1 => 3, 2 => 3, 3 => 2]
 ```
 
-#### reduce(mixed $start, callable) : mixed
-Reduces the collection to single value by iterating over the collection and calling callable while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function.
+#### reduce(callable $function, mixed $start) : mixed|Collection
+Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function. Return value is converted to collection if possible.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reduce(0, function ($tmp, $i) {
+    ->reduce(function ($tmp, $i) {
        return $tmp + $i;
-    }); //9
+    }, 0); //9
+```
+```
+reduce([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
-#### reduceRight(mixed $start,, callable $reduction) : mixed
+#### reduceRight(callable $function, mixed $start) : mixed|Collection
 Like reduce, but walks from last item to the first one.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reduceRight(0, function ($tmp, $i) {
+    ->reduceRight(function ($tmp, $i) {
        return $tmp + $i;
-    }); //9
+    }, 0); //9
+```
+```
+reduceRight([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
-#### reductions($start, callable $reduction) : Collection
+#### reductions(callable $reduction, $start) : Collection
 Returns a lazy collection of reduction steps.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reductions(0, function ($tmp, $i) {
+    ->reductions(function ($tmp, $i) {
         return $tmp + $i;
-    })
+    }, 0)
     ->toArray(); //[1, 4, 7, 9]
+```
+```php
+toArray(reductions([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0)); //[1, 4, 7, 9]
 ```
 
 #### reject(callable $filter) : Collection
-Returns a lazy collection of items for which $filter returned false. $filter could take 1 argument (the item) or 2 arguments (key, item).
+Returns a lazy collection of items for which $filter(value, key) returned false.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reject(function ($item) {
-        return $item > 2;
+    ->reject(function ($value) {
+        return $value > 2;
     })
     ->toArray() //[1, 3 => 2]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reject(function ($key, $item) {
-        return $item > 2 && $key > 1;
+    ->reject(function ($value, $key) {
+        return $value > 2 && $key > 1;
     })
-    ->toArray() ////[1, 1 => 3, 3 => 2]
+    ->toArray() //[1, 1 => 3, 3 => 2]
+```
+```php
+toArray(reject([1, 3, 3, 2], unction ($value) {return $value > 2;})); //[1, 1 => 3, 3 => 2]
 ```
 
 #### replace(Traversable|array $replacementMap) : Collection
@@ -645,21 +803,19 @@ Collection::from([1, 3, 3, 2])
     ->replace([3 => 'a'])
     ->toArray(); //[1, 'a', 'a', 2]
 ```
-
-#### values() : Collection
-Returns collection of items from this collection but with keys being numerical from 0 upwards.
-```php
-Collection::from(['asd' => 1])
-    ->values()
-    ->toArray(); //[1]
+```
+toArray(replace([1, 3, 3, 2], [3 => 'a'])); //[1, 'a', 'a', 2]
 ```
 
 #### reverse() : Collection
-Returns collection of items in this collection in reverse order.
+Returns a non-lazy collection of items in this collection in reverse order.
 ```php
 Collection::from([1, 2, 3])
     ->reverse()
     ->toArray(); //[2 => 3, 1 => 2, 0 => 1]
+```
+```php
+toArray(reverse([1, 2, 3])); //[2 => 3, 1 => 2, 0 => 1]
 ```
 
 #### shuffle() : Collection
@@ -669,11 +825,17 @@ Collection::from([1, 3, 3, 2])
     ->shuffle()
     ->toArray(); //something like [2 => 3, 0 => 1, 3 => 2, 1 => 3]
 ```
+```php
+toArray(shuffle([1, 3, 3, 2])); //something like [2 => 3, 0 => 1, 3 => 2, 1 => 3]
+```
 
 #### size() : int
 Returns the number of items in this collection.
 ```php
 Collection::from([1, 3, 3, 2])->size(); //4
+```
+```php
+size([1, 3, 3, 2]); //4
 ```
 
 #### slice(int $from, int $to) : Collection
@@ -681,31 +843,37 @@ Returns a lazy collection of items which are part of the original collection fro
 ```php
 Collection::from([1, 2, 3, 4, 5])
     ->slice(2, 4)
-    ->toArray(); //[1 => 2, 2 => 3, 3 => 4]
+    ->toArray(); //[2 => 3, 3 => 4]
 ```
 ```php
 Collection::from([1, 2, 3, 4, 5])
     ->slice(4)
-    ->toArray(); //[3 => 4, 4 => 5]
+    ->toArray(); //[4 => 5]
+```
+```php
+toArray(slice([1, 2, 3, 4, 5], 4)); //[4 => 5]
 ```
 
-#### some(callable $predicament) : bool
-Returns true if $predicament returns true for at least one item in this collection, false otherwise. $predicament could take 1 argument (the item) or 2 arguments (key, item).
+#### some(callable $function) : bool
+Returns true if $function(value, key) returns true for at least one item in this collection, false otherwise.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->every(function ($v) {
-       return $v < 3;
+    ->every(function ($value) {
+       return $value < 3;
     }); //true
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($k, $v) {
-       return $v < 4 && $k < 2;
+    ->find(function ($value, $key) {
+       return $value < 4 && $key < 2;
     }, 10); //true
 ```
+```php
+some([1, 3, 3 ,2], function ($value) {return $value < 3;}); //true
+```
 
-#### sort(callable $sort) : Collection
-Returns collection sorted using $sort($item1, $item2). $sort should return true if first item is larger than the second and false otherwise.
+#### sort(callable $function) : Collection
+Returns collection sorted using $function(value1, value2, key1, key2). $function should return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.
 ```php
 Collection::from([3, 1, 2])
     ->sort(function ($a, $b) {
@@ -715,10 +883,13 @@ Collection::from([3, 1, 2])
 ```
 ```php
 Collection::from([3, 1, 2])
-    ->sort(function ($k1, $v1, $k2, $v2) {
+    ->sort(function ($v1, $v2, $k1, $k2) {
         return $v1 < $v2;
     })
     ->toArray(); //[2 => 2, 1 => 1, 0 => 3]
+```
+```php
+toArray(sort([3, 1, 2], function ($a, $b) {return $a > $b;})); //[1 => 1, 2 => 2, 0 => 3]
 ```
 
 #### splitAt(int $position) : Collection
@@ -728,22 +899,28 @@ Collection::from([1, 3, 3, 2])
     ->splitAt(2)
     ->toArray(); //[[1, 3], [2 => 3, 3 => 2]]
 ```
+```php
+toArray(splitAt([1, 3, 3, 2], 2)); //[[1, 3], [2 => 3, 3 => 2]]
+```
 
-#### splitWith(callable $predicament) : Collection
-Returns a collection of lazy collections: [takeWhile($predicament), dropWhile($predicament)]. $predicament could take 1 argument (the item) or 2 arguments (key, item).
+#### splitWith(callable $function) : Collection
+Returns a collection of lazy collections: [takeWhile($function(value, key)), dropWhile($function(value, key))].
 ```php
 Collection::from([1, 3, 3, 2])
-    ->splitWith(function ($v) {
-        return $v < 3;
+    ->splitWith(function ($value) {
+        return $value < 3;
     })
     ->toArray(); //[[1], [1 => 3, 2 => 3, 3 => 2]]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->splitWith(function ($k, $v) {
-        return $k < 2 && $v < 3;
+    ->splitWith(function ($value, $key) {
+        return $key < 2 && $value < 3;
     })
     ->toArray(); //[[1], [1 => 3, 2 => 3, 3 => 2]]
+```
+```php
+toArray(splitWith([1, 3, 3, 2], function ($value) {return $value < 3;})); //[[1], [1 => 3, 2 => 3, 3 => 2]]
 ```
 
 #### take(int $numberOfItems) : Collection
@@ -753,6 +930,9 @@ Collection::from([1, 2, 3, 4, 5])
     ->take(2)
     ->toArray(); //[1, 2]
 ```
+```php
+toArray(take([1, 2, 3, 4, 5], 2)); //[1, 2]
+```
 
 #### takeNth(int $step) : Collection
 Returns a lazy collection of every nth item in this collection
@@ -761,36 +941,28 @@ Collection::from([1, 3, 3, 2])
     ->takeNth(2)
     ->toArray(); //[1, 2 => 3]
 ```
+```php
+toArray(takeNth([1, 3, 3, 2], 2)); //[1, 2 => 3]
+```
 
-#### takeWhile(callable $predicament) : Collection
-Returns a lazy collection of items from the start of the collection until the first item for which $predicament returns false. $predicament could take 1 argument (the item) or 2 arguments (key, item).
+#### takeWhile(callable $function) : Collection
+Returns a lazy collection of items from the start of the collection until the first item for which $function(value, key) returns false.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->takeWhile(function ($v) {
-        return $v < 3;
+    ->takeWhile(function ($value) {
+        return $value < 3;
     })
     ->toArray(); //[1]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->takeWhile(function ($k, $v) {
-        return $k < 2 && $v < 3;
+    ->takeWhile(function ($value, $key) {
+        return $key < 2 && $value < 3;
     })
     ->toArray(); //[1]
 ```
-
-#### first() : mixed
-Returns the first item from the collection. Throws an `ItemNotFound` exception if called on an empty Collection.
 ```php
-Collection::from([1, 2, 3])->first(); //1
-Collection::from([])->first(); //throws ItemNotFound
-```
-
-#### last() : mixed
-Returns the last item from the collection. Throws an `ItemNotFound` exception if called on an empty Collection.
-```php
-Collection::from([1, 2, 3])->last(); //3
-Collection::from([])->last(); //throws ItemNotFound
+toArray(takeWhile([1, 3, 3, 2], function ($value) {return $value < 3;})); //[1]
 ```
 
 #### toArray() : array
@@ -798,11 +970,41 @@ Converts the collection to array recursively. Obviously this is not lazy since a
 ```php
 Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 ```
+```php
+toArray([1, 3, 3, 2]); //[1, 3, 3, 2]
+```
+
+## Utility functions
+These are the functions bundled with Knapsack to make your life easier when transitioning into functional programming.
+
+#### identity(mixed $value)
+Returns $value
+
+```php
+$value === identity($value); //true
+```
+
+#### compare(mixed $a, mixed $b)
+Default comparator function. Returns a negative number, zero, or a positive number when $a is logically 'less than', 'equal to', or 'greater than' $b.
+
+```php
+compare(1, 2); //-1
+```
+
+#### increment(int $value)
+Returns value of $value incremented by one.
+
+```php
+increment(0) === 1; //true
+```
+
+#### decrement(int $value)
+Returns value of $value decremented by one.
+
+```php
+decrement(2) === 1; //true
 
 ## Planned    
 - multiple collections can be passed to lets say concat
-- rewrite from inheritance to using traits (iterable => collection operations), so it's easier to reason about the code
 - more scenarios
-- think about removing the Callback abstraction - execution overhead of ~100%
-- rewrite to functions with yields and use those in Collection class
-- no key changes in map
+- more utility functions (+, - ,...) 

@@ -63,7 +63,7 @@ class Collection implements Iterator
      * $function to the last value in the collection. By default this produces an infinite collection. However you can
      * end the collection by throwing a NoMoreItems exception.
      *
-     * @param array|Traversable $input
+     * @param mixed $input
      * @param callable $function
      * @return Collection
      */
@@ -448,7 +448,8 @@ class Collection implements Iterator
     }
 
     /**
-     * Reduce the collection to single value. Walks from right to left.
+     * Reduce the collection to single value. Walks from right to left. If the return value is a collection (array|
+     * Traversable) an instance of Collection will be returned.
      *
      * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
      * @param mixed $startValue
@@ -835,7 +836,8 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns first item of this collection. If the collection is empty, throws exception
+     * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If the return value is
+     * a collection (array|Traversable) an instance of Collection will be returned.
      *
      * @throws ItemNotFound
      * @return mixed|Collection
@@ -847,7 +849,8 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns last item of this collection. If the collection is empty, throws exception
+     * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If the return value is a
+     * collection (array|Traversable) an instance of Collection will be returned.
      *
      * @throws ItemNotFound
      * @return mixed|Collection
