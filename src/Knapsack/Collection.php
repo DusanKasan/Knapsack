@@ -4,12 +4,9 @@ namespace Knapsack;
 
 use Iterator;
 use IteratorAggregate;
-use Knapsack\Callback\Argument;
-use Knapsack\Callback\Callback;
 use Knapsack\Exceptions\InvalidArgument;
 use Knapsack\Exceptions\ItemNotFound;
 use RecursiveArrayIterator;
-use stdClass;
 use Traversable;
 
 class Collection implements Iterator
