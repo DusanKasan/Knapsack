@@ -52,3 +52,35 @@ function decrement($value)
     return $value - 1;
 }
 
+/**
+ * Returns a sum of all arguments.
+ *
+ * @param int|float|double[] ...$values
+ * @return number
+ */
+function sum(...$values)
+{
+    return array_sum($values);
+}
+
+/**
+ * Returns the highest value from all arguments.
+ *
+ * @param int|float|double[] ...$values
+ * @return mixed
+ */
+function max(...$values)
+{
+    return \max($values);
+}
+
+/**
+ * Returns the lowest value from all arguments.
+ *
+ * @param int|float|double[] ...$values
+ * @return mixed
+ */
+function min(...$values)
+{
+    return \min($values);
+}
