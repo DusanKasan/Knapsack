@@ -11,6 +11,7 @@ use Knapsack\Collection;
 use Knapsack\Exceptions\InvalidArgument;
 use Knapsack\Exceptions\ItemNotFound;
 use Knapsack\Exceptions\NoMoreItems;
+use function Knapsack\reverse;
 use PhpSpec\ObjectBehavior;
 
 /**

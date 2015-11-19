@@ -33,18 +33,22 @@ function toArray($collection)
  * Returns a lazy collection of distinct items in $collection.
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function distinct($collection)
 {
-    $distinctValues = [];
+    $generatorFactory = function () use ($collection) {
+        $distinctValues = [];
 
-    foreach ($collection as $key => $value) {
-        if (!in_array($value, $distinctValues)) {
-            $distinctValues[] = $value;
-            yield $key => $value;
+        foreach ($collection as $key => $value) {
+            if (!in_array($value, $distinctValues)) {
+                $distinctValues[] = $value;
+                yield $key => $value;
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -67,87 +71,101 @@ function size($collection)
  * Returns a non-lazy collection with items from $collection in reversed order.
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function reverse($collection)
 {
-    $array = [];
-    foreach ($collection as $key => $value) {
-        $array[] = [$key, $value];
-    }
-
-    return map(
-        indexBy(
-            array_reverse($array),
-            function($item) {
-                return $item[0];
-            }
-        ),
-        function($item) {
-            return $item[1];
+    $generatorFactory = function () use ($collection) {
+        $array = [];
+        foreach ($collection as $key => $value) {
+            $array[] = [$key, $value];
         }
-    );
+
+        return map(
+            indexBy(
+                array_reverse($array),
+                function($item) {
+                    return $item[0];
+                }
+            ),
+            function($item) {
+                return $item[1];
+            }
+        );
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
  * Returns a lazy collection of values from $collection (i.e. the keys are reset).
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function values($collection)
 {
-    foreach ($collection as $value) {
-        yield $value;
-    }
+    $generatorFactory = function () use ($collection) {
+        foreach ($collection as $value) {
+            yield $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
  * Returns a lazy collection of keys from $collection.
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function keys($collection)
 {
-    foreach ($collection as $key => $value) {
-        yield $key;
-    }
+    $generatorFactory = function () use ($collection) {
+        foreach ($collection as $key => $value) {
+            yield $key;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
  * Returns a lazy collection of items from $collection repeated infinitely.
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function cycle($collection)
 {
-    while (true) {
-        foreach ($collection as $key => $value) {
-            yield $key => $value;
+    $generatorFactory = function () use ($collection) {
+        while (true) {
+            foreach ($collection as $key => $value) {
+                yield $key => $value;
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
  * Returns a non-lazy collection of shuffled items from $collection.
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function shuffle($collection)
 {
-    $arr = [];
+    $buffer = [];
     foreach ($collection as $key => $value) {
-        $arr[] = [$key, $value];
+        $buffer[] = [$key, $value];
     }
 
-    \shuffle($arr);
+    \shuffle($buffer);
 
-    foreach ($arr as $item) {
-        yield $item[0] => $item[1];
-    }
+    return dereferenceKeyValue($buffer);
 }
 
 /**
@@ -181,13 +199,11 @@ function isNotEmpty($collection)
  * value.
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function frequencies($collection)
 {
-    return countBy($collection, function($value) {
-        return $value;
-    });
+    return countBy($collection, '\Knapsack\identity');
 }
 
 /**
@@ -218,13 +234,17 @@ function last($collection)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function map($collection, callable $function)
 {
-    foreach ($collection as $key => $value) {
-        yield $key => $function($value, $key);
-    }
+    $generatorFactory = function () use ($collection, $function) {
+        foreach ($collection as $key => $value) {
+            yield $key => $function($value, $key);
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -232,15 +252,19 @@ function map($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function filter($collection, callable $function)
 {
-    foreach ($collection as $key => $value) {
-        if ($function($value, $key)) {
-            yield $key => $value;
+    $generatorFactory = function () use ($collection, $function) {
+        foreach ($collection as $key => $value) {
+            if ($function($value, $key)) {
+                yield $key => $value;
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -248,17 +272,21 @@ function filter($collection, callable $function)
  *
  * @param array|Traversable $collection1
  * @param array|Traversable $collection2
- * @return Generator
+ * @return Collection
  */
 function concat($collection1, $collection2)
 {
-    foreach ($collection1 as $key => $value) {
-        yield $key => $value;
-    }
+    $generatorFactory = function () use ($collection1, $collection2) {
+        foreach ($collection1 as $key => $value) {
+            yield $key => $value;
+        }
 
-    foreach ($collection2 as $key => $value) {
-        yield $key => $value;
-    }
+        foreach ($collection2 as $key => $value) {
+            yield $key => $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -288,22 +316,26 @@ function reduce($collection, callable $function, $startValue)
  *
  * @param array|Traversable $collection
  * @param int $levelsToFlatten -1 to flatten everything
- * @return Generator
+ * @return Collection
  */
 function flatten($collection, $levelsToFlatten = -1)
 {
-    $flattenNextLevel = $levelsToFlatten < 0 || $levelsToFlatten > 0;
-    $childLevelsToFlatten = $levelsToFlatten > 0 ? $levelsToFlatten - 1 : $levelsToFlatten;
+    $generatorFactory = function () use ($collection, $levelsToFlatten) {
+        $flattenNextLevel = $levelsToFlatten < 0 || $levelsToFlatten > 0;
+        $childLevelsToFlatten = $levelsToFlatten > 0 ? $levelsToFlatten - 1 : $levelsToFlatten;
 
-    foreach ($collection as $key => $value) {
-        if ($flattenNextLevel && (is_array($value) || $value instanceof Traversable)) {
-            foreach (flatten($value, $childLevelsToFlatten) as $childKey => $childValue) {
-                yield $childKey => $childValue;
+        foreach ($collection as $key => $value) {
+            if ($flattenNextLevel && (is_array($value) || $value instanceof Traversable)) {
+                foreach (flatten($value, $childLevelsToFlatten) as $childKey => $childValue) {
+                    yield $childKey => $childValue;
+                }
+            } else {
+                yield $key => $value;
             }
-        } else {
-            yield $key => $value;
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -312,7 +344,7 @@ function flatten($collection, $levelsToFlatten = -1)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value1, $value2, $key1, $key2)
- * @return Generator
+ * @return Collection
  */
 function sort($collection, callable $function)
 {
@@ -334,9 +366,7 @@ function sort($collection, callable $function)
         }
     );
 
-    foreach ($array as $value) {
-        yield $value[0] => $value[1];
-    }
+    return dereferenceKeyValue($array);
 }
 
 /**
@@ -347,20 +377,24 @@ function sort($collection, callable $function)
  * @param array|Traversable $collection
  * @param int $from
  * @param int $to -1 to slice until end
- * @return Generator
+ * @return Collection
  */
 function slice($collection, $from, $to = -1)
 {
-    $index = 0;
-    foreach ($collection as $key => $value) {
-        if ($index >= $from && ($index < $to || $to == -1)) {
-            yield $key => $value;
-        } elseif ($index >= $to && $to >= 0) {
-            break;
-        }
+    $generatorFactory = function () use ($collection, $from, $to) {
+        $index = 0;
+        foreach ($collection as $key => $value) {
+            if ($index >= $from && ($index < $to || $to == -1)) {
+                yield $key => $value;
+            } elseif ($index >= $to && $to >= 0) {
+                break;
+            }
 
-        $index++;
-    }
+            $index++;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -368,7 +402,7 @@ function slice($collection, $from, $to = -1)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return array
+ * @return Collection
  */
 function groupBy($collection, callable $function)
 {
@@ -378,7 +412,7 @@ function groupBy($collection, callable $function)
         $result[$newKey][] = $value;
     }
 
-    return $result;
+    return new Collection($result);
 }
 
 /**
@@ -386,15 +420,19 @@ function groupBy($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function each($collection, callable $function)
 {
-    foreach ($collection as $key => $value) {
-        $function($value, $key);
+    $generatorFactory = function () use ($collection, $function) {
+        foreach ($collection as $key => $value) {
+            $function($value, $key);
 
-        yield $key => $value;
-    }
+            yield $key => $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -458,13 +496,17 @@ function find($collection, callable $function, $default = null)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function indexBy($collection, callable $function)
 {
-    foreach ($collection as $key => $value) {
-        yield $function($value, $key) => $value;
-    }
+    $generatorFactory = function () use ($collection, $function) {
+        foreach ($collection as $key => $value) {
+            yield $function($value, $key) => $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -473,7 +515,7 @@ function indexBy($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function countBy($collection, callable $function)
 {
@@ -555,7 +597,7 @@ function reduceRight($collection, callable $function, $startValue)
  *
  * @param array|Traversable $collection
  * @param int $numberOfItems
- * @return Generator
+ * @return Collection
  */
 function take($collection, $numberOfItems)
 {
@@ -567,7 +609,7 @@ function take($collection, $numberOfItems)
  *
  * @param array|Traversable $collection
  * @param int $numberOfItems
- * @return Generator
+ * @return Collection
  */
 function drop($collection, $numberOfItems)
 {
@@ -581,20 +623,24 @@ function drop($collection, $numberOfItems)
  *
  * @param mixed $value
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function iterate($value, callable $function)
 {
-    yield $value;
+    $generatorFactory = function () use ($value, $function) {
+        yield $value;
 
-    while (true) {
-        try {
-            $value = $function($value);
-            yield $value;
-        } catch (NoMoreItems $e) {
-            break;
+        while (true) {
+            try {
+                $value = $function($value);
+                yield $value;
+            } catch (NoMoreItems $e) {
+                break;
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -602,7 +648,7 @@ function iterate($value, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function reject($collection, callable $function)
 {
@@ -619,20 +665,24 @@ function reject($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param int $numberOfItems
- * @return Generator
+ * @return Collection
  */
 function dropLast($collection, $numberOfItems = 1)
 {
-    $buffer = [];
+    $generatorFactory = function () use ($collection, $numberOfItems) {
+        $buffer = [];
 
-    foreach ($collection as $key => $value) {
-        $buffer[] = [$key, $value];
+        foreach ($collection as $key => $value) {
+            $buffer[] = [$key, $value];
 
-        if (count($buffer) > $numberOfItems) {
-            $val = array_shift($buffer);
-            yield $val[0] => $val[1];
+            if (count($buffer) > $numberOfItems) {
+                $val = array_shift($buffer);
+                yield $val[0] => $val[1];
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -640,18 +690,22 @@ function dropLast($collection, $numberOfItems = 1)
  *
  * @param array|Traversable $collection
  * @param mixed $separator
- * @return Generator
+ * @return Collection
  */
 function interpose($collection, $separator)
 {
-    foreach (take($collection, 1) as $key => $value) {
-        yield $key => $value;
-    }
+    $generatorFactory = function () use ($collection, $separator) {
+        foreach (take($collection, 1) as $key => $value) {
+            yield $key => $value;
+        }
 
-    foreach (drop($collection, 1) as $key => $value) {
-        yield $separator;
-        yield $key => $value;
-    }
+        foreach (drop($collection, 1) as $key => $value) {
+            yield $separator;
+            yield $key => $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -660,27 +714,31 @@ function interpose($collection, $separator)
  *
  * @param array|Traversable $collection1
  * @param array|Traversable $collection2
- * @return Generator
+ * @return Collection
  */
 function interleave($collection1, $collection2)
 {
-    $collection1 = (is_array($collection1)) ? new ArrayIterator($collection1) : $collection1;
-    $collection2 = (is_array($collection2)) ? new ArrayIterator($collection2) : $collection2;
+    $generatorFactory = function () use ($collection1, $collection2) {
+        $collection1 = (is_array($collection1)) ? new ArrayIterator($collection1) : $collection1;
+        $collection2 = (is_array($collection2)) ? new ArrayIterator($collection2) : $collection2;
 
-    $collection1->rewind();
-    $collection2->rewind();
+        $collection1->rewind();
+        $collection2->rewind();
 
-    while ($collection1->valid() || $collection2->valid()) {
-        if ($collection1->valid()) {
-            yield $collection1->key() => $collection1->current();
-            $collection1->next();
+        while ($collection1->valid() || $collection2->valid()) {
+            if ($collection1->valid()) {
+                yield $collection1->key() => $collection1->current();
+                $collection1->next();
+            }
+
+            if ($collection2->valid()) {
+                yield $collection2->key() => $collection2->current();
+                $collection2->next();
+            }
         }
+    };
 
-        if ($collection2->valid()) {
-            yield $collection2->key() => $collection2->current();
-            $collection2->next();
-        }
-    }
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -690,19 +748,23 @@ function interleave($collection1, $collection2)
  * @param array|Traversable $collection
  * @param mixed $value
  * @param mixed|null $key
- * @return Generator
+ * @return Collection
  */
 function prepend($collection, $value, $key = null)
 {
-    if ($key === null) {
-        yield $value;
-    } else {
-        yield $key => $value;
-    }
+    $generatorFactory = function () use ($collection, $value, $key) {
+        if ($key === null) {
+            yield $value;
+        } else {
+            yield $key => $value;
+        }
 
-    foreach ($collection as $key => $value) {
-        yield $key => $value;
-    }
+        foreach ($collection as $key => $value) {
+            yield $key => $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -712,19 +774,23 @@ function prepend($collection, $value, $key = null)
  * @param array|Traversable $collection
  * @param mixed $value
  * @param mixed|null $key
- * @return Generator
+ * @return Collection
  */
 function append($collection, $value, $key = null)
 {
-    foreach ($collection as $k => $v) {
-        yield $k => $v;
-    }
+    $generatorFactory = function () use ($collection, $value, $key) {
+        foreach ($collection as $k => $v) {
+            yield $k => $v;
+        }
 
-    if ($key === null) {
-        yield $value;
-    } else {
-        yield $key => $value;
-    }
+        if ($key === null) {
+            yield $value;
+        } else {
+            yield $key => $value;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -732,20 +798,24 @@ function append($collection, $value, $key = null)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function dropWhile($collection, callable $function)
 {
-    $shouldDrop = true;
-    foreach ($collection as $key => $value) {
-        if ($shouldDrop) {
-            $shouldDrop = $function($value, $key);
-        }
+    $generatorFactory = function () use ($collection, $function) {
+        $shouldDrop = true;
+        foreach ($collection as $key => $value) {
+            if ($shouldDrop) {
+                $shouldDrop = $function($value, $key);
+            }
 
-        if (!$shouldDrop) {
-            yield $key => $value;
+            if (!$shouldDrop) {
+                yield $key => $value;
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -753,20 +823,24 @@ function dropWhile($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function takeWhile($collection, callable $function)
 {
-    $shouldTake = true;
-    foreach ($collection as $key => $value) {
-        if ($shouldTake) {
-            $shouldTake = $function($value, $key);
-        }
+    $generatorFactory = function () use ($collection, $function) {
+        $shouldTake = true;
+        foreach ($collection as $key => $value) {
+            if ($shouldTake) {
+                $shouldTake = $function($value, $key);
+            }
 
-        if ($shouldTake) {
-            yield $key => $value;
+            if ($shouldTake) {
+                yield $key => $value;
+            }
         }
-    }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -774,7 +848,7 @@ function takeWhile($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function mapcat($collection, callable $function)
 {
@@ -786,12 +860,16 @@ function mapcat($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param int $position
- * @return Generator
+ * @return Collection
  */
 function splitAt($collection, $position)
 {
-    yield take($collection, $position);
-    yield drop($collection, $position);
+    $generatorFactory = function () use ($collection, $position) {
+        yield take($collection, $position);
+        yield drop($collection, $position);
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -799,12 +877,16 @@ function splitAt($collection, $position)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Generator
+ * @return Collection
  */
 function splitWith($collection, callable $function)
 {
-    yield takeWhile($collection, $function);
-    yield dropWhile($collection, $function);
+    $generatorFactory = function () use ($collection, $function) {
+        yield takeWhile($collection, $function);
+        yield dropWhile($collection, $function);
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -813,14 +895,18 @@ function splitWith($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param array|Traversable $replacementMap
- * @return Generator
+ * @return Collection
  */
 function replace($collection, $replacementMap)
 {
-    foreach ($collection as $key => $value) {
-        $newValue = getOrDefault($replacementMap, $value, $value);
-        yield $key => $newValue;
-    }
+    $generatorFactory = function () use ($collection, $replacementMap) {
+        foreach ($collection as $key => $value) {
+            $newValue = getOrDefault($replacementMap, $value, $value);
+            yield $key => $newValue;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -829,17 +915,21 @@ function replace($collection, $replacementMap)
  * @param array|Traversable $collection
  * @param callable $function
  * @param mixed $startValue
- * @return Generator
+ * @return Collection
  */
 function reductions($collection, callable $function, $startValue)
 {
-    $tmp = duplicate($startValue);
+    $generatorFactory = function () use ($collection, $function, $startValue) {
+        $tmp = duplicate($startValue);
 
-    yield $tmp;
-    foreach ($collection as $key => $value) {
-        $tmp = $function($tmp, $value, $key);
         yield $tmp;
-    }
+        foreach ($collection as $key => $value) {
+            $tmp = $function($tmp, $value, $key);
+            yield $tmp;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -847,18 +937,22 @@ function reductions($collection, callable $function, $startValue)
  *
  * @param array|Traversable $collection
  * @param int $step
- * @return Generator
+ * @return Collection
  */
 function takeNth($collection, $step)
 {
-    $index = 0;
-    foreach ($collection as $key => $value) {
-        if ($index % $step == 0) {
-            yield $key => $value;
-        }
+    $generatorFactory = function () use ($collection, $step) {
+        $index = 0;
+        foreach ($collection as $key => $value) {
+            if ($index % $step == 0) {
+                yield $key => $value;
+            }
 
-        $index++;
-    }
+            $index++;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -872,33 +966,37 @@ function takeNth($collection, $step)
  * @param $numberOfItems
  * @param int $step
  * @param array $padding
- * @return Generator
+ * @return Collection
  */
 function partition($collection, $numberOfItems, $step = -1, $padding = [])
 {
-    $buffer = [];
-    $itemsToSkip = 0;
-    $step = $step ?: $numberOfItems;
+    $generatorFactory = function () use ($collection, $numberOfItems, $step, $padding) {
+        $buffer = [];
+        $itemsToSkip = 0;
+        $step = $step ?: $numberOfItems;
 
-    foreach ($collection as $key => $value) {
-        if (count($buffer) == $numberOfItems) {
-            yield dereferenceKeyValue($buffer);
+        foreach ($collection as $key => $value) {
+            if (count($buffer) == $numberOfItems) {
+                yield dereferenceKeyValue($buffer);
 
-            $buffer = array_slice($buffer, $step);
-            $itemsToSkip =  $step - $numberOfItems;
+                $buffer = array_slice($buffer, $step);
+                $itemsToSkip =  $step - $numberOfItems;
+            }
+
+            if ($itemsToSkip <= 0) {
+                $buffer[] = [$key, $value];
+            } else {
+                $itemsToSkip--;
+            }
         }
 
-        if ($itemsToSkip <= 0) {
-            $buffer[] = [$key, $value];
-        } else {
-            $itemsToSkip--;
-        }
-    }
+        yield take(
+            concat(dereferenceKeyValue($buffer), $padding),
+            $numberOfItems
+        );
+    };
 
-    yield take(
-        concat(dereferenceKeyValue($buffer), $padding),
-        $numberOfItems
-    );
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -906,28 +1004,32 @@ function partition($collection, $numberOfItems, $step = -1, $padding = [])
  *
  * @param array|Traversable $collection
  * @param callable $function
- * @return Generator
+ * @return Collection
  */
 function partitionBy($collection, callable $function)
 {
-    $result = null;
-    $buffer = [];
+    $generatorFactory = function () use ($collection, $function) {
+        $result = null;
+        $buffer = [];
 
-    foreach ($collection as $key => $value) {
-        $newResult = $function($value, $key);
+        foreach ($collection as $key => $value) {
+            $newResult = $function($value, $key);
 
-        if (!empty($buffer) && $result != $newResult) {
-            yield dereferenceKeyValue($buffer);
-            $buffer = [];
+            if (!empty($buffer) && $result != $newResult) {
+                yield dereferenceKeyValue($buffer);
+                $buffer = [];
+            }
+
+            $result = $newResult;
+            $buffer[] = [$key, $value];
         }
 
-        $result = $newResult;
-        $buffer[] = [$key, $value];
-    }
+        if (!empty($buffer)) {
+            yield dereferenceKeyValue($buffer);
+        }
+    };
 
-    if (!empty($buffer)) {
-        yield dereferenceKeyValue($buffer);
-    }
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -947,16 +1049,20 @@ function getNth($collection, $position)
  *
  * @param array|Traversable $collection
  * @param mixed $key
- * @return Generator
+ * @return Collection
  */
 function pluck($collection, $key)
 {
-    return map(
-        $collection,
-        function($value) use ($key) {
-            return $value[$key];
-        }
-    );
+    $generatorFactory = function () use ($collection, $key) {
+        return map(
+            $collection,
+            function($value) use ($key) {
+                return $value[$key];
+            }
+        );
+    };
+
+    return new Collection($generatorFactory);
 
 }
 
@@ -965,15 +1071,19 @@ function pluck($collection, $key)
  *
  * @param mixed $value
  * @param int $times
- * @return Generator
+ * @return Collection
  */
 function repeat($value, $times = -1)
 {
-    while ($times != 0) {
-        yield $value;
+    $generatorFactory = function () use ($value, $times) {
+        while ($times != 0) {
+            yield $value;
 
-        $times = $times < 0 ? -1 : $times - 1;
-    }
+            $times = $times < 0 ? -1 : $times - 1;
+        }
+    };
+
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -982,22 +1092,26 @@ function repeat($value, $times = -1)
  * @param int $start
  * @param int|null $end
  * @param int $step
- * @return Generator
+ * @return Collection
  */
 function range($start = 0, $end = null, $step = 1)
 {
-    return iterate(
-        $start,
-        function($value) use ($step, $end) {
-            $result = $value + $step;
+    $generatorFactory = function () use ($start, $end, $step) {
+        return iterate(
+            $start,
+            function($value) use ($step, $end) {
+                $result = $value + $step;
 
-            if ($end !== null && $result > $end) {
-                throw new NoMoreItems;
+                if ($end !== null && $result > $end) {
+                    throw new NoMoreItems;
+                }
+
+                return $result;
             }
+        );
+    };
 
-            return $result;
-        }
-    );
+    return new Collection($generatorFactory);
 }
 
 //helpers
@@ -1017,7 +1131,7 @@ function isCollection($input)
  * effect in functions.
  *
  * @param $input
- * @return Generator
+ * @return mixed
  */
 function duplicate($input)
 {
@@ -1041,11 +1155,15 @@ function duplicate($input)
  * Transforms [[$key, $value], [$key2, $value2]] into [$key => $value, $key2 => $value2]. Used as a helper
  *
  * @param array|Traversable $collection
- * @return Generator
+ * @return Collection
  */
 function dereferenceKeyValue($collection)
 {
-    foreach ($collection as $value) {
-        yield $value[0] => $value[1];
-    }
+    $generatorFactory = function () use ($collection) {
+        foreach ($collection as $value) {
+            yield $value[0] => $value[1];
+        }
+    };
+
+    return new Collection($generatorFactory);
 }

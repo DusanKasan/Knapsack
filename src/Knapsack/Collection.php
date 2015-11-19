@@ -66,11 +66,7 @@ class Collection implements Iterator
      */
     public static function iterate($input, callable $function)
     {
-        $generatorFactory = function () use ($input, $function) {
-            return iterate($input, $function);
-        };
-
-        return new self($generatorFactory);
+        return iterate($input, $function);
     }
 
     /**
@@ -82,11 +78,7 @@ class Collection implements Iterator
      */
     public static function repeat($value, $times = -1)
     {
-        $generatorFactory = function () use ($value, $times) {
-            return repeat($value, $times);
-        };
-
-        return new self($generatorFactory);
+        return repeat($value, $times);
     }
 
     /**
@@ -99,11 +91,7 @@ class Collection implements Iterator
      */
     public static function range($start = 0, $end = null, $step = 1)
     {
-        $generatorFactory = function () use ($start, $end, $step) {
-            return \Knapsack\range($start, $end, $step);
-        };
-
-        return new self($generatorFactory);
+        return \Knapsack\range($start, $end, $step);
     }
 
     public function current()
@@ -151,11 +139,7 @@ class Collection implements Iterator
      */
     public function filter(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return filter($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return filter($this, $function);
     }
 
     /**
@@ -165,11 +149,7 @@ class Collection implements Iterator
      */
     public function distinct()
     {
-        $generatorFactory = function () {
-            return distinct($this);
-        };
-
-        return new self($generatorFactory);
+        return distinct($this);
     }
 
     /**
@@ -180,11 +160,7 @@ class Collection implements Iterator
      */
     public function concat($collection)
     {
-        $generatorFactory = function () use ($collection) {
-            return concat($this, $collection);
-        };
-
-        return new self($generatorFactory);
+        return concat($this, $collection);
     }
 
     /**
@@ -195,11 +171,7 @@ class Collection implements Iterator
      */
     public function map(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return map($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return map($this, $function);
     }
 
     /**
@@ -228,11 +200,7 @@ class Collection implements Iterator
      */
     public function flatten($depth = -1)
     {
-        $generatorFactory = function () use ($depth) {
-            return flatten($this, $depth);
-        };
-
-        return new self($generatorFactory);
+        return flatten($this, $depth);
     }
 
     /**
@@ -244,11 +212,7 @@ class Collection implements Iterator
      */
     public function sort(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return \Knapsack\sort($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return \Knapsack\sort($this, $function);
     }
 
     /**
@@ -261,11 +225,7 @@ class Collection implements Iterator
      */
     public function slice($from, $to = -1)
     {
-        $generatorFactory = function () use ($from, $to) {
-            return slice($this, $from, $to);
-        };
-
-        return new self($generatorFactory);
+        return slice($this, $from, $to);
     }
 
     /**
@@ -276,7 +236,7 @@ class Collection implements Iterator
      */
     public function groupBy(callable $function)
     {
-        return new self(groupBy($this, $function));
+        return groupBy($this, $function);
     }
 
     /**
@@ -287,11 +247,7 @@ class Collection implements Iterator
      */
     public function each(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return \Knapsack\each($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return \Knapsack\each($this, $function);
     }
 
     /**
@@ -374,11 +330,7 @@ class Collection implements Iterator
      */
     public function countBy(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return countBy($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return countBy($this, $function);
     }
 
     /**
@@ -390,11 +342,7 @@ class Collection implements Iterator
      */
     public function indexBy(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return indexBy($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return indexBy($this, $function);
     }
 
     /**
@@ -437,11 +385,7 @@ class Collection implements Iterator
      */
     public function reverse()
     {
-        $generatorFactory = function () {
-            return reverse($this);
-        };
-
-        return new self($generatorFactory);
+        return reverse($this);
     }
 
     /**
@@ -467,11 +411,7 @@ class Collection implements Iterator
      */
     public function take($numberOfItems)
     {
-        $generatorFactory = function () use ($numberOfItems) {
-            return take($this, $numberOfItems);
-        };
-
-        return new self($generatorFactory);
+        return take($this, $numberOfItems);
     }
 
     /**
@@ -482,11 +422,7 @@ class Collection implements Iterator
      */
     public function drop($numberOfItems)
     {
-        $generatorFactory = function () use ($numberOfItems) {
-            return drop($this, $numberOfItems);
-        };
-
-        return new self($generatorFactory);
+        return drop($this, $numberOfItems);
     }
 
     /**
@@ -496,11 +432,7 @@ class Collection implements Iterator
      */
     public function values()
     {
-        $generatorFactory = function () {
-            return values($this);
-        };
-
-        return new self($generatorFactory);
+        return values($this);
     }
 
     /**
@@ -511,11 +443,7 @@ class Collection implements Iterator
      */
     public function reject(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return reject($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return reject($this, $function);
     }
 
     /**
@@ -525,11 +453,7 @@ class Collection implements Iterator
      */
     public function keys()
     {
-        $generatorFactory = function () {
-            return keys($this);
-        };
-
-        return new self($generatorFactory);
+        return keys($this);
     }
 
     /**
@@ -540,11 +464,7 @@ class Collection implements Iterator
      */
     public function interpose($separator)
     {
-        $generatorFactory = function () use ($separator) {
-            return interpose($this, $separator);
-        };
-
-        return new self($generatorFactory);
+        return interpose($this, $separator);
     }
 
     /**
@@ -555,11 +475,7 @@ class Collection implements Iterator
      */
     public function dropLast($numberOfItems = 1)
     {
-        $generatorFactory = function () use ($numberOfItems) {
-            return dropLast($this, $numberOfItems);
-        };
-
-        return new self($generatorFactory);
+        return dropLast($this, $numberOfItems);
     }
 
     /**
@@ -571,11 +487,7 @@ class Collection implements Iterator
      */
     public function interleave($collection)
     {
-        $generatorFactory = function () use ($collection) {
-            return interleave($this, $collection);
-        };
-
-        return new self($generatorFactory);
+        return interleave($this, $collection);
     }
 
     /**
@@ -585,11 +497,7 @@ class Collection implements Iterator
      */
     public function cycle()
     {
-        $generatorFactory = function () {
-            return cycle($this);
-        };
-
-        return new self($generatorFactory);
+        return cycle($this);
     }
 
     /**
@@ -602,11 +510,7 @@ class Collection implements Iterator
      */
     public function prepend($value, $key = null)
     {
-        $generatorFactory = function () use ($value, $key) {
-            return prepend($this, $value, $key);
-        };
-
-        return new self($generatorFactory);
+        return prepend($this, $value, $key);
     }
 
     /**
@@ -619,11 +523,7 @@ class Collection implements Iterator
      */
     public function append($value, $key = null)
     {
-        $generatorFactory = function () use ($value, $key) {
-            return append($this, $value, $key);
-        };
-
-        return new self($generatorFactory);
+        return append($this, $value, $key);
     }
 
     /**
@@ -635,11 +535,7 @@ class Collection implements Iterator
      */
     public function dropWhile(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return dropWhile($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return dropWhile($this, $function);
     }
 
     /**
@@ -650,11 +546,7 @@ class Collection implements Iterator
      */
     public function mapcat(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return mapcat($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return mapcat($this, $function);
     }
 
     /**
@@ -666,11 +558,7 @@ class Collection implements Iterator
      */
     public function takeWhile(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return takeWhile($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return takeWhile($this, $function);
     }
 
     /**
@@ -681,11 +569,7 @@ class Collection implements Iterator
      */
     public function splitAt($position)
     {
-        $generatorFactory = function () use ($position) {
-            return splitAt($this, $position);
-        };
-
-        return new self($generatorFactory);
+        return splitAt($this, $position);
     }
 
     /**
@@ -696,11 +580,7 @@ class Collection implements Iterator
      */
     public function splitWith(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return splitWith($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return splitWith($this, $function);
     }
 
     /**
@@ -712,11 +592,7 @@ class Collection implements Iterator
      */
     public function replace($replacementMap)
     {
-        $generatorFactory = function () use ($replacementMap) {
-            return replace($this, $replacementMap);
-        };
-
-        return new self($generatorFactory);
+        return replace($this, $replacementMap);
     }
 
     /**
@@ -728,11 +604,7 @@ class Collection implements Iterator
      */
     public function reductions(callable $function, $startValue)
     {
-        $generatorFactory = function () use ($function, $startValue) {
-            return reductions($this, $function, $startValue);
-        };
-
-        return new self($generatorFactory);
+        return reductions($this, $function, $startValue);
     }
 
     /**
@@ -743,11 +615,7 @@ class Collection implements Iterator
      */
     public function takeNth($step)
     {
-        $generatorFactory = function () use ($step) {
-            return takeNth($this, $step);
-        };
-
-        return new self($generatorFactory);
+        return takeNth($this, $step);
     }
 
     /**
@@ -757,11 +625,7 @@ class Collection implements Iterator
      */
     public function shuffle()
     {
-        $generatorFactory = function () {
-            return shuffle($this);
-        };
-
-        return new self($generatorFactory);
+        return shuffle($this);
     }
 
     /**
@@ -778,11 +642,7 @@ class Collection implements Iterator
      */
     public function partition($numberOfItems, $step = 0, $padding = [])
     {
-        $generatorFactory = function () use ($numberOfItems, $step, $padding) {
-            return partition($this, $numberOfItems, $step, $padding);
-        };
-
-        return new self($generatorFactory);
+        return partition($this, $numberOfItems, $step, $padding);
     }
 
     /**
@@ -794,11 +654,7 @@ class Collection implements Iterator
      */
     public function partitionBy(callable $function)
     {
-        $generatorFactory = function () use ($function) {
-            return partitionBy($this, $function);
-        };
-
-        return new self($generatorFactory);
+        return partitionBy($this, $function);
     }
 
     /**
@@ -829,7 +685,7 @@ class Collection implements Iterator
      */
     public function frequencies()
     {
-        return new self(frequencies($this));
+        return frequencies($this);
     }
 
     /**
@@ -866,6 +722,6 @@ class Collection implements Iterator
      */
     public function pluck($key)
     {
-        return new self(pluck($this, $key));
+        return pluck($this, $key);
     }
 }
