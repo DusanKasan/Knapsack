@@ -1,7 +1,6 @@
 <?php
 
 use Knapsack\Collection;
-use function Knapsack\countBy;
 use Symfony\Component\Console\Helper\Table;
 
 include_once "../../vendor/autoload.php";

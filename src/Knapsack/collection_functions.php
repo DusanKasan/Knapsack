@@ -3,7 +3,6 @@
 namespace Knapsack;
 
 use ArrayIterator;
-use Generator;
 use Knapsack\Exceptions\ItemNotFound;
 use Knapsack\Exceptions\NoMoreItems;
 use Traversable;
