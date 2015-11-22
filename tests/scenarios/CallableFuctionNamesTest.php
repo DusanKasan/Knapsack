@@ -10,8 +10,7 @@ class CallableFunctionNamesTest extends PHPUnit_Framework_TestCase
 {
     public function testIt()
     {
-        $collection = new Collection([2, 1]);
-        $result = $collection
+        $result = Collection::from([2, 1])
             ->concat([3, 4])
             ->sort('\Knapsack\compare')
             ->values()

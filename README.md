@@ -1008,6 +1008,27 @@ Returns value of $value decremented by one.
 decrement(2) === 1; //true
 ```
 
+#### sum(... int $values)
+Returns the sum of all arguments.
+
+```php
+sum(1, 2, 3) === 6; //true
+```
+
+#### max(... int $values)
+Returns the max value of all arguments.
+
+```php
+sum(1, 5, 3) === 5; //true
+```
+
+#### min(... int $values)
+Returns the min value of all arguments.
+
+```php
+sum(1, 5, 3) === 1; //true
+```
+
 ## Planned    
 - multiple collections can be passed to lets say concat
 - more scenarios
