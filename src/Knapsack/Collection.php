@@ -2,6 +2,7 @@
 
 namespace Knapsack;
 
+use Closure;
 use Iterator;
 use IteratorAggregate;
 use Knapsack\Exceptions\InvalidArgument;
@@ -22,7 +23,7 @@ class Collection implements Iterator
     private $generatorFactory;
 
     /**
-     * @param callable|array|Traversable $input If callable is passed, it must be a generator factory function
+     * @param callable|Closure|array|Traversable $input If callable is passed, it must be a generator factory function
      */
     public function __construct($input)
     {
@@ -40,8 +41,6 @@ class Collection implements Iterator
         } else {
             throw new InvalidArgument;
         }
-
-        $this->rewind();
     }
 
     /**
