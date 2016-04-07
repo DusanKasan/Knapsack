@@ -31,7 +31,7 @@
       "src/Knapsack/utility_functions.php"
     ],
     "psr-4": {
-      "Knapsack": "src/Knapsack",
+      "Knapsack\\": "src/Knapsack",
       "tests\\helpers\\Knapsack\\": "tests/helpers/Knapsack/"
     }
   }
