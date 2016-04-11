@@ -255,8 +255,8 @@ Collection::from([1, 3, 3, 2])
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
-#### concat(Traversable|array) : Collection
-Returns a lazy collection with items from this collection followed by items from $collection.
+#### concat(...Traversable|array) : Collection
+Returns a lazy collection with items from this collection followed by items from the collection from first argument, then second and so on.
 ```php
 Collection::from([1, 3, 3, 2])
     ->concat([4, 5]) //If we would convert to array here, we would loose 2 items because of same keys [4, 5, 3, 2]
@@ -582,8 +582,8 @@ Collection::from([1, 3, 3, 2])
 toArray(indexBy([1, 3, 3, 2], '\DusanKasan\Knapsack\identity')); //[1 => 1, 3 => 3, 2 => 2]
 ```
 
-#### interleave(Traversable|array $collection) : Collection
-Returns a lazy collection of first item from first collection, first item from second, second from first and so on.
+#### interleave(...Traversable|array $collection) : Collection
+Returns a lazy collection of first item from first collection, first item from second, second from first and so on. Works with any number of arguments.
 ```php
 Collection::from([1, 3, 3, 2])
     ->interleave(['a', 'b', 'c', 'd', 'e'])
