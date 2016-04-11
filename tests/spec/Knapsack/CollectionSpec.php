@@ -13,6 +13,7 @@ use Knapsack\Exceptions\ItemNotFound;
 use Knapsack\Exceptions\NoMoreItems;
 use function Knapsack\reverse;
 use PhpSpec\ObjectBehavior;
+use tests\helpers\Knapsack\PlusOneAdder;
 
 /**
  * @mixin Collection
@@ -632,27 +633,28 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_split_the_collection_at_nth_item()
     {
-        $this
-            ->splitAt(2)
-            ->toArray()
-            ->shouldReturn([[1, 3], [2 => 3, 3 => 2]]);
+        $this->splitAt(2)->size()->shouldBe(2);
+        $this->splitAt(2)->first()->toArray()->shouldBeLike([1, 3]);
+        $this->splitAt(2)->getNth(1)->toArray()->shouldBeLike([2 => 3, 3 => 2]);
     }
 
     function it_can_split_the_collection_with_predicament()
     {
-        $this
-            ->splitWith(function ($v) {
-                return $v < 3;
-            })
-            ->toArray()
-            ->shouldReturn([[1], [1 => 3, 2 => 3, 3 => 2]]);
+        $s1 = $this->splitWith(function ($v) {
+            return $v < 3;
+        });
 
-        $this
-            ->splitWith(function ($k, $v) {
-                return $k < 2 && $v < 3;
-            })
-            ->toArray()
-            ->shouldReturn([[1], [1 => 3, 2 => 3, 3 => 2]]);
+        $s1->size()->shouldBe(2);
+        $s1->first()->toArray()->shouldBe([1]);
+        $s1->getNth(1)->toArray()->shouldBe([1 => 3, 2 => 3, 3 => 2]);
+
+        $s2 = $this->splitWith(function ($v, $k) {
+            return $v < 2 && $k < 3;
+        });
+
+        $s2->size()->shouldBe(2);
+        $s2->first()->toArray()->shouldBe([1]);
+        $s2->getNth(1)->toArray()->shouldBe([1 => 3, 2 => 3, 3 => 2]);
     }
 
     function it_can_replace_items_by_items_from_another_collection()
@@ -698,44 +700,48 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_partition()
     {
-        $this
-            ->partition(3, 2, [0, 1])
-            ->toArray()
-            ->shouldReturn([[1, 3, 3], [2 => 3, 3 => 2, 0 => 0]]);
+        $s1 = $this->partition(3, 2, [0, 1]);
+        $s1->size()->shouldBe(2);
+        $s1->first()->toArray()->shouldBe([1, 3, 3]);
+        $s1->getNth(1)->toArray()->shouldBe([2 => 3, 3 => 2, 0 => 0]);
 
-        $this
-            ->partition(3, 2)
-            ->toArray()
-            ->shouldReturn([[1, 3, 3], [2 => 3, 3 => 2]]);
+        $s2 = $this->partition(3, 2);
+        $s2->size()->shouldBe(2);
+        $s2->first()->toArray()->shouldBe([1, 3, 3]);
+        $s2->getNth(1)->toArray()->shouldBe([2 => 3, 3 => 2]);
 
-        $this
-            ->partition(3)
-            ->toArray()
-            ->shouldReturn([[1, 3, 3], [3 => 2]]);
+        $s3 = $this->partition(3);
+        $s3->size()->shouldBe(2);
+        $s3->first()->toArray()->shouldBe([1, 3, 3]);
+        $s3->getNth(1)->toArray()->shouldBe([3 => 2]);
 
-        $this
-            ->partition(1, 3)
-            ->toArray()
-            ->shouldReturn([[1], [3 => 2]]);
+        $s4 = $this->partition(1, 3);
+        $s4->size()->shouldBe(2);
+        $s4->first()->toArray()->shouldBe([1,]);
+        $s4->getNth(1)->toArray()->shouldBe([3 => 2]);
     }
 
     function it_can_partition_by()
     {
         $this->beConstructedWith([1, 3, 3, 2]);
 
-        $this
-            ->partitionBy(function ($v) {
-                return $v % 3 == 0;
-            })
-            ->toArray()
-            ->shouldReturn([[1], [1 => 3, 2 => 3], [3 => 2]]);
+        $s1 = $this->partitionBy(function ($v) {
+            return $v % 3 == 0;
+        });
+        $s1->size()->shouldBe(3);
+        $s1->first()->toArray()->shouldBe([1]);
+        $s1->getNth(1)->toArray()->shouldBe([1 => 3, 2 => 3]);
+        $s1->getNth(2)->toArray()->shouldBe([3 => 2]);
 
-        $this
-            ->partitionBy(function ($v, $k) {
-                return $k - $v;
-            })
-            ->toArray()
-            ->shouldReturn([[1], [1 => 3], [2 => 3], [3 => 2]]);
+
+        $s2 = $this->partitionBy(function ($v, $k) {
+            return $k - $v;
+        });
+        $s2->size()->shouldBe(4);
+        $s2->first()->toArray()->shouldBe([1]);
+        $s2->getNth(1)->toArray()->shouldBe([1 => 3]);
+        $s2->getNth(2)->toArray()->shouldBe([2 => 3]);
+        $s2->getNth(3)->toArray()->shouldBe([3 => 2]);
     }
 
     function it_can_get_nth_value()
@@ -822,4 +828,16 @@ class CollectionSpec extends ObjectBehavior
         $this->shouldThrow(ItemNotFound::class)->during('last');
     }
 
+    function it_can_realize_the_collection(PlusOneAdder $adder)
+    {
+        $adder->dynamicMethod(1)->willReturn(2);
+        $adder->dynamicMethod(2)->willReturn(3);
+
+        $this->beConstructedWith(function () use ($adder) {
+            yield $adder->dynamicMethod(1);
+            yield $adder->dynamicMethod(2);
+        });
+
+        $this->realize();
+    }
 }

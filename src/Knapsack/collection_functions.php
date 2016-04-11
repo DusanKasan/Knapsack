@@ -19,12 +19,12 @@ function toArray($collection)
     if (is_array($collection) || $collection instanceof Traversable) {
         $arr = [];
         foreach ($collection as $key => $value) {
-            $arr[$key] = toArray($value);
+            $arr[$key] = $value;
         }
 
         return $arr;
     } else {
-        return $collection;
+        return [$collection];
     }
 }
 
@@ -1165,4 +1165,15 @@ function dereferenceKeyValue($collection)
     };
 
     return new Collection($generatorFactory);
+}
+
+/**
+ * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values
+ *
+ * @param array|Traversable $collection
+ * @return Collection
+ */
+function realize($collection)
+{
+    return new Collection(toArray($collection));
 }

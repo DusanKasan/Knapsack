@@ -723,4 +723,9 @@ class Collection implements Iterator
     {
         return pluck($this, $key);
     }
+
+    public function realize()
+    {
+        return realize($this);
+    }
 }
