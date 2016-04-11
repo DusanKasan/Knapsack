@@ -742,6 +742,22 @@ Collection::from([1, 3, 3, 2])
     ->toArray(); //['a' => 1, 0 => 1, 1 => 3, 2 => 3, 3 => 2]
 ```
 
+#### realize() : Collection
+Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
+```php
+$helper->setValue(1); 
+
+$realizedCollection = Collection::from([1, 3, 3, 2])
+    ->map(function ($item) use ($helper) {return $helper->getValue() + $item;})
+    ->realize();
+    
+$helper->setValue(2);
+$realizedCollection->toArray([2, 4, 4, 3]);
+```
+```php
+toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
+```
+
 #### reduce(callable $function, mixed $start) : mixed|Collection
 Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function. Return value is converted to collection if possible.
 ```php
@@ -975,22 +991,6 @@ Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 ```
 ```php
 toArray([1, 3, 3, 2]); //[1, 3, 3, 2]
-```
-
-#### realize() : Collection
-Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
-```php
-$helper->setValue(1); 
-
-$realizedCollection = Collection::from([1, 3, 3, 2])
-    ->map(function ($item) use ($helper) {return $helper->getValue() + $item;})
-    ->realize();
-    
-$helper->setValue(2);
-$realizedCollection->toArray([2, 4, 4, 3]);
-```
-```php
-toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
 ```
 
 ## Utility functions
