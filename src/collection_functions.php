@@ -267,21 +267,18 @@ function filter($collection, callable $function)
 }
 
 /**
- * Returns a lazy collection with items from $collection2 appended at the end of $collection1
+ * Returns a lazy collection with items from all $collections passed as argument appended together
  *
- * @param array|Traversable $collection1
- * @param array|Traversable $collection2
+ * @param array|Traversable ...$collections
  * @return Collection
  */
-function concat($collection1, $collection2)
+function concat(...$collections)
 {
-    $generatorFactory = function () use ($collection1, $collection2) {
-        foreach ($collection1 as $key => $value) {
-            yield $key => $value;
-        }
-
-        foreach ($collection2 as $key => $value) {
-            yield $key => $value;
+    $generatorFactory = function () use ($collections) {
+        foreach ($collections as $collection) {
+            foreach ($collection as $key => $value) {
+                yield $key => $value;
+            }
         }
     };
 
@@ -709,32 +706,33 @@ function interpose($collection, $separator)
 
 /**
  * Returns a lazy collection of first item from first collection, first item from second, second from first and
- * so on.
+ * so on. Accepts any number of collections.
  *
- * @param array|Traversable $collection1
- * @param array|Traversable $collection2
+ * @param array|Traversable ...$collections
  * @return Collection
  */
-function interleave($collection1, $collection2)
+function interleave(...$collections)
 {
-    $generatorFactory = function () use ($collection1, $collection2) {
-        $collection1 = (is_array($collection1)) ? new ArrayIterator($collection1) : $collection1;
-        $collection2 = (is_array($collection2)) ? new ArrayIterator($collection2) : $collection2;
+    $generatorFactory = function () use ($collections) {
+        $collections = array_map(
+            function ($collection) {
+                $c = (is_array($collection)) ? new ArrayIterator($collection) : $collection;
+                $c->rewind();
+                return $c;
+            },
+            $collections
+        );
 
-        $collection1->rewind();
-        $collection2->rewind();
-
-        while ($collection1->valid() || $collection2->valid()) {
-            if ($collection1->valid()) {
-                yield $collection1->key() => $collection1->current();
-                $collection1->next();
+        do {
+            $valid = false;
+            foreach ($collections as $collection) {
+                if ($collection->valid()) {
+                    yield $collection->key() => $collection->current();
+                    $collection->next();
+                    $valid = true;
+                }
             }
-
-            if ($collection2->valid()) {
-                yield $collection2->key() => $collection2->current();
-                $collection2->next();
-            }
-        }
+        } while ($valid);
     };
 
     return new Collection($generatorFactory);

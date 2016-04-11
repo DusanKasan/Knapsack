@@ -152,14 +152,14 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns a lazy collection with items from $this and $collection.
+     * Returns a lazy collection with items from all $collections passed as argument appended together
      *
-     * @param Traversable|array $collection
+     * @param Traversable|array ...$collections
      * @return Collection
      */
-    public function concat($collection)
+    public function concat(...$collections)
     {
-        return concat($this, $collection);
+        return concat($this, ...$collections);
     }
 
     /**
@@ -479,14 +479,14 @@ class Collection implements Iterator
 
     /**
      * Returns a lazy collection of first item from first collection, first item from second, second from first and
-     * so on.
+     * so on. Accepts any number of collections.
      *
-     * @param Traversable|array $collection
+     * @param array|Traversable ...$collections
      * @return Collection
      */
-    public function interleave($collection)
+    public function interleave(...$collections)
     {
-        return interleave($this, $collection);
+        return interleave($this, ...$collections);
     }
 
     /**
@@ -714,7 +714,7 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns a lazy collection by picking a $key key from each sub-collection of $collection.
+     * Returns a lazy collection by picking a $key key from each sub-collection of $this.
      *
      * @param mixed $key
      * @return Collection
