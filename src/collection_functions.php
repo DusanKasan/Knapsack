@@ -1168,7 +1168,7 @@ function dereferenceKeyValue($collection)
 }
 
 /**
- * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values
+ * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
  *
  * @param array|Traversable $collection
  * @return Collection

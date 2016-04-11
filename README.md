@@ -5,11 +5,11 @@
 
 Knapsack is a collection library for PHP >= 5.6 that implements most of the sequence operations proposed by [Clojures sequences](http://clojure.org/sequences) plus some additional ones. All its features are available as functions (for functional programming) and as a [collection pipeline](http://martinfowler.com/articles/collection-pipeline/) object methods.
 
-The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Knapsack/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/Knapsack/collection_functions.php). Collection is an iterator implementor that accepts Traversable object, array or even a callable that produces a Generator object as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
+The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/collection_functions.php). Collection is an iterator implementor that accepts Traversable object, array or even a callable that produces a Generator object as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
  
 Most of the methods of Collection return lazy collections (such as filter/map/etc.). However, some return non-lazy collections (reverse) or simple values (count). For these operations all of the items in the collection must be iterated over (and realized). There are also operations (drop) that iterate over some items of the collection but do not affect/return them in the result. This behaviour as well as laziness is noted for each of the operations.  
 
-If you want more example usage beyond what is provided here, check the [specs](https://github.com/DusanKasan/Knapsack/tree/master/tests/spec/Knapsack) and/or [scenarios](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios). There are also [performance tests](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios) you can run on your machine and see the computation time impact of this library (the output of these is included below).
+If you want more example usage beyond what is provided here, check the [specs](https://github.com/DusanKasan/Knapsack/tree/master/tests/spec) and/or [scenarios](https://github.com/DusanKasan/Knapsack/tree/master/tests/scenarios). There are also [performance tests](https://github.com/DusanKasan/Knapsack/tree/master/tests/performance) you can run on your machine and see the computation time impact of this library (the output of these is included below).
 
 Feel free to report any [issues](https://github.com/DusanKasan/Knapsack/issues) you find. I will do my best to fix them as soon as possible, but community [pull requests](https://github.com/DusanKasan/Knapsack/pulls) to fix them are more than welcome.
 
@@ -579,7 +579,7 @@ Collection::from([1, 3, 3, 2])
     ->toArray(); //[1 => 1, 3 => 3, 2 => 2]
 ```
 ```php
-toArray(indexBy([1, 3, 3, 2], '\Knapsack\identity')); //[1 => 1, 3 => 3, 2 => 2]
+toArray(indexBy([1, 3, 3, 2], '\DusanKasan\Knapsack\identity')); //[1 => 1, 3 => 3, 2 => 2]
 ```
 
 #### interleave(Traversable|array $collection) : Collection
@@ -660,7 +660,7 @@ Collection::from([1, 3, 3, 2])
     ->toArray() //[2, 4, 4, 3]
 ```
 ```php
-toArray(map([1, 3, 3, 2], '\Knapsack\increment')); //[2, 4, 4, 3]
+toArray(map([1, 3, 3, 2], '\DusanKasan\Knapsack\increment')); //[2, 4, 4, 3]
 ```
 
 #### mapcat(callable $mapper) : Collection
@@ -975,6 +975,22 @@ Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 ```
 ```php
 toArray([1, 3, 3, 2]); //[1, 3, 3, 2]
+```
+
+#### realize() : Collection
+Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
+```php
+$helper->setValue(1); 
+
+$realizedCollection = Collection::from([1, 3, 3, 2])
+    ->map(function ($item) use ($helper) {return $helper->getValue() + $item;})
+    ->realize();
+    
+$helper->setValue(2);
+$realizedCollection->toArray([2, 4, 4, 3]);
+```
+```php
+toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
 ```
 
 ## Utility functions

@@ -724,6 +724,11 @@ class Collection implements Iterator
         return pluck($this, $key);
     }
 
+    /**
+     * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
+     *
+     * @return Collection
+     */
     public function realize()
     {
         return realize($this);
