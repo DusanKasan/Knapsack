@@ -623,7 +623,10 @@ function drop($collection, $numberOfItems)
  */
 function iterate($value, callable $function)
 {
-    $generatorFactory = function () use ($value, $function) {
+    $duplicated = duplicate($value);
+    $generatorFactory = function () use ($duplicated, $function) {
+        $value = $duplicated;
+
         yield $value;
 
         while (true) {
@@ -714,7 +717,7 @@ function interpose($collection, $separator)
 function interleave(...$collections)
 {
     $generatorFactory = function () use ($collections) {
-        $collections = array_map(
+        $normalizedCollection = array_map(
             function ($collection) {
                 $c = (is_array($collection)) ? new ArrayIterator($collection) : $collection;
                 $c->rewind();
@@ -725,7 +728,7 @@ function interleave(...$collections)
 
         do {
             $valid = false;
-            foreach ($collections as $collection) {
+            foreach ($normalizedCollection as $collection) {
                 if ($collection->valid()) {
                     yield $collection->key() => $collection->current();
                     $collection->next();
@@ -970,14 +973,14 @@ function partition($collection, $numberOfItems, $step = -1, $padding = [])
     $generatorFactory = function () use ($collection, $numberOfItems, $step, $padding) {
         $buffer = [];
         $itemsToSkip = 0;
-        $step = $step ?: $numberOfItems;
+        $tmpStep = $step ?: $numberOfItems;
 
         foreach ($collection as $key => $value) {
             if (count($buffer) == $numberOfItems) {
                 yield dereferenceKeyValue($buffer);
 
-                $buffer = array_slice($buffer, $step);
-                $itemsToSkip =  $step - $numberOfItems;
+                $buffer = array_slice($buffer, $tmpStep);
+                $itemsToSkip =  $tmpStep - $numberOfItems;
             }
 
             if ($itemsToSkip <= 0) {
@@ -1073,10 +1076,12 @@ function pluck($collection, $key)
 function repeat($value, $times = -1)
 {
     $generatorFactory = function () use ($value, $times) {
-        while ($times != 0) {
+        $tmpTimes = $times;
+
+        while ($tmpTimes != 0) {
             yield $value;
 
-            $times = $times < 0 ? -1 : $times - 1;
+            $tmpTimes = $tmpTimes < 0 ? -1 : $tmpTimes - 1;
         }
     };
 
