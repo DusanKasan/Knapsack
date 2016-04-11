@@ -1,10 +1,9 @@
 <?php
 
-namespace scenarios\Knapsack;
+namespace DusanKasan\Knapsack\Tests\Scenarios;
 
-use Knapsack\Collection;
+use DusanKasan\Knapsack\Collection;
 use PHPUnit_Framework_TestCase;
-use stdClass;
 
 class CallableFunctionNamesTest extends PHPUnit_Framework_TestCase
 {
@@ -12,7 +11,7 @@ class CallableFunctionNamesTest extends PHPUnit_Framework_TestCase
     {
         $result = Collection::from([2, 1])
             ->concat([3, 4])
-            ->sort('\Knapsack\compare')
+            ->sort('\DusanKasan\Knapsack\compare')
             ->values()
             ->toArray();
 

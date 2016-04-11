@@ -1,12 +1,12 @@
 <?php
 
-namespace Knapsack;
+namespace DusanKasan\Knapsack;
 
 use Closure;
+use DusanKasan\Knapsack\Exceptions\InvalidArgument;
+use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use Iterator;
 use IteratorAggregate;
-use Knapsack\Exceptions\InvalidArgument;
-use Knapsack\Exceptions\ItemNotFound;
 use RecursiveArrayIterator;
 use Traversable;
 
@@ -90,7 +90,7 @@ class Collection implements Iterator
      */
     public static function range($start = 0, $end = null, $step = 1)
     {
-        return \Knapsack\range($start, $end, $step);
+        return \DusanKasan\Knapsack\range($start, $end, $step);
     }
 
     public function current()
@@ -211,7 +211,7 @@ class Collection implements Iterator
      */
     public function sort(callable $function)
     {
-        return \Knapsack\sort($this, $function);
+        return \DusanKasan\Knapsack\sort($this, $function);
     }
 
     /**
@@ -246,7 +246,7 @@ class Collection implements Iterator
      */
     public function each(callable $function)
     {
-        return \Knapsack\each($this, $function);
+        return \DusanKasan\Knapsack\each($this, $function);
     }
 
     /**

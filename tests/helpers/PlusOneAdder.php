@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\helpers\Knapsack;
+namespace DusanKasan\Knapsack\Tests\Helpers;
 
 class PlusOneAdder
 {

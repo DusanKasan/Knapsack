@@ -27,12 +27,12 @@
   },
   "autoload": {
     "files": [
-      "src/Knapsack/collection_functions.php",
-      "src/Knapsack/utility_functions.php"
+      "src/collection_functions.php",
+      "src/utility_functions.php"
     ],
     "psr-4": {
-      "Knapsack\\": "src/Knapsack",
-      "tests\\helpers\\Knapsack\\": "tests/helpers/Knapsack/"
+      "DusanKasan\\Knapsack\\": "src/",
+      "DusanKasan\\Knapsack\\Tests\\Helpers\\": "tests/helpers/"
     }
   }
 }

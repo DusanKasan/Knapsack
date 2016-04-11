@@ -1,10 +1,10 @@
 <?php
 
-namespace Knapsack;
+namespace DusanKasan\Knapsack;
 
 use ArrayIterator;
-use Knapsack\Exceptions\ItemNotFound;
-use Knapsack\Exceptions\NoMoreItems;
+use DusanKasan\Knapsack\Exceptions\ItemNotFound;
+use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use Traversable;
 
 /**
@@ -202,7 +202,7 @@ function isNotEmpty($collection)
  */
 function frequencies($collection)
 {
-    return countBy($collection, '\Knapsack\identity');
+    return countBy($collection, '\DusanKasan\Knapsack\identity');
 }
 
 /**
@@ -520,7 +520,7 @@ function countBy($collection, callable $function)
 {
     return map(
         groupBy($collection, $function),
-        '\Knapsack\size'
+        '\DusanKasan\Knapsack\size'
     );
 }
 

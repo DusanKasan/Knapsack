@@ -1,8 +1,8 @@
 <?php
 
-namespace scenarios\Knapsack;
+namespace DusanKasan\Knapsack\Tests\Scenarios;
 
-use Knapsack\Collection;
+use DusanKasan\Knapsack\Collection;
 use PHPUnit_Framework_TestCase;
 
 /**

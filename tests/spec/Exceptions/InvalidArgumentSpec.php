@@ -1,8 +1,8 @@
 <?php
 
-namespace spec\Knapsack\Exceptions;
+namespace spec\DusanKasan\Knapsack\Exceptions;
 
-use Knapsack\Exceptions\InvalidArgument;
+use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use RuntimeException;

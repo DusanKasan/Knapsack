@@ -1,8 +1,8 @@
 <?php
 
-namespace spec\Knapsack\Exceptions;
+namespace spec\DusanKasan\Knapsack\Exceptions;
 
-use Knapsack\Exceptions\NoMoreItems;
+use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use RuntimeException;

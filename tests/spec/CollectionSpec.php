@@ -1,19 +1,18 @@
 <?php
 
-namespace spec\Knapsack;
+namespace spec\DusanKasan\Knapsack;
 
 use ArrayIterator;
 use DOMXPath;
+use DusanKasan\Knapsack\Collection;
+use DusanKasan\Knapsack\Exceptions\InvalidArgument;
+use DusanKasan\Knapsack\Exceptions\ItemNotFound;
+use DusanKasan\Knapsack\Exceptions\NoMoreItems;
+use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
 use Iterator;
 use IteratorAggregate;
-use Knapsack\Callback\Argument;
-use Knapsack\Collection;
-use Knapsack\Exceptions\InvalidArgument;
-use Knapsack\Exceptions\ItemNotFound;
-use Knapsack\Exceptions\NoMoreItems;
-use function Knapsack\reverse;
 use PhpSpec\ObjectBehavior;
-use tests\helpers\Knapsack\PlusOneAdder;
+use function DusanKasan\Knapsack\reverse;
 
 /**
  * @mixin Collection
@@ -299,9 +298,8 @@ class CollectionSpec extends ObjectBehavior
             )
             ->shouldReturn('not found');
 
-        $this->find('\Knapsack\isCollection')->first()->shouldReturn(5);
+        $this->find('\DusanKasan\Knapsack\isCollection')->first()->shouldReturn(5);
     }
-
 
     function it_can_count_by()
     {

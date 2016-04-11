@@ -1,6 +1,6 @@
 <?php
 
-namespace Knapsack\Exceptions;
+namespace DusanKasan\Knapsack\Exceptions;
 
 use RuntimeException;
 
