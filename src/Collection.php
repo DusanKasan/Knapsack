@@ -93,26 +93,41 @@ class Collection implements Iterator
         return \DusanKasan\Knapsack\range($start, $end, $step);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function current()
     {
         return $this->input->current();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function next()
     {
         $this->input->next();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function key()
     {
         return $this->input->key();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function valid()
     {
         return $this->input->valid();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function rewind()
     {
         if ($this->generatorFactory) {
@@ -176,18 +191,17 @@ class Collection implements Iterator
     /**
      * Reduces the collection to single value by iterating over the collection and calling $function while
      * passing $startValue and current key/item as parameters. The output of $function is used as $startValue in
-     * next iteration. The output of $function on last element is the return value of this function. If the return
-     * value is a collection (array|Traversable) an instance of Collection will be returned.
+     * next iteration. The output of $function on last element is the return value of this function.
      *
      * @param mixed $startValue
      * @param callable $function ($tmpValue, $value, $key)
-     * @return mixed|Collection
+     * @return mixed
      */
     public function reduce(callable $function, $startValue)
     {
         $result = reduce($this, $function, $startValue);
 
-        return isCollection($result) ? new self($result) : $result;
+        return $result;
     }
 
     /**
@@ -260,64 +274,71 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns value at the key $key. If multiple values have this key, return first. If no value has
-     * this key, throw ItemNotFound.If the return value is a collection (array|Traversable) an instance of Collection
-     * will be returned.
+     * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw
+     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * instance of Collection will be returned.
      *
      * @param mixed $key
-     * @return mixed|Collection
+     * @param bool $convertToCollection
+     * @return Collection|mixed
+     * @throws ItemNotFound
      */
-    public function get($key)
+    public function get($key, $convertToCollection = false)
     {
         $result = get($this, $key);
 
-        return isCollection($result) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
     }
 
     /**
-     * Returns item at the key $key. If multiple items have this key, return first. If no item has
-     * this key, return $ifNotFound. If the return value is a collection (array|Traversable) an instance of Collection
-     * will be returned.
+     * Returns item at the key $key. If multiple items have this key, return first. If no item has this key, return
+     * $ifNotFound. If no value has this key, throw ItemNotFound. If $convertToCollection is true and the return value
+     * is a collection (array|Traversable) an instance of Collection will be returned.
      *
      * @param mixed $key
      * @param mixed $default
-     * @return mixed|Collection
+     * @param bool $convertToCollection
+     * @return mixed
+     * @throws ItemNotFound
      */
-    public function getOrDefault($key, $default = null)
+    public function getOrDefault($key, $default = null, $convertToCollection = false)
     {
         $result = getOrDefault($this, $key, $default);
 
-        return isCollection($result) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
     }
 
     /**
      * Returns nth item in the collection starting from 0. If the size of this collection is smaller than $position,
-     * throw ItemNotFound. If the return value is a collection (array|Traversable) an instance of Collection
-     * will be returned.
+     * throw ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * instance of Collection will be returned.
      *
      * @param int $position
-     * @return mixed|Collection
+     * @param bool $convertToCollection
+     * @return Collection|mixed
+     * @throws ItemNotFound
      */
-    public function getNth($position)
+    public function getNth($position, $convertToCollection = false)
     {
         $result = getNth($this, $position);
 
-        return isCollection($result) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
     }
 
     /**
-     * Returns first value matched by $function. If no value matches, return $default. If the return value is a
-     * collection (array|Traversable) an instance of Collection will be returned.
+     * Returns first value matched by $function. If no value matches, return $default. If $convertToCollection is true
+     * and the return value is a collection (array|Traversable) an instance of Collection will be returned.
      *
      * @param callable $function
      * @param mixed|null $default
-     * @return mixed|Collection
+     * @param bool $convertToCollection
+     * @return Collection|mixed
      */
-    public function find(callable $function, $default = null)
+    public function find(callable $function, $default = null, $convertToCollection = false)
     {
         $result = find($this, $function, $default);
 
-        return isCollection($result) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
     }
 
     /**
@@ -388,18 +409,15 @@ class Collection implements Iterator
     }
 
     /**
-     * Reduce the collection to single value. Walks from right to left. If the return value is a collection (array|
-     * Traversable) an instance of Collection will be returned.
+     * Reduce the collection to single value. Walks from right to left.
      *
      * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
      * @param mixed $startValue
-     * @return mixed|Collection
+     * @return mixed
      */
     public function reduceRight(callable $function, $startValue)
     {
-        $result = reduceRight($this, $function, $startValue);
-
-        return isCollection($result) ? new self($result) : $result;
+        return reduceRight($this, $function, $startValue);
     }
 
     /**

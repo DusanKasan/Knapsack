@@ -403,12 +403,15 @@ function slice($collection, $from, $to = -1)
 function groupBy($collection, callable $function)
 {
     $result = [];
+
     foreach ($collection as $key => $value) {
         $newKey = $function($value, $key);
-        $result[$newKey][] = $value;
+
+        $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
+        $result[$newKey] = $group->append($value);
     }
 
-    return new Collection($result);
+    return Collection::from($result);
 }
 
 /**
@@ -457,7 +460,7 @@ function get($collection, $key)
  * @param mixed $default value returned if key is not found
  * @return mixed
  */
-function getOrDefault($collection, $key, $default = null)
+function getOrDefault($collection, $key, $default)
 {
     try {
         return get($collection, $key);

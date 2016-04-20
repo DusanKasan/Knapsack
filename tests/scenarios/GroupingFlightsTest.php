@@ -53,10 +53,8 @@ class GroupingFlightsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function summarize(array $flightsData)
+    public function summarize(Collection $flights)
     {
-        $flights = new Collection($flightsData);
-
         $numCancellations = $flights
             ->filter(function ($f) {
                 return $f['cancelled'];

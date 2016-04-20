@@ -156,13 +156,13 @@ class CollectionSpec extends ObjectBehavior
 
         $this
             ->reduce(
-                function ($temp, $item) {
-                    return array_merge([$item], $temp);
+                function (Collection $temp, $item) {
+                    return $temp->append($item);
                 },
-                []
+                new Collection([])
             )
             ->toArray()
-            ->shouldReturn([2, 3, 3, 1]);
+            ->shouldReturn([1, 3, 3, 2]);
     }
 
     function it_can_flatten()
@@ -210,19 +210,19 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 2, 3, 4, 5]);
 
-        $this
-            ->groupBy(function ($i) {
-                return $i % 2;
-            })
-            ->toArray()
-            ->shouldReturn([1 => [1, 3, 5], 0 => [2, 4]]);
+        $collection = $this->groupBy(function ($i) {
+            return $i % 2;
+        });
 
-        $this
-            ->groupBy(function ($k, $i) {
-                return ($k + $i) % 3;
-            })
-            ->toArray()
-            ->shouldReturn([1 => [1, 4], 0 => [2, 5], 2 => [3]]);
+        $collection->get(0)->toArray()->shouldReturn([2, 4]);
+        $collection->get(1)->toArray()->shouldReturn([1, 3, 5]);
+
+        $collection = $this->groupBy(function ($k, $i) {
+            return ($k + $i) % 3;
+        });
+        $collection->get(0)->toArray()->shouldReturn([2, 5]);
+        $collection->get(1)->toArray()->shouldReturn([1, 4]);
+        $collection->get(2)->toArray()->shouldReturn([3]);
     }
 
     function it_can_execute_callback_for_each_item(DOMXPath $a)
@@ -247,7 +247,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, [2], 3]);
         $this->get(0)->shouldReturn(1);
-        $this->get(1)->first()->shouldReturn(2);
+        $this->get(1, true)->first()->shouldReturn(2);
+        $this->get(1)->shouldReturn([2]);
         $this->shouldThrow(new ItemNotFound)->during('get', [5]);
     }
 
@@ -255,7 +256,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, [2], 3]);
         $this->getOrDefault(0)->shouldReturn(1);
-        $this->getOrDefault(1)->first()->shouldReturn(2);
+        $this->getOrDefault(1, null, true)->first()->shouldReturn(2);
+        $this->getOrDefault(1, null)->shouldReturn([2]);
         $this->getOrDefault(5)->shouldReturn(null);
         $this->getOrDefault(5, 'not found')->shouldReturn('not found');
     }
@@ -264,7 +266,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, [2], 3]);
         $this->getNth(0)->shouldReturn(1);
-        $this->getNth(1)->first()->shouldReturn(2);
+        $this->getNth(1, true)->first()->shouldReturn(2);
+        $this->getNth(1)->shouldReturn([2]);
     }
 
     function it_can_find()
@@ -298,7 +301,8 @@ class CollectionSpec extends ObjectBehavior
             )
             ->shouldReturn('not found');
 
-        $this->find('\DusanKasan\Knapsack\isCollection')->first()->shouldReturn(5);
+        $this->find('\DusanKasan\Knapsack\isCollection', null, true)->first()->shouldReturn(5);
+        $this->find('\DusanKasan\Knapsack\isCollection')->shouldReturn([5]);
     }
 
     function it_can_count_by()
@@ -446,10 +450,10 @@ class CollectionSpec extends ObjectBehavior
 
         $this
             ->reduceRight(
-                function ($temp, $item) {
-                    return array_merge($temp, [$item]);
+                function (Collection $temp, $item) {
+                    return $temp->append($item);
                 },
-                []
+                new Collection([])
             )
             ->toArray()
             ->shouldReturn([2, 3, 3, 1]);

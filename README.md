@@ -79,13 +79,13 @@ foreach ($result as $item) {
 //5
 ```
 
-### If array or Traversable would be returned, it is converted to Collection
+### If array or Traversable would be returned from functions that return an item from the collection, it can be converted to Collection using the optional flag. By default it returns the item as is.
 ```php
-$result = Collection::from([[1]])
-    ->first()
+$result = Collection::from([[[1]]])
+    ->first(true)
     ->first();
     
-echo $result; //1
+vardump($result); //[1]
 ```
 
 
@@ -432,8 +432,8 @@ Collection::from([1, 3, 3, 2])
 toArray(values(filter([1, 3, 3, 2], function ($value) {return $value > 2;}))); //[3, 3]
 ```
 
-#### find(callable $function, mixed $ifNotFound = null) : mixed|Collection
-Returns first value for which $function(value, key) returns true. If no item is matched, returns $ifNotFound.
+#### find(callable $function, mixed $ifNotFound = null, bool $convertToCollection = false) : mixed|Collection
+Returns first value for which $function(value, key) returns true. If no item is matched, returns $ifNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
 ```php
 Collection::from([1, 3, 3, 2])
     ->find(function ($value) {
@@ -457,20 +457,20 @@ Collection::from([1, 3, 3, 2])
 Collection::from([1, [4, 5], 3, 2])
     ->find(function ($value) {
       return is_array($value);
-    })
+    }, true)
     ->size(); //2 
 ```
 ```php
 find([1, 3, 3, 2], function ($value) {return $value > 2;}); //3
 ```
 
-#### first() : mixed|Collection
+#### first(bool $convertToCollection = false) : mixed|Collection
 Returns first value in the collection or throws ItemNotFound if the collection is empty. If possible, converts return value to Collection.
 ```php
 Collection::from([1, 2, 3])->first(); //1
 ```
 ```php
-Collection::from([[1], 2, 3])->first()->toArray(); //[1]
+Collection::from([[1], 2, 3])->first(); //[1]
 ```
 ```php
 Collection::from([])->first(); //throws ItemNotFound
@@ -508,13 +508,13 @@ Collection::from([1, 3, 3, 2])
 toArray(frequencies([1, 3, 3, 2])); //[1 => 1, 3 => 2, 2 => 1]
 ```
 
-#### get(mixed $key) : mixed|Collection
-Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`. Converts return value to Collection if possible.
+#### get(mixed $key, bool $convertToCollection = false) : mixed|Collection
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
 ```php
 Collection::from([1, 3, 3, 2])->get(2); //3
 ```
 ```php
-Collection::from([1, [1, 2]])->get(1)->toArray(); //[1, 2]
+Collection::from([1, [1, 2]])->get(1, true)->toArray(); //[1, 2]
 ```
 ```php
 Collection::from([1, 3, 3, 2])->get(5); //throws ItemNotFound
@@ -523,13 +523,13 @@ Collection::from([1, 3, 3, 2])->get(5); //throws ItemNotFound
 get([1, 3, 3, 2], 2); //3
 ```
 
-#### getNth(int $position) : mixed|Collection
-Returns value at $position position in collection. If that position does not exist, throws `ItemNotFound`. Converts return value to Collection if possible.
+#### getNth(int $position, bool $convertToCollection = false) : mixed|Collection
+Returns value at $position position in collection. If that position does not exist, throws `ItemNotFound`. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
 ```php
 Collection::from([1, 3, 3, 2])->getNth(0); //1
 ```
 ```php
-Collection::from([1, [1, 2]])->getNth(1)->toArray(); //[1, 2]
+Collection::from([1, [1, 2]])->getNth(1, true)->toArray(); //[1, 2]
 ```
 ```php
 Collection::from([1, 3, 3, 2])->getNth(5); //throws ItemNotFound
@@ -538,8 +538,8 @@ Collection::from([1, 3, 3, 2])->getNth(5); //throws ItemNotFound
 getNth([1, 3, 3, 2], 2); //3
 ```
 
-#### getOrDefault(mixed $key, mixed $default = null) : mixed|Collection
-Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $default. Converts return value to Collection if possible.
+#### getOrDefault(mixed $key, mixed $default = null, bool $convertToCollection = false) : mixed|Collection
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $default. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
 ```php
 Collection::from([1, 3, 3, 2])->getOrDefault(2); //3
 ```
@@ -550,7 +550,7 @@ Collection::from([1, 3, 3, 2])->getOrDefault(5); //null
 Collection::from([1, 3, 3, 2])->getOrDefault(5, 'asd'); //'asd'
 ```
 ```php
-Collection::from([1, 3, 3, 2])->getOrDefault(5, [1, 2])->toArray(); //[1, 2]
+Collection::from([1, 3, 3, 2])->getOrDefault(5, [1, 2], null, true)->toArray(); //[1, 2]
 ```
 ```php
 getOrDefault([1, 3, 3, 2], 5, 'asd'); //'asd'
@@ -635,13 +635,13 @@ Collection::from(['a' => [1, 2], 'b' => [2, 3]])
 toArray(keys(['a' => [1, 2], 'b' => [2, 3]])); //['a', 'b']
 ```
 
-#### last() : mixed|Collection
-Returns last value in the collection or throws ItemNotFound if the collection is empty. If possible, converts return value to Collection.
+#### last(bool $convertToCollection = false) : mixed|Collection
+Returns last value in the collection or throws ItemNotFound if the collection is empty. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
 ```php
 Collection::from([1, 2, 3])->last(); //3
 ```
 ```php
-Collection::from([1, 2, [3]])->last()->toArray(); //[1]
+Collection::from([1, 2, [3]])->last(true)->toArray(); //[1]
 ```
 ```php
 Collection::from([])->last(); //throws ItemNotFound
@@ -758,8 +758,8 @@ $realizedCollection->toArray([2, 4, 4, 3]);
 toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
 ```
 
-#### reduce(callable $function, mixed $start) : mixed|Collection
-Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function. Return value is converted to collection if possible.
+#### reduce(callable $function, mixed $start) : mixed
+Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function.
 ```php
 Collection::from([1, 3, 3, 2])
     ->reduce(function ($tmp, $i) {
@@ -770,7 +770,7 @@ Collection::from([1, 3, 3, 2])
 reduce([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
-#### reduceRight(callable $function, mixed $start) : mixed|Collection
+#### reduceRight(callable $function, mixed $start) : mixed
 Like reduce, but walks from last item to the first one.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -1046,6 +1046,4 @@ sum(1, 5, 3) === 1; //true
 ```
 
 ## Planned    
-- multiple collections can be passed to lets say concat
-- more scenarios
-- more utility functions (+, - ,...) 
+- more scenarios (read CSV, etc)
