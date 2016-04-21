@@ -96,8 +96,7 @@ a:hover {
 }
 
 a img {
-    width: 18%;
-    min-width: 100px;
+    height: 25px;
 }
 
 h2, h3, h4 {
