@@ -808,7 +808,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, [2], 3]);
         $this->first()->shouldReturn(1);
-        $this->drop(1)->first()->toArray()->shouldReturn([2]);
+        $this->drop(1)->first()->shouldReturn([2]);
+        $this->drop(1)->first(true)->toArray()->shouldReturn([2]);
     }
 
     function it_will_throw_when_trying_to_get_first_item_of_empty_collection()
@@ -821,7 +822,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, [2], 3]);
         $this->last()->shouldReturn(3);
-        $this->take(2)->last()->toArray()->shouldReturn([2]);
+        $this->take(2)->last()->shouldReturn([2]);
+        $this->take(2)->last(true)->toArray()->shouldReturn([2]);
     }
 
     function it_will_throw_when_trying_to_get_last_item_of_empty_collection()
