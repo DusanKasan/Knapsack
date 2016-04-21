@@ -1,6 +1,6 @@
 build:
   environment:
-          php: '5.6.0'
+          php: '5.6'
 
   tests:
     override:
@@ -15,6 +15,10 @@ build:
         command: 'phpenv global hhvm && vendor/bin/phpspec run -vvv'
       -
         command: 'phpenv global hhvm vendor/bin/phpunit'
+      -
+        command: 'phpenv global 7.0 && vendor/bin/phpspec run -vvv'
+      -
+        command: 'phpenv global 7.0 vendor/bin/phpunit'
 
 
 tools:
@@ -32,10 +36,10 @@ checks:
         duplication: true
 
 build_failure_conditions:
-    - 'issues.label("coding-style").exists'         # No coding style issues allowed
-    - 'issues.severity(>= MINOR).exists'             # New issues of major or higher severity
-    - 'project.metric("scrutinizer.quality", < 8)' # Code Quality Rating drops below 8.5
-    - 'project.metric("scrutinizer.test_coverage", < 1)' # Code Coverage drops below 100%
+    - 'issues.label("coding-style").exists'
+    - 'issues.severity(>= MINOR).exists'
+    - 'project.metric("scrutinizer.quality", < 7)'
+    - 'project.metric("scrutinizer.test_coverage", < 0.95)'
 
 filter:
     excluded_paths:
