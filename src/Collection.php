@@ -706,29 +706,31 @@ class Collection implements Iterator
     }
 
     /**
-     * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If the return value is
-     * a collection (array|Traversable) an instance of Collection will be returned.
+     * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
+     * is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
      *
-     * @throws ItemNotFound
+     * @param bool $convertToCollection
      * @return mixed|Collection
+     * @throws ItemNotFound
      */
-    public function first()
+    public function first($convertToCollection = false)
     {
         $result = first($this);
-        return isCollection($result) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
     }
 
     /**
-     * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If the return value is a
-     * collection (array|Traversable) an instance of Collection will be returned.
+     * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
+     * is true and the return value is a collection (array|Traversable) an
      *
-     * @throws ItemNotFound
+     * @param bool $convertToCollection
      * @return mixed|Collection
+     * @throws ItemNotFound
      */
-    public function last()
+    public function last($convertToCollection = false)
     {
         $result = last($this);
-        return isCollection($result) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
     }
 
     /**

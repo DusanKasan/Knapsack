@@ -465,7 +465,7 @@ find([1, 3, 3, 2], function ($value) {return $value > 2;}); //3
 ```
 
 #### first(bool $convertToCollection = false) : mixed|Collection
-Returns first value in the collection or throws ItemNotFound if the collection is empty. If possible, converts return value to Collection.
+Returns first value in the collection or throws ItemNotFound if the collection is empty. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
 ```php
 Collection::from([1, 2, 3])->first(); //1
 ```
