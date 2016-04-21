@@ -1,6 +1,6 @@
 build:
   environment:
-          php: '5.6'
+          php: '5.6.9'
 
   tests:
     override:
@@ -16,9 +16,9 @@ build:
       -
         command: 'phpenv global hhvm vendor/bin/phpunit'
       -
-        command: 'phpenv global 7.0 && vendor/bin/phpspec run -vvv'
+        command: 'phpenv global 7.0.0 && vendor/bin/phpspec run -vvv'
       -
-        command: 'phpenv global 7.0 vendor/bin/phpunit'
+        command: 'phpenv global 7.0.0 vendor/bin/phpunit'
 
 
 tools:
