@@ -16,16 +16,12 @@ use Traversable;
  */
 function toArray($collection)
 {
-    if (is_array($collection) || $collection instanceof Traversable) {
-        $arr = [];
-        foreach ($collection as $key => $value) {
-            $arr[$key] = $value;
-        }
-
-        return $arr;
-    } else {
-        return [$collection];
+    $arr = [];
+    foreach ($collection as $key => $value) {
+        $arr[$key] = $value;
     }
+
+    return $arr;
 }
 
 /**
