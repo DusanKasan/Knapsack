@@ -399,11 +399,14 @@ function slice($collection, $from, $to = -1)
 function groupBy($collection, callable $function)
 {
     $result = [];
+
     foreach ($collection as $key => $value) {
         $newKey = $function($value, $key);
+
         $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
         $result[$newKey] = $group->append($value);
     }
+
     return Collection::from($result);
 }
 
@@ -421,11 +424,12 @@ function groupByKey($collection, $groupKey)
 
     foreach ($collection as $key => $value) {
         $newKey = $function($value, $key);
+
         $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
         $result[$newKey] = $group->append($value);
     }
 
-    return new Collection($result);
+    return Collection::from($result);
 }
 
 /**
