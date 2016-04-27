@@ -414,7 +414,7 @@ function groupBy($collection, callable $function)
  * Returns a non-lazy collection of items grouped by the value at given key.
  *
  * @param array|Traversable $collection
- * @param mixed $key
+ * @param mixed $groupKey
  * @return Collection
  */
 function groupByKey($collection, $groupKey)
