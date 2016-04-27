@@ -253,6 +253,17 @@ class Collection implements Iterator
     }
 
     /**
+     * Returns collection which items are separated into groups indexed by the value at the given key.
+     *
+     * @param mixed $key The key to be used for grouping
+     * @return Collection
+     */
+    public function groupByKey($key)
+    {
+        return groupByKey($this, $key);
+    }
+
+    /**
      * Returns a lazy collection in which $function is executed for each item.
      *
      * @param callable $function ($value, $key)

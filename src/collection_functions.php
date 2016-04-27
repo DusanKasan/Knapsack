@@ -396,19 +396,36 @@ function slice($collection, $from, $to = -1)
  * @param callable $function ($value, $key)
  * @return Collection
  */
-function groupBy($collection, $function)
+function groupBy($collection, callable $function)
 {
     $result = [];
-    $function = getCallable($function);
+    foreach ($collection as $key => $value) {
+        $newKey = $function($value, $key);
+        $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
+        $result[$newKey] = $group->append($value);
+    }
+    return Collection::from($result);
+}
+
+/**
+ * Returns a non-lazy collection of items grouped by the value at given key.
+ *
+ * @param array|Traversable $collection
+ * @param mixed $key
+ * @return Collection
+ */
+function groupByKey($collection, $groupKey)
+{
+    $result = [];
+    $function = getCallable($groupKey);
 
     foreach ($collection as $key => $value) {
         $newKey = $function($value, $key);
-
         $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
         $result[$newKey] = $group->append($value);
     }
 
-    return Collection::from($result);
+    return new Collection($result);
 }
 
 /**

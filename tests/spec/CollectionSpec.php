@@ -233,7 +233,7 @@ class CollectionSpec extends ObjectBehavior
            ['letter' => 'B', 'type' => 'caps'],
         ]);
 
-        $collection = $this->groupBy('type');
+        $collection = $this->groupByKey('type');
         $collection->get('small')->toArray()->shouldReturn([['letter' => 'a', 'type' => 'small']]);
         $collection->get('caps')->toArray()->shouldReturn([
             ['letter' => 'A', 'type' => 'caps'],
