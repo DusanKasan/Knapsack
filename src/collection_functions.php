@@ -1212,20 +1212,20 @@ function second($collection)
 function combine($keys, $values, $strict = false)
 {
     $generatorFactory = function () use ($keys, $values, $strict) {
-        $keys = is_array($keys) ? new ArrayIterator($keys) : $keys;
-        $values = is_array($values) ? new ArrayIterator($values) : $values;
-        $values->rewind();
+        $keyCollection = new Collection($keys);
+        $valueCollection = new Collection($values);
+        $valueCollection->rewind();
 
-        foreach ($keys as $key) {
-            if (!$values->valid()) {
+        foreach ($keyCollection as $key) {
+            if (!$valueCollection->valid()) {
                 break;
             }
 
-            yield $key => $values->current();
-            $values->next();
+            yield $key => $valueCollection->current();
+            $valueCollection->next();
         }
 
-        if ($strict && ($keys->valid() || $values->valid())) {
+        if ($strict && ($keyCollection->valid() || $valueCollection->valid())) {
             throw new ItemNotFound;
         }
     };
@@ -1326,7 +1326,7 @@ function has($collection, $key)
     try {
         get($collection, $key);
         return true;
-    } catch (ItemNotFound $key) {
+    } catch (ItemNotFound $e) {
         return false;
     }
 }
