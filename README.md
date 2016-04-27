@@ -28,6 +28,8 @@ $ composer require dusank/knapsack
 
 ### Instantiate via static or dynamic constructor
 ```php
+use DusanKasan\Knapsack\Collection;
+
 $collection1 = new Collection([1, 2, 3]);
 $collection2 = Collection::from([1, 2, 3]); //preferred since you can call methods on its result directly.
 ```
