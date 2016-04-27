@@ -9,7 +9,7 @@ use IteratorAggregate;
 use RecursiveArrayIterator;
 use Traversable;
 
-class Collection implements Iterator, \ArrayAccess
+class Collection implements Iterator
 {
     use CollectionTrait;
 
