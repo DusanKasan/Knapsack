@@ -8,6 +8,8 @@ use Traversable;
 trait CollectionTrait
 {
     /**
+     * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
+     *
      * @return array
      */
     public function toArray()
@@ -157,7 +159,7 @@ trait CollectionTrait
     {
         $result = get($this->getItems(), $key);
 
-        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -175,7 +177,7 @@ trait CollectionTrait
     {
         $result = getOrDefault($this->getItems(), $key, $default);
 
-        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -192,7 +194,7 @@ trait CollectionTrait
     {
         $result = getNth($this->getItems(), $position);
 
-        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -208,7 +210,7 @@ trait CollectionTrait
     {
         $result = find($this->getItems(), $function, $default);
 
-        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -512,7 +514,7 @@ trait CollectionTrait
      */
     public function shuffle()
     {
-        return shuffle($this->getItems());
+        return \DusanKasan\Knapsack\shuffle($this->getItems());
     }
 
     /**
@@ -586,7 +588,7 @@ trait CollectionTrait
     public function first($convertToCollection = false)
     {
         $result = first($this->getItems());
-        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -600,7 +602,7 @@ trait CollectionTrait
     public function last($convertToCollection = false)
     {
         $result = last($this->getItems());
-        return (isCollection($result) && $convertToCollection) ? new self($result) : $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**

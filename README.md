@@ -154,6 +154,14 @@ foreach ($result as $key => $item) {
 ### Collection trait is provided
 If you wish to use all the Collection methods in your existing classes directly, no need to proxy their calls, you can just use the provided [CollectionTrait](https://github.com/DusanKasan/Knapsack/blob/master/src/CollectionTrait.php). This will work on any Traversable by default. In any other class you will have to override the getItems() method provided by the trait. Keep in mind that after calling filter or any other method that returns collection, the returned type will be actually Collection, not the original Traversable. 
 
+```php
+class AwesomeIterator extends ArrayIterator {
+    use CollectionTrait;
+}
+
+$iterator = new AwesomeIterator([1, 2, 3]);
+$iterator->size(); //3
+```
 ## Performance tests
 
 ### PHP 5.6

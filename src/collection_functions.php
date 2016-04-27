@@ -8,8 +8,7 @@ use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use Traversable;
 
 /**
- * Converts $collection to array. If $collection is not array or Traversable, an array [$collection] will be returned.
- * If there are multiple items with the same key, only the last will be preserved.
+     * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
  *
  * @param array|Traversable $collection
  * @return array
