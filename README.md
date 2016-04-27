@@ -20,6 +20,8 @@ Check out the documentation (which is prettified version of this readme) at http
 
 ### Instantiate via static or dynamic constructor
 ```php
+use DusanKasan\Knapsack\Collection;
+
 $collection1 = new Collection([1, 2, 3]);
 $collection2 = Collection::from([1, 2, 3]); //preferred since you can call methods on its result directly.
 ```
