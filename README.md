@@ -16,6 +16,14 @@ Feel free to report any [issues](https://github.com/DusanKasan/Knapsack/issues) 
 ## Documentation
 Check out the documentation (which is prettified version of this readme) at http://dusankasan.github.io/Knapsack
 
+## Install
+
+Via Composer
+
+``` bash
+$ composer require dusank/knapsack
+```
+
 ## Usage
 
 ### Instantiate via static or dynamic constructor
