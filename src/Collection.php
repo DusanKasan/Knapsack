@@ -4,7 +4,6 @@ namespace DusanKasan\Knapsack;
 
 use Closure;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
-use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use Iterator;
 use IteratorAggregate;
 use RecursiveArrayIterator;
@@ -654,7 +653,7 @@ class Collection implements Iterator
      *
      * @param int $numberOfItems
      * @param int $step
-     * @param array $padding
+     * @param array|Traversable $padding
      * @return Collection
      */
     public function partition($numberOfItems, $step = 0, $padding = [])
@@ -752,5 +751,85 @@ class Collection implements Iterator
     public function realize()
     {
         return realize($this);
+    }
+
+    /**
+     * Returns the second item in this collection or throws ItemNotFound if the collection is empty or has 1 item.
+     *
+     * @return mixed
+     */
+    public function second()
+    {
+        return second($this);
+    }
+
+    /**
+     * Combines the values of this collection as keys, with values of $collection as values.  The resulting collection
+     * has length equal to the size of smaller collection. If $strict is true, the size of both collections must be
+     * equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
+     *
+     * @param array|Traversable $collection
+     * @param bool $strict
+     * @return Collection
+     */
+    public function combine($collection, $strict = false)
+    {
+        return combine($this, $collection, $strict);
+    }
+
+    /**
+     * Returns a lazy collection without the items associated to any of the keys from $keys.
+     *
+     * @param array|Traversable $keys
+     * @return Collection
+     */
+    public function except($keys)
+    {
+        return except($this, $keys);
+    }
+
+    /**
+     * Returns a lazy collection of items associated to any of the keys from $keys.
+     *
+     * @param array|Traversable $keys
+     * @return Collection
+     */
+    public function only($keys)
+    {
+        return only($this, $keys);
+    }
+
+    /**
+     * Returns a lazy collection of items that are in $this but are not in any of the other arguments. Note that the
+     * ...$collections are iterated non-lazily.
+     *
+     * @param array|Traversable ...$collections
+     * @return Collection
+     */
+    public function difference(...$collections)
+    {
+        return difference($this, ...$collections);
+    }
+
+
+    /**
+     * Returns a lazy collection where keys and values are flipped.
+     *
+     * @return Collection
+     */
+    public function flip()
+    {
+        return flip($this);
+    }
+
+    /**
+     * Checks for the existence of $key in this collection.
+     *
+     * @param mixed $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        return has($this, $key);
     }
 }

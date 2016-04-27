@@ -758,6 +758,13 @@ class CollectionSpec extends ObjectBehavior
         $this->pluck('a')->values()->toArray()->shouldReturn([1, 2]);
     }
 
+    function it_can_pluck_from_heterogenous_collection()
+    {
+        $this->beConstructedWith([['a' => 1], ['b' => 2], 1]);
+        $this->pluck('a')->values()->toArray()->shouldReturn([1]);
+
+    }
+
     function it_can_create_infinite_collection_of_repeated_values()
     {
         $this->beConstructedThrough('repeat', [1]);
@@ -843,5 +850,59 @@ class CollectionSpec extends ObjectBehavior
         });
 
         $this->realize();
+    }
+
+    function it_can_combine_the_collection()
+    {
+        $this->beConstructedWith(['a', 'b']);
+        $this->combine([1, 2])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
+        $this->combine([1])->toArray()->shouldReturn(['a' => 1]);
+        $this->combine([1, 2, 3])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
+        $this->shouldThrow(ItemNotFound::class)->during('combine', [[1, 2, 3], true]);
+    }
+
+    function it_can_get_second_item()
+    {
+        $this->beConstructedWith([1, 2]);
+        $this->second()->shouldReturn(2);
+    }
+
+    function it_throws_when_trying_to_get_non_existent_second_item()
+    {
+        $this->beConstructedWith([1]);
+        $this->shouldThrow(ItemNotFound::class)->during('second');
+    }
+
+    function it_can_drop_item_by_key()
+    {
+        $this->beConstructedWith(['a' => 1, 'b' => 2]);
+        $this->except(['a', 'b'])->toArray()->shouldReturn([]);
+    }
+
+    function it_can_get_the_difference_between_collections()
+    {
+        $this->beConstructedWith([1, 2, 3, 4]);
+        $this->difference([1, 2])->toArray()->shouldReturn([2 => 3, 3 => 4]);
+        $this->difference([1, 2], [3])->toArray()->shouldReturn([3 => 4]);
+    }
+
+    function it_can_flip_the_collection()
+    {
+        $this->beConstructedWith(['a' => 1, 'b' => 2]);
+        $this->flip()->toArray()->shouldReturn([1 => 'a', 2 => 'b']);
+    }
+
+    function it_can_check_if_key_exits()
+    {
+        $this->beConstructedWith(['a' => 1, 'b' => 2]);
+        $this->has('a')->shouldReturn(true);
+        $this->has('x')->shouldReturn(false);
+    }
+
+    function it_filters_by_keys()
+    {
+        $this->beConstructedWith(['a' => 1, 'b' => 2, 'c' => 3]);
+        $this->only(['a', 'b'])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
+        $this->only(['a', 'b', 'x'])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
     }
 }
