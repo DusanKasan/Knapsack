@@ -16,11 +16,12 @@ Feel free to report any [issues](https://github.com/DusanKasan/Knapsack/issues) 
 ## Documentation
 Check out the documentation (which is prettified version of this readme) at http://dusankasan.github.io/Knapsack
 
-## Install
+## Installation
 
-Via Composer
+Require this package using Composer.
 
-``` bash
+
+```
 $ composer require dusank/knapsack
 ```
 
@@ -34,7 +35,7 @@ $collection1 = new Collection([1, 2, 3]);
 $collection2 = Collection::from([1, 2, 3]); //preferred since you can call methods on its result directly.
 ```
 
-### Work with arrays, Traversable objects or callables that produce Generators
+### Work with arrays, Traversable objects or callables that produce Traversables
 ```php
 $collection1 = Collection::from([1, 2, 3]);
 $collection2 = Collection::from(new ArrayIterator([1, 2, 3]);
@@ -150,6 +151,9 @@ foreach ($result as $key => $item) {
 //1:4
 ```
 
+### Collection trait is provided
+If you wish to use all the Collection methods in your existing classes directly, no need to proxy their calls, you can just use the provided [CollectionTrait](https://github.com/DusanKasan/Knapsack/blob/master/src/CollectionTrait.php). This will work on any Traversable by default. In any other class you will have to override the getItems() method provided by the trait. Keep in mind that after calling filter or any other method that returns collection, the returned type will be actually Collection, not the original Traversable. 
+
 ## Performance tests
 
 ### PHP 5.6
@@ -182,7 +186,7 @@ foreach ($result as $key => $item) {
 These are ways how to create the Collection class. There is one default constructor and few named (static) ones.
 
 #### new(array|Traversable|callback $input)
-The default constructor accepts array, Traversable or a callable that takes no arguments and produces Generator. The Generator can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
+The default constructor accepts array, Traversable or a callable that takes no arguments and produces Traversable. The use case for the callable argument is for example a Generator, which can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
 
 ```php
 $collection = new Collection([1, 2, 3]);
