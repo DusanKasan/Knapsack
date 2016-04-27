@@ -396,9 +396,10 @@ function slice($collection, $from, $to = -1)
  * @param callable $function ($value, $key)
  * @return Collection
  */
-function groupBy($collection, callable $function)
+function groupBy($collection, $function)
 {
     $result = [];
+    $function = getCallable($function);
 
     foreach ($collection as $key => $value) {
         $newKey = $function($value, $key);
@@ -1178,4 +1179,21 @@ function dereferenceKeyValue($collection)
 function realize($collection)
 {
     return new Collection(toArray($collection));
+}
+
+/**
+ * Returns a callable that can be used to get data from an input collection
+ *
+ * @param string|callable
+ * @return callable
+ */
+function getCallable($function)
+{
+    if(is_callable($function)) {
+        return $function;
+    }
+
+    return function($item, $key) use($function) {
+        return isset($item[$function]) ? $item[$function] : null;
+    };
 }

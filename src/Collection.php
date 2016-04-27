@@ -247,7 +247,7 @@ class Collection implements Iterator
      * @param callable $function ($value, $key)
      * @return Collection
      */
-    public function groupBy(callable $function)
+    public function groupBy($function)
     {
         return groupBy($this, $function);
     }
