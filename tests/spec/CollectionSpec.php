@@ -19,6 +19,11 @@ use function DusanKasan\Knapsack\reverse;
  */
 class CollectionSpec extends ObjectBehavior
 {
+    static function asd()
+    {
+        return [1,2,3];
+    }
+
     function let()
     {
         $this->beConstructedWith([1, 3, 3, 2,]);

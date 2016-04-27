@@ -28,15 +28,15 @@ class Collection implements Iterator
      */
     public function __construct($input)
     {
-        if (is_array($input)) {
+        if (is_callable($input)) {
+            $this->generatorFactory = $input;
+            $this->input = $input();
+        } elseif (is_array($input)) {
             $input = new RecursiveArrayIterator($input);
             $this->input = $input;
         } elseif ($input instanceof IteratorAggregate) {
             $input = $input->getIterator();
             $this->input = $input;
-        } elseif (is_callable($input)) {
-            $this->generatorFactory = $input;
-            $this->input = $input();
         } elseif ($input instanceof Iterator) {
             $this->input = $input;
         } else {

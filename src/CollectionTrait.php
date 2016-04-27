@@ -2,9 +2,6 @@
 
 namespace DusanKasan\Knapsack;
 
-use DusanKasan\Knapsack\Exceptions\ItemNotFound;
-use Traversable;
-
 trait CollectionTrait
 {
     /**
@@ -41,7 +38,7 @@ trait CollectionTrait
     /**
      * Returns a lazy collection with items from all $collections passed as argument appended together
      *
-     * @param Traversable|array ...$collections
+     * @param \Traversable[]|array ...$collections
      * @return Collection
      */
     public function concat(...$collections)
@@ -147,13 +144,13 @@ trait CollectionTrait
 
     /**
      * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw
-     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable an
      * instance of Collection will be returned.
      *
      * @param mixed $key
      * @param bool $convertToCollection
      * @return Collection|mixed
-     * @throws ItemNotFound
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function get($key, $convertToCollection = false)
     {
@@ -171,7 +168,7 @@ trait CollectionTrait
      * @param mixed $default
      * @param bool $convertToCollection
      * @return mixed
-     * @throws ItemNotFound
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function getOrDefault($key, $default = null, $convertToCollection = false)
     {
@@ -182,13 +179,13 @@ trait CollectionTrait
 
     /**
      * Returns nth item in the collection starting from 0. If the size of this collection is smaller than $position,
-     * throw ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * throw ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable an
      * instance of Collection will be returned.
      *
      * @param int $position
      * @param bool $convertToCollection
      * @return Collection|mixed
-     * @throws ItemNotFound
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function getNth($position, $convertToCollection = false)
     {
@@ -199,7 +196,7 @@ trait CollectionTrait
 
     /**
      * Returns first value matched by $function. If no value matches, return $default. If $convertToCollection is true
-     * and the return value is a collection (array|Traversable) an instance of Collection will be returned.
+     * and the return value is a collection (array|Traversable an instance of Collection will be returned.
      *
      * @param callable $function
      * @param mixed|null $default
@@ -371,7 +368,7 @@ trait CollectionTrait
      * Returns a lazy collection of first item from first collection, first item from second, second from first and
      * so on. Accepts any number of collections.
      *
-     * @param array|Traversable ...$collections
+     * @param array|\Traversable ...$collections
      * @return Collection
      */
     public function interleave(...$collections)
@@ -476,7 +473,7 @@ trait CollectionTrait
      * Returns a lazy collection with items from this collection but values that are found in keys of $replacementMap
      * are replaced by their values.
      *
-     * @param Traversable|array $replacementMap
+     * @param \Traversable|array $replacementMap
      * @return Collection
      */
     public function replace($replacementMap)
@@ -526,7 +523,7 @@ trait CollectionTrait
      *
      * @param int $numberOfItems
      * @param int $step
-     * @param array|Traversable $padding
+     * @param array|\Traversable $padding
      * @return Collection
      */
     public function partition($numberOfItems, $step = 0, $padding = [])
@@ -579,11 +576,11 @@ trait CollectionTrait
 
     /**
      * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+     * is true and the return value is a collection (array|Traversable an instance of Collection is returned.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
-     * @throws ItemNotFound
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function first($convertToCollection = false)
     {
@@ -593,11 +590,11 @@ trait CollectionTrait
 
     /**
      * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable) an
+     * is true and the return value is a collection (array|Traversable an
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
-     * @throws ItemNotFound
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function last($convertToCollection = false)
     {
@@ -641,9 +638,10 @@ trait CollectionTrait
      * has length equal to the size of smaller collection. If $strict is true, the size of both collections must be
      * equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
      *
-     * @param array|Traversable $collection
+     * @param array|\Traversable $collection
      * @param bool $strict
      * @return Collection
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function combine($collection, $strict = false)
     {
@@ -653,7 +651,7 @@ trait CollectionTrait
     /**
      * Returns a lazy collection without the items associated to any of the keys from $keys.
      *
-     * @param array|Traversable $keys
+     * @param array|\Traversable $keys
      * @return Collection
      */
     public function except($keys)
@@ -664,7 +662,7 @@ trait CollectionTrait
     /**
      * Returns a lazy collection of items associated to any of the keys from $keys.
      *
-     * @param array|Traversable $keys
+     * @param array|\Traversable $keys
      * @return Collection
      */
     public function only($keys)
@@ -676,7 +674,7 @@ trait CollectionTrait
      * Returns a lazy collection of items that are in $this but are not in any of the other arguments. Note that the
      * ...$collections are iterated non-lazily.
      *
-     * @param array|Traversable ...$collections
+     * @param array|\Traversable ...$collections
      * @return Collection
      */
     public function difference(...$collections)
@@ -707,7 +705,7 @@ trait CollectionTrait
     }
 
     /**
-     * @return array|Traversable
+     * @return array|\Traversable
      */
     protected function getItems()
     {
