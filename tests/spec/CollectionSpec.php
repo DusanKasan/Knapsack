@@ -225,6 +225,29 @@ class CollectionSpec extends ObjectBehavior
         $collection->get(2)->toArray()->shouldReturn([3]);
     }
 
+    function it_can_group_by_key()
+    {
+        $this->beConstructedWith([
+            'some' => 'thing',
+            ['letter' => 'A', 'type' => 'caps'],
+            ['letter' => 'a', 'type' => 'small'],
+            ['letter' => 'B', 'type' => 'caps'],
+            ['letter' => 'Z']
+        ]);
+
+        $collection = $this->groupByKey('type');
+        $collection->get('small')->toArray()->shouldReturn([
+            ['letter' => 'a', 'type' => 'small']
+        ]);
+        $collection->get('caps')->toArray()->shouldReturn([
+            ['letter' => 'A', 'type' => 'caps'],
+            ['letter' => 'B', 'type' => 'caps']
+        ]);
+
+        $collection = $this->groupByKey('types');
+        $collection->shouldThrow(new ItemNotFound)->during('get', ['caps']);
+    }
+
     function it_can_execute_callback_for_each_item(DOMXPath $a)
     {
         $a->query('asd')->shouldBeCalled();

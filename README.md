@@ -635,6 +635,28 @@ Collection::from([1, 2, 3, 4, 5])
 toArray(groupBy([1, 2, 3, 4, 5], function ($value) {return $value % 2;})); //[1 => [1, 3, 5], 0 => [2, 4]]
 ```
 
+#### groupByKey(mixed $key) : Collection
+Returns collection where items are separated into groups indexed by the value at given key.
+```php
+Collection::from([
+        ['letter' => 'A', 'type' => 'caps'],
+        ['letter' => 'a', 'type' => 'small'],
+        ['letter' => 'B', 'type' => 'caps'],
+    ])
+    ->groupByKey('type')
+    ->map('DusanKasan\Knapsack\toArray')
+    ->toArray();
+    // [ 'caps' => [['letter' => 'A', 'type' => 'caps'], ...], 'small' => [['letter' => 'a', 'type' => 'small']]]
+```
+
+```php
+$data = [
+    ['letter' => 'A', 'type' => 'caps'],
+    ['letter' => 'a', 'type' => 'small'],
+    ['letter' => 'B', 'type' => 'caps'],
+];
+toArray(map(groupByKey($data, 'type'), 'toArray')); //[ 'caps' => [['letter' => 'A', 'type' => 'caps'], ...], 'small' => [['letter' => 'a', 'type' => 'small']]]
+```
 
 #### has(mixed $key) : bool
 Checks for the existence of $key in this collection.

@@ -409,6 +409,34 @@ function groupBy($collection, callable $function)
     return Collection::from($result);
 }
 
+
+/**
+ * Returns a non-lazy collection of items grouped by the value at given key.
+ * Ignores non-collection items and items without the given keys
+ *
+ * @param array|Traversable $collection
+ * @param mixed $key
+ * @return Collection
+ */
+function groupByKey($collection, $key)
+{
+    $generatorFactory = function () use ($collection, $key) {
+
+        return groupBy(
+            filter(
+                $collection,
+                function ($item) use ($key) {
+                    return isCollection($item) && has($item, $key);
+                }
+            ),
+            function($value) use ($key) {
+                return get($value, $key);
+            }
+        );
+    };
+
+    return new Collection($generatorFactory);
+}
 /**
  * Executes $function for each item in $collection
  *

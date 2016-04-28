@@ -122,6 +122,17 @@ trait CollectionTrait
     }
 
     /**
+     * Returns collection where items are separated into groups indexed by the value at given key.
+     *
+     * @param $key
+     * @return Collection
+     */
+    public function groupByKey($key)
+    {
+        return groupByKey($this->getItems(), $key);
+    }
+
+    /**
      * Returns a lazy collection in which $function is executed for each item.
      *
      * @param callable $function ($value, $key)
