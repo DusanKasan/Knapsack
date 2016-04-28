@@ -245,7 +245,7 @@ class CollectionSpec extends ObjectBehavior
         ]);
 
         $collection = $this->groupByKey('types');
-        $this->shouldThrow(new ItemNotFound)->during('get', ['caps']);
+        $collection->shouldThrow(new ItemNotFound)->during('get', ['caps']);
     }
 
     function it_can_execute_callback_for_each_item(DOMXPath $a)
