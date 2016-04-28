@@ -255,7 +255,7 @@ class Collection implements Iterator
     /**
      * Returns collection which items are separated into groups indexed by the value at the given key.
      *
-     * @param mixed $key The key to be used for grouping
+     * @param mixed $key
      * @return Collection
      */
     public function groupByKey($key)

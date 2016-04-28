@@ -410,6 +410,7 @@ function groupBy($collection, callable $function)
     return Collection::from($result);
 }
 
+
 /**
  * Returns a non-lazy collection of items grouped by the value at given key.
  *
@@ -420,10 +421,9 @@ function groupBy($collection, callable $function)
 function groupByKey($collection, $groupKey)
 {
     $result = [];
-    $function = getCallable($groupKey);
 
     foreach ($collection as $key => $value) {
-        $newKey = $function($value, $key);
+        $newKey = isset($value[$groupKey]) ? $value[$groupKey] : null;
 
         $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
         $result[$newKey] = $group->append($value);
@@ -1200,21 +1200,4 @@ function dereferenceKeyValue($collection)
 function realize($collection)
 {
     return new Collection(toArray($collection));
-}
-
-/**
- * Returns a callable that can be used to get data from an input collection
- *
- * @param string|callable
- * @return callable
- */
-function getCallable($function)
-{
-    if(is_callable($function)) {
-        return $function;
-    }
-
-    return function($item, $key) use($function) {
-        return isset($item[$function]) ? $item[$function] : null;
-    };
 }
