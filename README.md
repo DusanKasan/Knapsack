@@ -5,7 +5,7 @@
 
 Knapsack is a collection library for PHP >= 5.6 that implements most of the sequence operations proposed by [Clojures sequences](http://clojure.org/sequences) plus some additional ones. All its features are available as functions (for functional programming) and as a [collection pipeline](http://martinfowler.com/articles/collection-pipeline/) object methods.
 
-The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/collection_functions.php). Collection is an iterator implementor that accepts Traversable object, array or even a callable that produces a Generator object as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
+The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `DusanKasan\Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/collection_functions.php). Collection is an iterator implementor that accepts Traversable object, array or even a callable that produces a Traversable object or array as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
  
 Most of the methods of Collection return lazy collections (such as filter/map/etc.). However, some return non-lazy collections (reverse) or simple values (count). For these operations all of the items in the collection must be iterated over (and realized). There are also operations (drop) that iterate over some items of the collection but do not affect/return them in the result. This behaviour as well as laziness is noted for each of the operations.  
 
@@ -16,15 +16,26 @@ Feel free to report any [issues](https://github.com/DusanKasan/Knapsack/issues) 
 ## Documentation
 Check out the documentation (which is prettified version of this readme) at http://dusankasan.github.io/Knapsack
 
+## Installation
+
+Require this package using Composer.
+
+
+```
+$ composer require dusank/knapsack
+```
+
 ## Usage
 
 ### Instantiate via static or dynamic constructor
 ```php
+use DusanKasan\Knapsack\Collection;
+
 $collection1 = new Collection([1, 2, 3]);
 $collection2 = Collection::from([1, 2, 3]); //preferred since you can call methods on its result directly.
 ```
 
-### Work with arrays, Traversable objects or callables that produce Generators
+### Work with arrays, Traversable objects or callables that produce Traversables
 ```php
 $collection1 = Collection::from([1, 2, 3]);
 $collection2 = Collection::from(new ArrayIterator([1, 2, 3]);
@@ -140,6 +151,17 @@ foreach ($result as $key => $item) {
 //1:4
 ```
 
+### Collection trait is provided
+If you wish to use all the Collection methods in your existing classes directly, no need to proxy their calls, you can just use the provided [CollectionTrait](https://github.com/DusanKasan/Knapsack/blob/master/src/CollectionTrait.php). This will work on any Traversable by default. In any other class you will have to override the getItems() method provided by the trait. Keep in mind that after calling filter or any other method that returns collection, the returned type will be actually Collection, not the original Traversable. 
+
+```php
+class AwesomeIterator extends ArrayIterator {
+    use CollectionTrait;
+}
+
+$iterator = new AwesomeIterator([1, 2, 3]);
+$iterator->size(); //3
+```
 ## Performance tests
 
 ### PHP 5.6
@@ -172,7 +194,7 @@ foreach ($result as $key => $item) {
 These are ways how to create the Collection class. There is one default constructor and few named (static) ones.
 
 #### new(array|Traversable|callback $input)
-The default constructor accepts array, Traversable or a callable that takes no arguments and produces Generator. The Generator can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
+The default constructor accepts array, Traversable or a callable that takes no arguments and produces Traversable. The use case for the callable argument is for example a Generator, which can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
 
 ```php
 $collection = new Collection([1, 2, 3]);
@@ -255,6 +277,17 @@ Collection::from([1, 3, 3, 2])
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
+#### combine($collection, $strict = false) : Collection
+Combines the values of this collection as keys, with values of $collection as values.  The resulting collection has length equal to the size of smaller collection. If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
+```php
+Collection::from(['a', 'b])
+    ->combine([1, 2)
+    ->toArray(); //['a' => 1, 'b' => 2]
+```
+```php    
+toArray(combine(['a', 'b], [1, 2])); //['a' => 1, 'b' => 2]
+```
+
 #### concat(...Traversable|array) : Collection
 Returns a lazy collection with items from this collection followed by items from the collection from first argument, then second and so on.
 ```php
@@ -300,6 +333,17 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php    
 toArray(values(take(cycle([1, 3, 3, 2]), 8))); //[1, 3, 3, 2, 1, 3, 3, 2]
+```
+
+#### difference(array|Traversable ...$collections) : Collection
+Returns a lazy collection of items that are in $this but are not in any of the other arguments. Note that the ...$collections are iterated non-lazily.
+```php
+Collection::from([1, 3, 3, 2])
+    ->difference([1, 3])
+    ->toArray() //[3 => 2]
+```
+```php    
+toArray(difference([1, 3, 3, 2], [1, 3])); //[3 => 2]
 ```
 
 #### distinct() : Collection
@@ -411,6 +455,17 @@ Collection::from([1, 3, 3, 2])
 every([1, 3, 3, 2], function ($v) {return $v < 5;}); //true
 ```
 
+#### except(array|Traversable $keys) : Collection
+Returns a lazy collection without the items associated to any of the keys from $keys.
+```php
+Collection::from(['a' => 1, 'b' => 2])
+    ->except(['a'])
+    ->toArray(); //['b' => 2]
+```
+```php
+toArray(except(['a' => 1, 'b' => 2], ['a'])); //['b' => 2]
+```
+
 #### filter(callable $function) : Collection
 Returns a lazy collection of items for which $function(value, key) returned true.
 ```php
@@ -497,6 +552,17 @@ Collection::from([1,[2, [3]]])
 toArray(values(flatten([1, [2, [3]]]))); //[1, 2, 3]
 ```
 
+#### flip() : Collection
+Returns a lazy collection where keys and values are flipped.
+```php
+Collection::from(['a' => 0, 'b' => 1])
+    ->flip()
+    ->toArray() //['a', 'b']
+```
+```php
+toArray(flip(['a' => 0, 'b' => 1])); //['a', 'b']
+```
+
 #### frequencies() : Collection
 Returns a collection where keys are distinct items from this collection and their values are number of occurrences of each value.
 ```php
@@ -567,6 +633,38 @@ Collection::from([1, 2, 3, 4, 5])
 ```
 ```php
 toArray(groupBy([1, 2, 3, 4, 5], function ($value) {return $value % 2;})); //[1 => [1, 3, 5], 0 => [2, 4]]
+```
+
+#### groupByKey(mixed $key) : Collection
+Returns collection where items are separated into groups indexed by the value at given key.
+```php
+Collection::from([
+        ['letter' => 'A', 'type' => 'caps'],
+        ['letter' => 'a', 'type' => 'small'],
+        ['letter' => 'B', 'type' => 'caps'],
+    ])
+    ->groupByKey('type')
+    ->map('DusanKasan\Knapsack\toArray')
+    ->toArray();
+    // [ 'caps' => [['letter' => 'A', 'type' => 'caps'], ...], 'small' => [['letter' => 'a', 'type' => 'small']]]
+```
+
+```php
+$data = [
+    ['letter' => 'A', 'type' => 'caps'],
+    ['letter' => 'a', 'type' => 'small'],
+    ['letter' => 'B', 'type' => 'caps'],
+];
+toArray(map(groupByKey($data, 'type'), 'toArray')); //[ 'caps' => [['letter' => 'A', 'type' => 'caps'], ...], 'small' => [['letter' => 'a', 'type' => 'small']]]
+```
+
+#### has(mixed $key) : bool
+Checks for the existence of $key in this collection.
+```php
+Collection::from(['a' => 1])->has('a'); //true
+```
+```php
+has(['a' => 1], 'a'); //true
 ```
 
 #### indexBy(callable $function) : Collection
@@ -682,6 +780,17 @@ Collection::from([1, 3, 3, 2])
 ```php
 toArray(mapcat([1, 3, 3, 2], function ($value) {return [[$value]];})); //[[1], [3], [3], [2]]
 ``` 
+
+#### only(array|Traversable $keys) : Collection
+Returns a lazy collection of items associated to any of the keys from $keys.
+```php
+Collection::from(['a' => 1, 'b' => 2])
+    ->only(['b'])
+    ->toArray(); //['b' => 2]
+```
+```php
+toArray(only(['a' => 1, 'b' => 2], ['b'])); //['b' => 2]
+```
 
 #### partition(int $numberOfItems, int $step = 0, Traversable|array $padding = []) : Collection
 Returns a lazy collection of collections of $numberOfItems items each, at $step step apart. If $step is not supplied, defaults to $numberOfItems, i.e. the partitionsdo not overlap. If a $padding collection is supplied, use its elements asnecessary to complete last partition up to $numberOfItems items. In case there are not enough padding elements, return a partition with less than $numberOfItems items.
@@ -836,6 +945,17 @@ Collection::from([1, 2, 3])
 ```php
 toArray(reverse([1, 2, 3])); //[2 => 3, 1 => 2, 0 => 1]
 ```
+
+
+#### second() : mixed
+Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item.
+```php
+Collection::from([1, 3, 3, 2])->second(); //3
+```
+```php
+second([1, 3]); //3
+```
+
 
 #### shuffle() : Collection
 Returns a collection of shuffled items from this collection
@@ -1044,6 +1164,3 @@ Returns the min value of all arguments.
 ```php
 sum(1, 5, 3) === 1; //true
 ```
-
-## Planned    
-- more scenarios (read CSV, etc)

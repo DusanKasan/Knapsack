@@ -8,8 +8,7 @@ use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use Traversable;
 
 /**
- * Converts $collection to array. If $collection is not array or Traversable, an array [$collection] will be returned.
- * If there are multiple items with the same key, only the last will be preserved.
+     * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
  *
  * @param array|Traversable $collection
  * @return array
@@ -413,25 +412,31 @@ function groupBy($collection, callable $function)
 
 /**
  * Returns a non-lazy collection of items grouped by the value at given key.
+ * Ignores non-collection items and items without the given keys
  *
  * @param array|Traversable $collection
- * @param mixed $groupKey
+ * @param mixed $key
  * @return Collection
  */
-function groupByKey($collection, $groupKey)
+function groupByKey($collection, $key)
 {
-    $result = [];
+    $generatorFactory = function () use ($collection, $key) {
 
-    foreach ($collection as $key => $value) {
-        $newKey = isset($value[$groupKey]) ? $value[$groupKey] : null;
+        return groupBy(
+            filter(
+                $collection,
+                function ($item) use ($key) {
+                    return isCollection($item) && has($item, $key);
+                }
+            ),
+            function($value) use ($key) {
+                return get($value, $key);
+            }
+        );
+    };
 
-        $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
-        $result[$newKey] = $group->append($value);
-    }
-
-    return Collection::from($result);
+    return new Collection($generatorFactory);
 }
-
 /**
  * Executes $function for each item in $collection
  *
@@ -983,10 +988,10 @@ function takeNth($collection, $step)
  * necessary to complete last partition up to $numberOfItems items. In case there are
  * not enough padding elements, return a partition with less than $numberOfItems items.
  *
- * @param $collection
+ * @param array|Traversable $collection
  * @param $numberOfItems
  * @param int $step
- * @param array $padding
+ * @param array|Traversable $padding
  * @return Collection
  */
 function partition($collection, $numberOfItems, $step = -1, $padding = [])
@@ -1066,7 +1071,8 @@ function getNth($collection, $position)
 }
 
 /**
- * Returns a lazy collection by picking a $key key from each sub-collection of $collection.
+ * Returns a lazy collection by picking a $key key from each sub-collection of $collection if possible. Ignores
+ * non-collection items.
  *
  * @param array|Traversable $collection
  * @param mixed $key
@@ -1075,10 +1081,16 @@ function getNth($collection, $position)
 function pluck($collection, $key)
 {
     $generatorFactory = function () use ($collection, $key) {
+
         return map(
-            $collection,
+            filter(
+                $collection,
+                function ($item) use ($key) {
+                    return isCollection($item) && has($item, $key);
+                }
+            ),
             function($value) use ($key) {
-                return $value[$key];
+                return get($value, $key);
             }
         );
     };
@@ -1200,4 +1212,148 @@ function dereferenceKeyValue($collection)
 function realize($collection)
 {
     return new Collection(toArray($collection));
+}
+
+/**
+ * Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item.
+ *
+ * @param array|Traversable $collection
+ * @return mixed
+ */
+function second($collection)
+{
+    return first(drop($collection, 1));
+}
+
+
+/**
+ * Combines $keys and $values into a lazy collection. The resulting collection has length equal to the size of smaller
+ * argument If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When
+ * strict, the collection is realized immediately.
+ *
+ * @param array|Traversable $keys
+ * @param array|Traversable $values
+ * @param bool $strict
+ * @return Collection
+ */
+function combine($keys, $values, $strict = false)
+{
+    $generatorFactory = function () use ($keys, $values, $strict) {
+        $keyCollection = new Collection($keys);
+        $valueCollection = new Collection($values);
+        $valueCollection->rewind();
+
+        foreach ($keyCollection as $key) {
+            if (!$valueCollection->valid()) {
+                break;
+            }
+
+            yield $key => $valueCollection->current();
+            $valueCollection->next();
+        }
+
+        if ($strict && ($keyCollection->valid() || $valueCollection->valid())) {
+            throw new ItemNotFound;
+        }
+    };
+
+    $collection = new Collection($generatorFactory);
+
+    if ($strict) {
+        $collection = realize($collection);
+    }
+
+    return $collection;
+}
+
+/**
+ * Returns a lazy collection without the items associated to any of the keys from $keys.
+ *
+ * @param array|Traversable $collection
+ * @param array|Traversable $keys
+ * @return Collection
+ */
+function except($collection, $keys)
+{
+    $keys = toArray(values($keys));
+
+    return reject(
+        $collection,
+        function ($value, $key) use ($keys) {
+            return in_array($key, $keys);
+        }
+    );
+}
+
+/**
+ * Returns a lazy collection of items associated to any of the keys from $keys.
+ *
+ * @param array|Traversable $collection
+ * @param array|Traversable $keys
+ * @return Collection
+ */
+function only($collection, $keys)
+{
+    $keys = toArray(values($keys));
+
+    return filter(
+        $collection,
+        function ($value, $key) use ($keys) {
+            return in_array($key, $keys);
+        }
+    );
+}
+
+/**
+ * Returns a lazy collection of items that are in $collection but are not in any of the other arguments. Note that the
+ * ...$collections are iterated non-lazily.
+ *
+ * @param array|Traversable $collection
+ * @param array|Traversable ...$collections
+ * @return Collection
+ */
+function difference($collection, ...$collections)
+{
+    $valuesToCompare = toArray(values(concat(...$collections)));
+    $generatorFactory = function () use ($collection, $valuesToCompare) {
+        foreach ($collection as $key => $value) {
+            if (!in_array($value, $valuesToCompare)) {
+                yield $key => $value;
+            }
+        }
+    };
+
+    return new Collection($generatorFactory);
+}
+
+/**
+ * Returns a lazy collection where keys and values are flipped.
+ *
+ * @param array|Traversable $collection
+ * @return Collection
+ */
+function flip($collection)
+{
+    $generatorFactory = function () use ($collection) {
+        foreach ($collection as $key => $value) {
+            yield $value => $key;
+        }
+    };
+
+    return new Collection($generatorFactory);
+}
+
+/**
+ * @param array|Traversable $collection
+ * @param mixed $key
+ * @return bool
+ */
+function has($collection, $key)
+{
+    try {
+        get($collection, $key);
+        return true;
+    } catch (ItemNotFound $e) {
+        return false;
+    }
 }
