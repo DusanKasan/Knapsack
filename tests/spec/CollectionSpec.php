@@ -14,6 +14,7 @@ use Iterator;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
 use function DusanKasan\Knapsack\reverse;
+use Serializable;
 
 /**
  * @mixin Collection
@@ -930,11 +931,11 @@ class CollectionSpec extends ObjectBehavior
         $this->only(['a', 'b', 'x'])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
     }
 
-    function it_can_serialize_and_unserialize(Collection $c)
+    function it_can_serialize_and_unserialize()
     {
         $original = Collection::from([1, 2, 3])->take(2);
         $this->beConstructedWith([1, 2, 3, 4]);
-        $this->shouldHaveType(\Serializable::class);
+        $this->shouldHaveType(Serializable::class);
         $this->unserialize($original->serialize());
         $this->toArray()->shouldReturn([1, 2]);
     }
