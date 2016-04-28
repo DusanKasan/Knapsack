@@ -9,7 +9,7 @@ use IteratorAggregate;
 use RecursiveArrayIterator;
 use Traversable;
 
-class Collection implements Iterator
+class Collection implements Iterator, \Serializable
 {
     use CollectionTrait;
 
@@ -136,5 +136,30 @@ class Collection implements Iterator
         }
 
         $this->input->rewind();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function serialize()
+    {
+        return serialize(
+            toArray(
+                map(
+                    $this->input,
+                    function ($value, $key) {
+                        return [$key, $value];
+                    }
+                )
+            )
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($serialized)
+    {
+        $this->input = dereferenceKeyValue(unserialize($serialized));
     }
 }

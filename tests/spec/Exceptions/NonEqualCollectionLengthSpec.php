@@ -2,15 +2,14 @@
 
 namespace spec\DusanKasan\Knapsack\Exceptions;
 
-use DusanKasan\Knapsack\Exceptions\ItemNotFound;
+use DusanKasan\Knapsack\Exceptions\RuntimeException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
-use RuntimeException;
 
 /**
- * @mixin ItemNotFound
+ * @mixin NonEqualCollectionLengthSpec
  */
-class ItemNotFoundSpec extends ObjectBehavior
+class NonEqualCollectionLengthSpec extends ObjectBehavior
 {
     function it_is_initializable()
     {

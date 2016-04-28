@@ -8,6 +8,7 @@ use DusanKasan\Knapsack\Collection;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
+use DusanKasan\Knapsack\Exceptions\NonEqualCollectionLength;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
 use Iterator;
 use IteratorAggregate;
@@ -881,7 +882,7 @@ class CollectionSpec extends ObjectBehavior
         $this->combine([1, 2])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
         $this->combine([1])->toArray()->shouldReturn(['a' => 1]);
         $this->combine([1, 2, 3])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
-        $this->shouldThrow(ItemNotFound::class)->during('combine', [[1, 2, 3], true]);
+        $this->shouldThrow(NonEqualCollectionLength::class)->during('combine', [[1, 2, 3], true]);
     }
 
     function it_can_get_second_item()
@@ -927,5 +928,14 @@ class CollectionSpec extends ObjectBehavior
         $this->beConstructedWith(['a' => 1, 'b' => 2, 'c' => 3]);
         $this->only(['a', 'b'])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
         $this->only(['a', 'b', 'x'])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
+    }
+
+    function it_can_serialize_and_unserialize(Collection $c)
+    {
+        $original = Collection::from([1, 2, 3])->take(2);
+        $this->beConstructedWith([1, 2, 3, 4]);
+        $this->shouldHaveType(\Serializable::class);
+        $this->unserialize($original->serialize());
+        $this->toArray()->shouldReturn([1, 2]);
     }
 }

@@ -5,6 +5,7 @@ namespace DusanKasan\Knapsack;
 use ArrayIterator;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
+use DusanKasan\Knapsack\Exceptions\NonEqualCollectionLength;
 use Traversable;
 
 /**
@@ -411,8 +412,8 @@ function groupBy($collection, callable $function)
 
 
 /**
- * Returns a non-lazy collection of items grouped by the value at given key.
- * Ignores non-collection items and items without the given keys
+ * Returns a non-lazy collection of items grouped by the value at given key. Ignores non-collection items and items
+ * without the given keys
  *
  * @param array|Traversable $collection
  * @param mixed $key
@@ -1211,7 +1212,16 @@ function dereferenceKeyValue($collection)
  */
 function realize($collection)
 {
-    return new Collection(toArray($collection));
+    return dereferenceKeyValue(
+        toArray(
+            map(
+                $collection,
+                function ($value, $key) {
+                    return [$key, $value];
+                }
+            )
+        )
+    );
 }
 
 /**
@@ -1253,7 +1263,7 @@ function combine($keys, $values, $strict = false)
         }
 
         if ($strict && ($keyCollection->valid() || $valueCollection->valid())) {
-            throw new ItemNotFound;
+            throw new NonEqualCollectionLength;
         }
     };
 
