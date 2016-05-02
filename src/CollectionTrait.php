@@ -2,6 +2,8 @@
 
 namespace DusanKasan\Knapsack;
 
+use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
+
 trait CollectionTrait
 {
     /**
@@ -700,6 +702,50 @@ trait CollectionTrait
     public function has($key)
     {
         return has($this->getItems(), $key);
+    }
+
+
+    /**
+     * Returns a lazy collection of non-lazy collections of items from nth position from this collection and each
+     * passed collection. Stops when any of the collections don't have an item at the nth position.
+     *
+     * @param array|\Traversable[] ...$collections
+     * @return Collection
+     */
+    public function zip(...$collections)
+    {
+        array_unshift($collections, $this->getItems());
+        return zip(...$collections);
+    }
+
+    /**
+     * Uses a $transformer callable that takes a Collection and returns Collection on itself.
+     *
+     * @param callable $transformer Collection => Collection
+     * @return mixed
+     * @throws InvalidReturnValue
+     */
+    public function transform(callable $transformer)
+    {
+        $transformed = $transformer($this->getItems());
+
+        if (!($transformed instanceof Collection)) {
+            throw new InvalidReturnValue;
+        }
+
+        return $transformed;
+    }
+
+    /**
+     * Extracts data from collection items by dot separated key path. Supports the * wildcard.  If a key contains \ or
+     * it must be escaped using \ character.
+     *
+     * @param mixed $keyPath
+     * @return Collection
+     */
+    public function extract($keyPath)
+    {
+        return \DusanKasan\Knapsack\extract($this->getItems(), $keyPath);
     }
 
     /**

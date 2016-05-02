@@ -2,11 +2,9 @@
 
 namespace DusanKasan\Knapsack;
 
-use ArrayIterator;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
-use IteratorAggregate;
 use Traversable;
 
 /**
