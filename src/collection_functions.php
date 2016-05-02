@@ -3,9 +3,10 @@
 namespace DusanKasan\Knapsack;
 
 use ArrayIterator;
+use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
-use DusanKasan\Knapsack\Exceptions\NonEqualCollectionLength;
+use IteratorAggregate;
 use Traversable;
 
 /**
@@ -746,9 +747,9 @@ function interleave(...$collections)
     $generatorFactory = function () use ($collections) {
         $normalizedCollection = array_map(
             function ($collection) {
-                $c = (is_array($collection)) ? new ArrayIterator($collection) : $collection;
-                $c->rewind();
-                return $c;
+                $traversable = new Collection($collection);
+                $traversable->rewind();
+                return $traversable;
             },
             $collections
         );
@@ -1072,35 +1073,6 @@ function getNth($collection, $position)
 }
 
 /**
- * Returns a lazy collection by picking a $key key from each sub-collection of $collection if possible. Ignores
- * non-collection items.
- *
- * @param array|Traversable $collection
- * @param mixed $key
- * @return Collection
- */
-function pluck($collection, $key)
-{
-    $generatorFactory = function () use ($collection, $key) {
-
-        return map(
-            filter(
-                $collection,
-                function ($item) use ($key) {
-                    return isCollection($item) && has($item, $key);
-                }
-            ),
-            function($value) use ($key) {
-                return get($value, $key);
-            }
-        );
-    };
-
-    return new Collection($generatorFactory);
-
-}
-
-/**
  * Returns a lazy collection of $value repeated $times times. If $times is not provided the collection is infinite.
  *
  * @param mixed $value
@@ -1150,7 +1122,6 @@ function range($start = 0, $end = null, $step = 1)
     return new Collection($generatorFactory);
 }
 
-//helpers
 /**
  * Returns true if $input is array or Traversable object.
  *
@@ -1238,17 +1209,15 @@ function second($collection)
 
 /**
  * Combines $keys and $values into a lazy collection. The resulting collection has length equal to the size of smaller
- * argument If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When
- * strict, the collection is realized immediately.
+ * argument.
  *
  * @param array|Traversable $keys
  * @param array|Traversable $values
- * @param bool $strict
  * @return Collection
  */
-function combine($keys, $values, $strict = false)
+function combine($keys, $values)
 {
-    $generatorFactory = function () use ($keys, $values, $strict) {
+    $generatorFactory = function () use ($keys, $values) {
         $keyCollection = new Collection($keys);
         $valueCollection = new Collection($values);
         $valueCollection->rewind();
@@ -1261,19 +1230,9 @@ function combine($keys, $values, $strict = false)
             yield $key => $valueCollection->current();
             $valueCollection->next();
         }
-
-        if ($strict && ($keyCollection->valid() || $valueCollection->valid())) {
-            throw new NonEqualCollectionLength;
-        }
     };
 
-    $collection = new Collection($generatorFactory);
-
-    if ($strict) {
-        $collection = realize($collection);
-    }
-
-    return $collection;
+    return new Collection($generatorFactory);
 }
 
 /**
@@ -1354,6 +1313,8 @@ function flip($collection)
 }
 
 /**
+ * Checks for the existence of an item with key $key in $collection.
+ *
  * @param array|Traversable $collection
  * @param mixed $key
  * @return bool
@@ -1366,4 +1327,89 @@ function has($collection, $key)
     } catch (ItemNotFound $e) {
         return false;
     }
+}
+
+/**
+ * Returns a lazy collection of non-lazy collections of items from nth position from each passed collection. Stops when
+ * any of the collections don't have an item at the nth position.
+ *
+ * @param array|Traversable[] ...$collections
+ * @return Collection
+ */
+function zip(...$collections)
+{
+    $normalizedCollections = [];
+    foreach ($collections as $collection) {
+        $traversable = new Collection($collection);
+        $traversable->rewind();
+        $normalizedCollections[] = $traversable;
+    }
+
+    $generatorFactory = function () use ($normalizedCollections) {
+        while (true) {
+            $isMissingItems = false;
+            $zippedItem = new Collection([]);
+
+            foreach ($normalizedCollections as $collection) {
+                if (!$collection->valid()) {
+                    $isMissingItems = true;
+                    break;
+                }
+
+                $zippedItem = append($zippedItem, $collection->current(), $collection->key());
+                $collection->next();
+            }
+
+            if (!$isMissingItems) {
+                yield $zippedItem;
+            } else {
+                break;
+            }
+        }
+    };
+
+    return new Collection($generatorFactory);
+}
+
+/**
+ * Returns a lazy collection of data extracted from $collection items by dot separated key path. Supports the *
+ * wildcard. If a key contains \ or * it must be escaped using \ character.
+ *
+ * @param array|Traversable $collection
+ * @param mixed $keyPath
+ * @return Collection
+ */
+function extract($collection, $keyPath)
+{
+    $error = !preg_match_all('/(.*[^\\\])(?:\.|$)/U', $keyPath, $matches);
+
+    if ($error || count($matches) != 2) {
+        throw new InvalidArgument;
+    }
+
+    $pathParts = $matches[1];
+
+    $extractor = function ($coll) use ($pathParts) {
+        foreach ($pathParts as $pathPart) {
+            $coll = flatten(filter($coll, '\DusanKasan\Knapsack\isCollection'), 1);
+
+            if ($pathPart != '*') {
+                $pathPart = str_replace(['\.', '\*'], ['.', '*'], $pathPart);
+                $coll = values(only($coll, [$pathPart]));
+            }
+        }
+
+        return $coll;
+    };
+
+    $generatorFactory = function () use ($collection, $extractor) {
+        foreach ($collection as $item) {
+            foreach ($extractor([$item]) as $extracted) {
+                yield $extracted;
+            }
+        }
+    };
+
+
+    return new Collection($generatorFactory);
 }

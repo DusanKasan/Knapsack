@@ -6,9 +6,9 @@ use ArrayIterator;
 use DOMXPath;
 use DusanKasan\Knapsack\Collection;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
+use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
-use DusanKasan\Knapsack\Exceptions\NonEqualCollectionLength;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
 use Iterator;
 use IteratorAggregate;
@@ -777,19 +777,6 @@ class CollectionSpec extends ObjectBehavior
         $this->getNth(3)->shouldReturn(2);
     }
 
-    function it_can_pluck()
-    {
-        $this->beConstructedWith([['a' => 1], ['a' => 2,  'b' => 3]]);
-        $this->pluck('a')->values()->toArray()->shouldReturn([1, 2]);
-    }
-
-    function it_can_pluck_from_heterogenous_collection()
-    {
-        $this->beConstructedWith([['a' => 1], ['b' => 2], 1]);
-        $this->pluck('a')->values()->toArray()->shouldReturn([1]);
-
-    }
-
     function it_can_create_infinite_collection_of_repeated_values()
     {
         $this->beConstructedThrough('repeat', [1]);
@@ -883,7 +870,6 @@ class CollectionSpec extends ObjectBehavior
         $this->combine([1, 2])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
         $this->combine([1])->toArray()->shouldReturn(['a' => 1]);
         $this->combine([1, 2, 3])->toArray()->shouldReturn(['a' => 1, 'b' => 2]);
-        $this->shouldThrow(NonEqualCollectionLength::class)->during('combine', [[1, 2, 3], true]);
     }
 
     function it_can_get_second_item()
@@ -938,5 +924,82 @@ class CollectionSpec extends ObjectBehavior
         $this->shouldHaveType(Serializable::class);
         $this->unserialize($original->serialize());
         $this->toArray()->shouldReturn([1, 2]);
+    }
+
+    function it_can_zip()
+    {
+        $this->beConstructedWith([1, 2, 3]);
+        $this->zip(['a' => 1, 'b' => 2, 'c' => 4])
+            ->map('\DusanKasan\Knapsack\toArray')
+            ->toArray()
+            ->shouldReturn([[1, 'a' => 1], [1 => 2, 'b' => 2], [2 => 3, 'c' => 4]]);
+
+        $this->zip([4, 5, 6], [7, 8, 9])
+            ->map('\DusanKasan\Knapsack\values')
+            ->map('\DusanKasan\Knapsack\toArray')
+            ->toArray()
+            ->shouldReturn([[1, 4, 7], [2, 5, 8], [3, 6, 9]]);
+
+        $this->zip([4, 5])
+            ->map('\DusanKasan\Knapsack\values')
+            ->map('\DusanKasan\Knapsack\toArray')
+            ->toArray()
+            ->shouldReturn([[1, 4], [2, 5]]);
+    }
+
+    function it_can_use_callable_as_transformer()
+    {
+        $this->beConstructedWith([1, 2, 3]);
+        $this
+            ->transform(function (Collection $collection) {
+                return $collection->map('\DusanKasan\Knapsack\increment');
+            })
+            ->toArray()
+            ->shouldReturn([2, 3, 4]);
+
+        $this
+            ->shouldThrow(InvalidReturnValue::class)
+            ->during(
+                'transform',
+                [
+                    function (Collection $collection) {
+                        return $collection->first();
+                    }
+                ]
+            );
+    }
+
+    function it_can_extract_data_from_nested_collections()
+    {
+        $this->beConstructedWith([
+            [
+                'a' => [
+                    'b' => 1
+                ]
+            ],
+            [
+                'a' => [
+                    'b' => 2
+                ]
+            ],
+            [
+                '*' => [
+                    'b' => 3
+                ]
+            ],
+            [
+                '.' => [
+                    'b' => 4
+                ],
+                'c' => [
+                    'b' => 5
+                ]
+            ]
+        ]);
+
+        $this->extract('a.b')->toArray()->shouldReturn([1, 2]);
+        $this->extract('*.b')->toArray()->shouldReturn([1, 2, 3, 4, 5]);
+        $this->extract('\*.b')->toArray()->shouldReturn([3]);
+        $this->extract('\..b')->toArray()->shouldReturn([4]);
     }
 }

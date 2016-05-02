@@ -22,7 +22,7 @@ Require this package using Composer.
 
 
 ```
-$ composer require dusank/knapsack
+composer require dusank/knapsack
 ```
 
 ## Usage
@@ -277,7 +277,7 @@ Collection::from([1, 3, 3, 2])
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
-#### combine($collection, $strict = false) : Collection
+#### combine(array|Traversable $collection, bool $strict = false) : Collection
 Combines the values of this collection as keys, with values of $collection as values.  The resulting collection has length equal to the size of smaller collection. If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
 ```php
 Collection::from(['a', 'b])
@@ -288,7 +288,7 @@ Collection::from(['a', 'b])
 toArray(combine(['a', 'b], [1, 2])); //['a' => 1, 'b' => 2]
 ```
 
-#### concat(...Traversable|array) : Collection
+#### concat(...array|Traversable) : Collection
 Returns a lazy collection with items from this collection followed by items from the collection from first argument, then second and so on.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -464,6 +464,17 @@ Collection::from(['a' => 1, 'b' => 2])
 ```
 ```php
 toArray(except(['a' => 1, 'b' => 2], ['a'])); //['b' => 2]
+```
+
+#### extract(mixed $keyPath) : Collection
+Returns a lazy collection of data extracted from $collection items by dot separated key path. Supports the * wildcard. If a key contains \ or * it must be escaped using \ character.
+```php
+$collection = Collection::from([['a' => ['b' => 1]], ['a' => ['b' => 2]], ['c' => ['b' => 3]]])
+$collection->extract('a.b')->toArray(); //[1, 2]
+$collection->extract('*.b')->toArray(); //[1, 2, 3]
+```
+```php
+toArray(extract([['a' => ['b' => 1]], ['a' => ['b' => 2]]], 'a.b')); //[1, 2]
 ```
 
 #### filter(callable $function) : Collection
@@ -680,7 +691,7 @@ Collection::from([1, 3, 3, 2])
 toArray(indexBy([1, 3, 3, 2], '\DusanKasan\Knapsack\identity')); //[1 => 1, 3 => 3, 2 => 2]
 ```
 
-#### interleave(...Traversable|array $collection) : Collection
+#### interleave(...array|Traversable $collection) : Collection
 Returns a lazy collection of first item from first collection, first item from second, second from first and so on. Works with any number of arguments.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -792,7 +803,7 @@ Collection::from(['a' => 1, 'b' => 2])
 toArray(only(['a' => 1, 'b' => 2], ['b'])); //['b' => 2]
 ```
 
-#### partition(int $numberOfItems, int $step = 0, Traversable|array $padding = []) : Collection
+#### partition(int $numberOfItems, int $step = 0, array|Traversable $padding = []) : Collection
 Returns a lazy collection of collections of $numberOfItems items each, at $step step apart. If $step is not supplied, defaults to $numberOfItems, i.e. the partitionsdo not overlap. If a $padding collection is supplied, use its elements asnecessary to complete last partition up to $numberOfItems items. In case there are not enough padding elements, return a partition with less than $numberOfItems items.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -824,17 +835,6 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php
 toArray(partitionBy([1, 3, 3, 2], function ($value) {return $value % 3 == 0;})); //[[1], [1 => 3, 2 => 3], [3 => 2]]
-```
-
-#### pluck(mixed $key) : Collection
-Returns a lazy collection by picking a $key key from each sub-collection of $collection.
-```php
-Collection::from([['a' => 1], ['a' => 2,  'b' => 3]])
-    ->pluck('a')
-    ->toArray(); //[1, 2]
-```
-```php
-toArray(pluck([['a' => 1], ['a' => 2,  'b' => 3]], 'a')); //[1, 2]
 ```
 
 #### prepend(mixed $item, mixed $key = null) : Collection
@@ -924,7 +924,7 @@ Collection::from([1, 3, 3, 2])
 toArray(reject([1, 3, 3, 2], unction ($value) {return $value > 2;})); //[1, 1 => 3, 3 => 2]
 ```
 
-#### replace(Traversable|array $replacementMap) : Collection
+#### replace(array|Traversable $replacementMap) : Collection
 Returns a lazy collection with items from this collection equal to any key in $replacementMap replaced for their value.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -1104,6 +1104,23 @@ Collection::from([1, 3, 3, 2])
 toArray(takeWhile([1, 3, 3, 2], function ($value) {return $value < 3;})); //[1]
 ```
 
+#### through(callable $transformer) : Collection
+Uses a $transformer callable on itself that takes a Collection and returns Collection. This allows for creating a separate and reusable algorithms.
+```php
+$transformer = function (Collection $collection) {
+    return $collection
+        ->filter(function ($item) {
+            return $item > 1;
+        })
+        ->map('\DusanKasan\Knapsack\increment');
+};
+
+Collection::from([1, 3, 3, 2])
+    ->transform($transformer)
+    ->toArray(); //[4, 4, 3]
+```
+
+
 #### toArray() : array
 Converts the collection to array recursively. Obviously this is not lazy since all the items must be realized. Calls iterator_to_array internaly.
 ```php
@@ -1111,6 +1128,23 @@ Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 ```
 ```php
 toArray([1, 3, 3, 2]); //[1, 3, 3, 2]
+```
+
+#### zip(array|Traversable[] ...$collections) : Collection
+Returns a lazy collection of non-lazy collections of items from nth position from this collection and each passed collection. Stops when any of the collections don't have an item at the nth position.
+```php
+Collection::from([1, 2, 3])
+    ->zip(['a' => 1, 'b' => 2, 'c' => 4])
+    ->map('\DusanKasan\Knapsack\toArray')
+    ->toArray(); //[[1, 'a' => 1], [1 => 2, 'b' => 2], [2 => 3, 'c' => 4]]
+
+Collection::from([1, 2, 3])
+    ->zip(['a' => 1, 'b' => 2])
+    ->map('\DusanKasan\Knapsack\toArray')
+    ->toArray(); //[[1, 'a' => 1], [1 => 2, 'b' => 2]]
+```
+```php
+toArray(map(zip([1, 2, 3], ['a' => 1, 'b' => 2, 'c' => 4]), '\DusanKasan\Knapsack\toArray')); //[[1, 'a' => 1], [1 => 2, 'b' => 2], [2 => 3, 'c' => 4]]
 ```
 
 ## Utility functions

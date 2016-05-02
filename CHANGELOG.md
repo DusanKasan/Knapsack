@@ -53,4 +53,11 @@
 - GroupByKey function introduced
 - Serialization support added
 - Changelog added
-- **Breaking change: combine now throws NonEqualCollectionLength.**
+- **Breaking change: combine now throws NonEqualCollectionLength**
+
+##5.0.0
+- Zip function added
+- Extract function added
+- Transform function added
+- **Breaking change: combine now stops when it runs out of keys or values**
+- **Breaking change: pluck removed (replaced by extract)**

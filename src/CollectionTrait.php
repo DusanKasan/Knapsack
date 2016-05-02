@@ -614,17 +614,6 @@ trait CollectionTrait
     }
 
     /**
-     * Returns a lazy collection by picking a $key key from each sub-collection of $this.
-     *
-     * @param mixed $key
-     * @return Collection
-     */
-    public function pluck($key)
-    {
-        return pluck($this->getItems(), $key);
-    }
-
-    /**
      * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
      *
      * @return Collection
@@ -646,17 +635,15 @@ trait CollectionTrait
 
     /**
      * Combines the values of this collection as keys, with values of $collection as values.  The resulting collection
-     * has length equal to the size of smaller collection. If $strict is true, the size of both collections must be
-     * equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
+     * has length equal to the size of smaller collection.
      *
      * @param array|\Traversable $collection
-     * @param bool $strict
      * @return Collection
      * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
-    public function combine($collection, $strict = false)
+    public function combine($collection)
     {
-        return combine($this->getItems(), $collection, $strict);
+        return combine($this->getItems(), $collection);
     }
 
     /**
@@ -705,7 +692,7 @@ trait CollectionTrait
     }
 
     /**
-     * Checks for the existence of $key in this collection.
+     * Checks for the existence of an item with$key in this collection.
      *
      * @param mixed $key
      * @return bool
