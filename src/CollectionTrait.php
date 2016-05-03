@@ -191,23 +191,6 @@ trait CollectionTrait
     }
 
     /**
-     * Returns nth item in the collection starting from 0. If the size of this collection is smaller than $position,
-     * throw ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable an
-     * instance of Collection will be returned.
-     *
-     * @param int $position
-     * @param bool $convertToCollection
-     * @return Collection|mixed
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
-     */
-    public function getNth($position, $convertToCollection = false)
-    {
-        $result = getNth($this->getItems(), $position);
-
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
-    }
-
-    /**
      * Returns first value matched by $function. If no value matches, return $default. If $convertToCollection is true
      * and the return value is a collection (array|Traversable an instance of Collection will be returned.
      *
@@ -677,9 +660,9 @@ trait CollectionTrait
      * @param array|\Traversable ...$collections
      * @return Collection
      */
-    public function difference(...$collections)
+    public function diff(...$collections)
     {
-        return difference($this->getItems(), ...$collections);
+        return diff($this->getItems(), ...$collections);
     }
 
 
@@ -727,7 +710,9 @@ trait CollectionTrait
      */
     public function transform(callable $transformer)
     {
-        $transformed = $transformer($this->getItems());
+        $items = $this->getItems();
+
+        $transformed = $transformer($items instanceof Collection ? $items : new Collection($items));
 
         if (!($transformed instanceof Collection)) {
             throw new InvalidReturnValue;
@@ -746,6 +731,18 @@ trait CollectionTrait
     public function extract($keyPath)
     {
         return \DusanKasan\Knapsack\extract($this->getItems(), $keyPath);
+    }
+
+    /**
+     * Returns a lazy collection of items that are in $collection and all the other arguments, indexed by the keys from
+     * the first collection. Note that the ...$collections are iterated non-lazily.
+     *
+     * @param array|\Traversable[] ...$collections
+     * @return Collection
+     */
+    public function intersect(...$collections)
+    {
+        return intersect($this->getItems(), ...$collections);
     }
 
     /**

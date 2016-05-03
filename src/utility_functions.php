@@ -84,3 +84,21 @@ function min(...$values)
 {
     return \min($values);
 }
+
+/**
+ * @param int|float|double[] ...$values
+ * @return float
+ */
+function average(...$values)
+{
+    return sum($values) / count($values);
+}
+
+/**
+ * @param array ...$values
+ * @return mixed
+ */
+function concatenate(...$values)
+{
+    return implode('', $values);
+}

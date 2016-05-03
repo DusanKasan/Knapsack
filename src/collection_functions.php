@@ -208,7 +208,7 @@ function frequencies($collection)
  */
 function first($collection)
 {
-    return getNth($collection, 0);
+    return get(values($collection), 0);
 }
 
 /**
@@ -1059,18 +1059,6 @@ function partitionBy($collection, callable $function)
 }
 
 /**
- * Returns nth ($position) item from $collection. If $position is greater than $collection size, throws ItemNotFound.
- *
- * @param array|Traversable $collection
- * @param int $position
- * @return mixed
- */
-function getNth($collection, $position)
-{
-    return get(values($collection), $position);
-}
-
-/**
  * Returns a lazy collection of $value repeated $times times. If $times is not provided the collection is infinite.
  *
  * @param mixed $value
@@ -1201,7 +1189,7 @@ function realize($collection)
  */
 function second($collection)
 {
-    return first(drop($collection, 1));
+    return get(values($collection), 1);
 }
 
 
@@ -1279,12 +1267,34 @@ function only($collection, $keys)
  * @param array|Traversable ...$collections
  * @return Collection
  */
-function difference($collection, ...$collections)
+function diff($collection, ...$collections)
 {
     $valuesToCompare = toArray(values(concat(...$collections)));
     $generatorFactory = function () use ($collection, $valuesToCompare) {
         foreach ($collection as $key => $value) {
             if (!in_array($value, $valuesToCompare)) {
+                yield $key => $value;
+            }
+        }
+    };
+
+    return new Collection($generatorFactory);
+}
+
+/**
+ * Returns a lazy collection of items that are in $collection and all the other arguments, indexed by the keys from the
+ * first collection. Note that the ...$collections are iterated non-lazily.
+ *
+ * @param array|Traversable $collection
+ * @param array|Traversable ...$collections
+ * @return Collection
+ */
+function intersect($collection, ...$collections)
+{
+    $valuesToCompare = toArray(values(concat(...$collections)));
+    $generatorFactory = function () use ($collection, $valuesToCompare) {
+        foreach ($collection as $key => $value) {
+            if (in_array($value, $valuesToCompare)) {
                 yield $key => $value;
             }
         }

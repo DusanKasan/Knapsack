@@ -194,7 +194,7 @@ $iterator->size(); //3
 These are ways how to create the Collection class. There is one default constructor and few named (static) ones.
 
 #### new(array|Traversable|callback $input)
-The default constructor accepts array, Traversable or a callable that takes no arguments and produces Traversable. The use case for the callable argument is for example a Generator, which can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
+The default constructor accepts array, Traversable or a callable that takes no arguments and produces Traversable or array. The use case for the callable argument is for example a Generator, which can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
 
 ```php
 $collection = new Collection([1, 2, 3]);
@@ -335,15 +335,15 @@ Collection::from([1, 3, 3, 2])
 toArray(values(take(cycle([1, 3, 3, 2]), 8))); //[1, 3, 3, 2, 1, 3, 3, 2]
 ```
 
-#### difference(array|Traversable ...$collections) : Collection
+#### diff(array|Traversable ...$collections) : Collection
 Returns a lazy collection of items that are in $this but are not in any of the other arguments. Note that the ...$collections are iterated non-lazily.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->difference([1, 3])
+    ->diff([1, 3])
     ->toArray() //[3 => 2]
 ```
 ```php    
-toArray(difference([1, 3, 3, 2], [1, 3])); //[3 => 2]
+toArray(diff([1, 3, 3, 2], [1, 3])); //[3 => 2]
 ```
 
 #### distinct() : Collection
@@ -600,21 +600,6 @@ Collection::from([1, 3, 3, 2])->get(5); //throws ItemNotFound
 get([1, 3, 3, 2], 2); //3
 ```
 
-#### getNth(int $position, bool $convertToCollection = false) : mixed|Collection
-Returns value at $position position in collection. If that position does not exist, throws `ItemNotFound`. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
-```php
-Collection::from([1, 3, 3, 2])->getNth(0); //1
-```
-```php
-Collection::from([1, [1, 2]])->getNth(1, true)->toArray(); //[1, 2]
-```
-```php
-Collection::from([1, 3, 3, 2])->getNth(5); //throws ItemNotFound
-```
-```php
-getNth([1, 3, 3, 2], 2); //3
-```
-
 #### getOrDefault(mixed $key, mixed $default = null, bool $convertToCollection = false) : mixed|Collection
 Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $default. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
 ```php
@@ -713,6 +698,17 @@ Collection::from([1, 2, 3])
 ```
 ```php
 toArray(interpose([1, 3, 3, 2], 'a')); //[1, 'a', 2, 'a', 3] 
+```
+
+#### intersect(array|Traversable) : Collection
+Returns a lazy collection of items that are in $collection and all the other arguments, indexed by the keys from the first collection. Note that the ...$collections are iterated non-lazily.
+```php
+Collection::from([1, 2, 3])
+    ->intersect([1, 3])
+    ->toArray(); //[1, 2 => 3]
+```
+```php
+toArray(intersect([1, 2, 3],[1, 3])); //[1, 2 => 3] 
 ```
 
 #### isEmpty() : bool
@@ -1104,7 +1100,7 @@ Collection::from([1, 3, 3, 2])
 toArray(takeWhile([1, 3, 3, 2], function ($value) {return $value < 3;})); //[1]
 ```
 
-#### through(callable $transformer) : Collection
+#### transform(callable $transformer) : Collection
 Uses a $transformer callable on itself that takes a Collection and returns Collection. This allows for creating a separate and reusable algorithms.
 ```php
 $transformer = function (Collection $collection) {
@@ -1186,15 +1182,26 @@ sum(1, 2, 3) === 6; //true
 ```
 
 #### max(... int $values)
-Returns the max value of all arguments.
+Returns the maximal value of all arguments.
 
 ```php
-sum(1, 5, 3) === 5; //true
+maximum(1, 5, 3) === 5; //true
 ```
 
 #### min(... int $values)
-Returns the min value of all arguments.
+Returns the minimal value of all arguments.
 
 ```php
-sum(1, 5, 3) === 1; //true
+minimum(1, 5, 3) === 1; //true
 ```
+#### average(... int $values)
+Returns the average value of all arguments.
+
+```php
+average(1, 2, 3) === 2.0; //true
+```
+
+#### concatenate(... string $values)
+Returns a string of all the arguments concatenated together.
+```php
+concatenate('a', 'b', 'c');

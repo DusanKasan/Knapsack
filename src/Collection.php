@@ -21,15 +21,15 @@ class Collection implements Iterator, \Serializable
     /**
      * @var callable
      */
-    private $generatorFactory;
+    private $inputFactory;
 
     /**
-     * @param callable|Closure|array|Traversable $input If callable is passed, it must be a generator factory function
+     * @param callable|Closure|array|Traversable $input If callable is passed, it must return an array|Traversable.
      */
     public function __construct($input)
     {
         if (is_callable($input)) {
-            $this->generatorFactory = $input;
+            $this->inputFactory = $input;
             $this->input = $input();
         } elseif (is_array($input)) {
             $input = new RecursiveArrayIterator($input);
@@ -131,8 +131,8 @@ class Collection implements Iterator, \Serializable
      */
     public function rewind()
     {
-        if ($this->generatorFactory) {
-            $this->input = call_user_func($this->generatorFactory);
+        if ($this->inputFactory) {
+            $this->input = call_user_func($this->inputFactory);
         }
 
         $this->input->rewind();

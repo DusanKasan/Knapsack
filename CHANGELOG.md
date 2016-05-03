@@ -61,3 +61,10 @@
 - Transform function added
 - **Breaking change: combine now stops when it runs out of keys or values**
 - **Breaking change: pluck removed (replaced by extract)**
+
+##6.0.0
+- Intersect function added
+- Average utility function added
+- Concatenate utility function added
+- **Breaking change: getNth removed (to solve ambiguity with takeNth)**
+- **Breaking change: difference renamed to diff**
