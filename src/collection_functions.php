@@ -2,7 +2,6 @@
 
 namespace DusanKasan\Knapsack;
 
-use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use Traversable;
