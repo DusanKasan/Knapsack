@@ -66,5 +66,6 @@
 - Intersect function added
 - Average utility function added
 - Concatenate utility function added
+- Reduce/reduceRight/second now have the returnAsCollection flag
 - **Breaking change: getNth removed (to solve ambiguity with takeNth)**
 - **Breaking change: difference renamed to diff**

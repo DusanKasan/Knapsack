@@ -62,17 +62,20 @@ trait CollectionTrait
     /**
      * Reduces the collection to single value by iterating over the collection and calling $function while
      * passing $startValue and current key/item as parameters. The output of $function is used as $startValue in
-     * next iteration. The output of $function on last element is the return value of this function.
+     * next iteration. The output of $function on last element is the return value of this function. If
+     * $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection
+     * is returned.
      *
-     * @param mixed $startValue
      * @param callable $function ($tmpValue, $value, $key)
-     * @return mixed
+     * @param mixed $startValue
+     * @param bool $convertToCollection
+     * @return mixed|Collection
      */
-    public function reduce(callable $function, $startValue)
+    public function reduce(callable $function, $startValue, $convertToCollection = false)
     {
         $result = reduce($this->getItems(), $function, $startValue);
 
-        return $result;
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -180,7 +183,7 @@ trait CollectionTrait
      * @param mixed $key
      * @param mixed $default
      * @param bool $convertToCollection
-     * @return mixed
+     * @return mixed|Collection
      * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function getOrDefault($key, $default = null, $convertToCollection = false)
@@ -276,13 +279,18 @@ trait CollectionTrait
     /**
      * Reduce the collection to single value. Walks from right to left.
      *
-     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
+     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.  If
+     * $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection
+     * is returned.
      * @param mixed $startValue
-     * @return mixed
+     * @param bool $convertToCollection
+     * @return mixed|Collection
      */
-    public function reduceRight(callable $function, $startValue)
+    public function reduceRight(callable $function, $startValue, $convertToCollection = false)
     {
-        return reduceRight($this->getItems(), $function, $startValue);
+        $result = reduceRight($this->getItems(), $function, $startValue);
+
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -586,7 +594,7 @@ trait CollectionTrait
 
     /**
      * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable an
+     * is true and the return value is a collection (array|Traversable) it is converted to Collection.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
@@ -609,13 +617,18 @@ trait CollectionTrait
     }
 
     /**
-     * Returns the second item in this collection or throws ItemNotFound if the collection is empty or has 1 item.
+     * Returns the second item in this collection or throws ItemNotFound if the collection is empty or has 1 item. If
+     * $convertToCollection is true and the return value is a collection (array|Traversable) it is converted to
+     * Collection.
      *
-     * @return mixed
+     * @param bool $convertToCollection
+     * @return Collection|mixed
+     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
-    public function second()
+    public function second($convertToCollection = false)
     {
-        return second($this->getItems());
+        $result = second($this->getItems());
+        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
     }
 
     /**
@@ -705,7 +718,7 @@ trait CollectionTrait
      * Uses a $transformer callable that takes a Collection and returns Collection on itself.
      *
      * @param callable $transformer Collection => Collection
-     * @return mixed
+     * @return Collection
      * @throws InvalidReturnValue
      */
     public function transform(callable $transformer)

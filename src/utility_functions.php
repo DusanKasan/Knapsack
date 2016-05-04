@@ -86,6 +86,8 @@ function min(...$values)
 }
 
 /**
+ * Returns the average of all arguments.
+ *
  * @param int|float|double[] ...$values
  * @return float
  */
@@ -95,7 +97,9 @@ function average(...$values)
 }
 
 /**
- * @param array ...$values
+ * Concatenates all arguments.
+ *
+ * @param string[] ...$values
  * @return mixed
  */
 function concatenate(...$values)

@@ -1389,12 +1389,7 @@ function zip(...$collections)
  */
 function extract($collection, $keyPath)
 {
-    $error = !preg_match_all('/(.*[^\\\])(?:\.|$)/U', $keyPath, $matches);
-
-    if ($error || count($matches) != 2) {
-        throw new InvalidArgument;
-    }
-
+    preg_match_all('/(.*[^\\\])(?:\.|$)/U', $keyPath, $matches);
     $pathParts = $matches[1];
 
     $extractor = function ($coll) use ($pathParts) {

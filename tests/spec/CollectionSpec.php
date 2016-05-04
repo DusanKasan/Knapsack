@@ -13,8 +13,8 @@ use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
 use Iterator;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
-use function DusanKasan\Knapsack\reverse;
 use Serializable;
+use function DusanKasan\Knapsack\reverse;
 
 /**
  * @mixin Collection
@@ -144,6 +144,20 @@ class CollectionSpec extends ObjectBehavior
     function it_can_reduce()
     {
         $this->beConstructedWith([1, 3, 3, 2,]);
+
+        $this
+            ->reduce(
+                function ($temp, $item) {
+                    $temp[] = $item;
+
+                    return $temp;
+                },
+                ['a' => [1]],
+                true
+            )
+            ->values()
+            ->toArray()
+            ->shouldReturn([[1], 1, 3, 3, 2]);
 
         $this
             ->reduce(
@@ -1035,7 +1049,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_extract_data_from_nested_collections()
     {
-        $this->beConstructedWith([
+        $input = [
             [
                 'a' => [
                     'b' => 1
@@ -1059,8 +1073,10 @@ class CollectionSpec extends ObjectBehavior
                     'b' => 5
                 ]
             ]
-        ]);
+        ];
+        $this->beConstructedWith($input);
 
+        $this->extract('')->toArray()->shouldReturn($input);
         $this->extract('a.b')->toArray()->shouldReturn([1, 2]);
         $this->extract('*.b')->toArray()->shouldReturn([1, 2, 3, 4, 5]);
         $this->extract('\*.b')->toArray()->shouldReturn([3]);

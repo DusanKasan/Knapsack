@@ -20,7 +20,6 @@ Check out the documentation (which is prettified version of this readme) at http
 
 Require this package using Composer.
 
-
 ```
 composer require dusank/knapsack
 ```
@@ -117,14 +116,16 @@ function add($a, $b)
     return $a + $b;
 }
 
-$result = Collection::from([1, 2])
+$collection = Collection::from([1, 2]);
+
+$result = $collection
     ->map('multiplyBy2')
     ->reduce(0, 'add');
     
 echo $result; //6
 
 //On the same collection
-$differentResult = Collection::from([1, 2])
+$differentResult = $collection
     ->map('multiplyBy3')
     ->reduce(0, 'add');
     
@@ -213,7 +214,7 @@ $collection = new Collection($generatorFactory);
 ```
 
 #### from(array|Traversable|callback $input)
-Collection::from is a static alias of the default constructor.
+Collection::from is a static alias of the default constructor. This is the preferred way to create a Collection. 
 
 ```php
 $collection = Collection::from([1, 2, 3]);
@@ -863,25 +864,53 @@ $realizedCollection->toArray([2, 4, 4, 3]);
 toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
 ```
 
-#### reduce(callable $function, mixed $start) : mixed
-Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function.
+#### reduce(callable $function, mixed $start, bool $convertToCollectionv = false) : mixed
+Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reduce(function ($tmp, $i) {
-       return $tmp + $i;
-    }, 0); //9
+    ->reduce(
+        function ($tmp, $i) {
+        return $tmp + $i;
+        }, 
+        0
+    ); //9
+    
+Collection::from([1, 3, 3, 2])
+    ->reduce(
+        function ($tmp, $i) {
+            $tmp[] = $i + 1;
+            return $tmp;
+        }, 
+        [],
+        true
+    )
+    ->first(); //2
 ```
 ```php
 reduce([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
-#### reduceRight(callable $function, mixed $start) : mixed
-Like reduce, but walks from last item to the first one.
+#### reduceRight(callable $function, mixed $start, bool $convertToColleciton = false) : mixed
+Like reduce, but walks from last item to the first one.  If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->reduceRight(function ($tmp, $i) {
-       return $tmp + $i;
-    }, 0); //9
+    ->reduceRight(
+        function ($tmp, $i) {
+            return $tmp + $i;
+        }, 
+        0
+    ); //9
+    
+Collection::from([1, 3, 3, 2])
+    ->reduce(
+        function ($tmp, $i) {
+            $tmp[] = $i + 1;
+            return $tmp;
+        }, 
+        [],
+        true
+    )
+    ->first(); //3
 ```
 ```php
 reduceRight([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
@@ -917,7 +946,7 @@ Collection::from([1, 3, 3, 2])
     ->toArray() //[1, 1 => 3, 3 => 2]
 ```
 ```php
-toArray(reject([1, 3, 3, 2], unction ($value) {return $value > 2;})); //[1, 1 => 3, 3 => 2]
+toArray(reject([1, 3, 3, 2], function ($value) {return $value > 2;})); //[1, 1 => 3, 3 => 2]
 ```
 
 #### replace(array|Traversable $replacementMap) : Collection
@@ -943,8 +972,8 @@ toArray(reverse([1, 2, 3])); //[2 => 3, 1 => 2, 0 => 1]
 ```
 
 
-#### second() : mixed
-Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item.
+#### second(bool $convertToCollection = false) : mixed
+Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item. If $convertToCollection is true and the return value is a collection (array|Traversable) it is converted to Collection.
 ```php
 Collection::from([1, 3, 3, 2])->second(); //3
 ```
@@ -1204,4 +1233,4 @@ average(1, 2, 3) === 2.0; //true
 #### concatenate(... string $values)
 Returns a string of all the arguments concatenated together.
 ```php
-concatenate('a', 'b', 'c');
+concatenate('a', 'b', 'c') == 'abc'; //true 
