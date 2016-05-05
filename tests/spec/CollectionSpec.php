@@ -1089,4 +1089,47 @@ class CollectionSpec extends ObjectBehavior
         $this->intersect([1, 2])->values()->toArray()->shouldReturn([1, 2]);
         $this->intersect([1], [3])->values()->toArray()->shouldReturn([1, 3]);
     }
+
+    function it_can_use_the_utility_methods()
+    {
+        $this->beConstructedWith([1, 3, 2]);
+
+        $this
+            ->sort('\DusanKasan\Knapsack\compare')
+            ->values()
+            ->toArray()
+            ->shouldReturn([1, 2, 3]);
+        
+        $this
+            ->map('\DusanKasan\Knapsack\compare')
+            ->toArray()
+            ->shouldReturn([1, 1, 0]);
+
+        $this
+            ->map('\DusanKasan\Knapsack\decrement')
+            ->toArray()
+            ->shouldReturn([0, 2, 1]);
+
+        $this
+            ->reduce('\DusanKasan\Knapsack\sum', 0)
+            ->shouldReturn(9);
+
+        $this
+            ->reduce('\DusanKasan\Knapsack\max', 0)
+            ->shouldReturn(3);
+
+        $this
+            ->reduce('\DusanKasan\Knapsack\min', 1)
+            ->shouldReturn(0);
+
+        $this
+            ->map('\DusanKasan\Knapsack\average')
+            ->toArray()
+            ->shouldReturn([0.5, 2, 2]);
+
+        $this
+            ->reduce('\DusanKasan\Knapsack\concatenate', '')
+            ->shouldReturn('103122');
+    }
 }
+

@@ -93,7 +93,7 @@ function min(...$values)
  */
 function average(...$values)
 {
-    return sum($values) / count($values);
+    return sum(...$values) / count($values);
 }
 
 /**
