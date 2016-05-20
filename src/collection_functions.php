@@ -244,11 +244,17 @@ function map($collection, callable $function)
  * Returns a lazy collection of items from $collection for which $function returns true.
  *
  * @param array|Traversable $collection
- * @param callable $function ($value, $key)
+ * @param callable|null $function ($value, $key)
  * @return Collection
  */
-function filter($collection, callable $function)
+function filter($collection, callable $function = null)
 {
+    if (null === $function) {
+        $function = function ($value) {
+            return (bool)$value;
+        };
+    };
+
     $generatorFactory = function () use ($collection, $function) {
         foreach ($collection as $key => $value) {
             if ($function($value, $key)) {

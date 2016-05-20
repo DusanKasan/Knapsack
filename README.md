@@ -478,7 +478,7 @@ $collection->extract('*.b')->toArray(); //[1, 2, 3]
 toArray(extract([['a' => ['b' => 1]], ['a' => ['b' => 2]]], 'a.b')); //[1, 2]
 ```
 
-#### filter(callable $function) : Collection
+#### filter(callable $function = null) : Collection
 Returns a lazy collection of items for which $function(value, key) returned true.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -498,6 +498,17 @@ Collection::from([1, 3, 3, 2])
 ```php
 toArray(values(filter([1, 3, 3, 2], function ($value) {return $value > 2;}))); //[3, 3]
 ```
+
+If `$function` is not provided, `\DusanKasan\Knapsack\identity` is used so every falsy value is removed. 
+```php
+Collection::from([0, 0.0, false, null, "", []])
+    ->filter()
+    ->isEmpty() //true
+```
+```php
+isEmpty(values(filter([0, 0.0, false, null, "", []]))); //true
+```
+
 
 #### find(callable $function, mixed $ifNotFound = null, bool $convertToCollection = false) : mixed|Collection
 Returns first value for which $function(value, key) returns true. If no item is matched, returns $ifNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
