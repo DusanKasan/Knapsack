@@ -19,10 +19,10 @@ trait CollectionTrait
     /**
      * Returns a lazy collection of items for which $function returned true.
      *
-     * @param callable $function ($value, $key)
+     * @param callable|null $function ($value, $key)
      * @return Collection
      */
-    public function filter(callable $function)
+    public function filter(callable $function = null)
     {
         return filter($this->getItems(), $function);
     }

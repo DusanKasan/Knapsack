@@ -110,6 +110,14 @@ class CollectionSpec extends ObjectBehavior
             ->shouldReturn([3 => 2]);
     }
 
+    function it_can_filter_falsy_values()
+    {
+        $this->beConstructedWith([false, null, '', 0, 0.0, []]);
+
+        $this->filter()->isEmpty()->shouldReturn(true);
+
+    }
+
     function it_can_distinct()
     {
         $this->beConstructedWith([1, 3, 3, 2,]);
