@@ -5,13 +5,16 @@ use Symfony\Component\Console\Helper\Table;
 
 include_once __DIR__ . "/../../vendor/autoload.php";
 
+const NUMBER_OF_ITEMS = 10000;
+const REPEAT_COUNT = 10;
+
 function getIntegerReport()
 {
     $arrayMapDeltas = 0.0;
     $collectionMapDeltas = 0.0;
     $fixtureProvider = function () {
         $array = [];
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < NUMBER_OF_ITEMS; $i++) {
             $array[] = $i;
         }
 
@@ -21,10 +24,9 @@ function getIntegerReport()
         return $item + 1;
     };
 
-    for ($j = 0; $j < 10; $j++) {
+    for ($j = 0; $j < REPEAT_COUNT; $j++) {
         $array = $fixtureProvider();
-
-
+        
         $arrayMapStart = microtime(true);
         $mappedArray = array_map($mapper, $array);
         foreach ($mappedArray as $item) {
@@ -40,9 +42,9 @@ function getIntegerReport()
     }
 
     return [
-        'name' => 'array_map vs Collection::map on 1000 integers (addition)',
-        'native' => $arrayMapDeltas / 10.0,
-        'collection' => $collectionMapDeltas / 10.0
+        'name' => 'array_map vs Collection::map on ' . NUMBER_OF_ITEMS . ' integers (addition)',
+        'native' => (float) $arrayMapDeltas / REPEAT_COUNT,
+        'collection' => (float) $collectionMapDeltas / REPEAT_COUNT
     ];
 }
 
@@ -52,7 +54,7 @@ function getStringReport()
     $collectionMapDeltas = 0.0;
     $fixtureProvider = function () {
         $array = [];
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < NUMBER_OF_ITEMS; $i++) {
             $array[] = $i . 'asd';
         }
 
@@ -62,7 +64,7 @@ function getStringReport()
         return $item . 'qwe';
     };
 
-    for ($j = 0; $j < 10; $j++) {
+    for ($j = 0; $j < REPEAT_COUNT; $j++) {
         $array = $fixtureProvider();
         $arrayMapStart = microtime(true);
         $mappedArray = array_map($mapper, $array);
@@ -80,9 +82,9 @@ function getStringReport()
     }
 
     return [
-        'name' => 'array_map vs Collection::map on 1000 strings (concatenation)',
-        'native' => $arrayMapDeltas / 10.0,
-        'collection' => $collectionMapDeltas / 10.0
+        'name' => 'array_map vs Collection::map on ' . NUMBER_OF_ITEMS . ' strings (concatenation)',
+        'native' => (float) $arrayMapDeltas / REPEAT_COUNT,
+        'collection' => (float) $collectionMapDeltas / REPEAT_COUNT
     ];
 }
 
@@ -92,7 +94,7 @@ function getObjectReport()
     $collectionMapDeltas = 0.0;
     $fixtureProvider = function () {
         $array = [];
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < NUMBER_OF_ITEMS; $i++) {
             $c = new stdClass();
             $c->asd = 1;
             $array[] = $c;
@@ -104,7 +106,7 @@ function getObjectReport()
         return $item->asd;
     };
 
-    for ($j = 0; $j < 10; $j++) {
+    for ($j = 0; $j < REPEAT_COUNT; $j++) {
         $array = $fixtureProvider();
         $arrayMapStart = microtime(true);
         $mappedArray = array_map($mapper, $array);
@@ -122,9 +124,9 @@ function getObjectReport()
     }
 
     return [
-        'name' => 'array_map vs Collection::map on 1000 object (object to field value)',
-        'native' => $arrayMapDeltas / 10.0,
-        'collection' => $collectionMapDeltas / 10.0
+        'name' => 'array_map vs Collection::map on ' . NUMBER_OF_ITEMS . ' objects (object to field value)',
+        'native' => (float) $arrayMapDeltas / REPEAT_COUNT,
+        'collection' => (float) $collectionMapDeltas / REPEAT_COUNT
     ];
 }
 
@@ -134,7 +136,7 @@ function getComplexOperationReport()
     $collectionMapDeltas = 0.0;
     $fixtureProvider = function () {
         $array = [];
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < NUMBER_OF_ITEMS; $i++) {
             $array[] = $i;
         }
 
@@ -149,7 +151,7 @@ function getComplexOperationReport()
         return $result;
     };
 
-    for ($j = 0; $j < 10; $j++) {
+    for ($j = 0; $j < REPEAT_COUNT; $j++) {
         $array = $fixtureProvider();
         $arrayMapStart = microtime(true);
         $mappedArray = array_map($mapper, $array);
@@ -167,9 +169,9 @@ function getComplexOperationReport()
     }
 
     return [
-        'name' => 'array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way',
-        'native' => $arrayMapDeltas / 10.0,
-        'collection' => $collectionMapDeltas / 10.0
+        'name' => 'array_map vs Collection::map on ' . NUMBER_OF_ITEMS . ' integers n, counting sum(0, n) the naive way',
+        'native' => (float) $arrayMapDeltas / REPEAT_COUNT,
+        'collection' => (float) $collectionMapDeltas / REPEAT_COUNT
     ];
 }
 
@@ -179,7 +181,7 @@ function getHashReport()
     $collectionMapDeltas = 0.0;
     $fixtureProvider = function () {
         $array = [];
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < NUMBER_OF_ITEMS; $i++) {
             $array[] = $i . 'asdf';
         }
 
@@ -189,7 +191,7 @@ function getHashReport()
         return md5($item);
     };
 
-    for ($j = 0; $j < 10; $j++) {
+    for ($j = 0; $j < REPEAT_COUNT; $j++) {
         $array = $fixtureProvider();
         $arrayMapStart = microtime(true);
         $mappedArray = array_map($mapper, $array);
@@ -207,9 +209,9 @@ function getHashReport()
     }
 
     return [
-        'name' => 'array_map vs Collection::map on 1000 md5 invocations',
-        'native' => $arrayMapDeltas / 10.0,
-        'collection' => $collectionMapDeltas / 10.0
+        'name' => 'array_map vs Collection::map on ' . NUMBER_OF_ITEMS . ' md5 invocations',
+        'native' => (float) $arrayMapDeltas / REPEAT_COUNT,
+        'collection' => (float) $collectionMapDeltas / REPEAT_COUNT
     ];
 }
 

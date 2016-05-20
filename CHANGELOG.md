@@ -69,3 +69,6 @@
 - Reduce/reduceRight/second now have the returnAsCollection flag
 - **Breaking change: getNth removed (to solve ambiguity with takeNth)**
 - **Breaking change: difference renamed to diff**
+
+##6.1.0
+- Filter can be called without arguments and it will remove falsy values

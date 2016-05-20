@@ -6,7 +6,8 @@ use DusanKasan\Knapsack\Collection;
 use PHPUnit_Framework_TestCase;
 
 /**
- * http://martinfowler.com/articles/refactoring-pipelines.html#GroupingFlightRecords
+ * More advanced usage of collection pipeline, see
+ * http://martinfowler.com/articles/refactoring-pipelines.html#GroupingFlightRecords for reference.
  */
 class GroupingFlightsTest extends PHPUnit_Framework_TestCase
 {

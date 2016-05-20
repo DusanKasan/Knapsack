@@ -168,26 +168,26 @@ $iterator->size(); //3
 ### PHP 5.6
 ```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| operation details                                                                  | native execution time | collection execution time | difference           |
+| operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 1000 integers (addition)                           | 0.0026963949203491s   | 0.017051982879639s        | 632%                 |
-| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0028762340545654s   | 0.019258499145508s        | 669%                 |
-| array_map vs Collection::map on 1000 object (object to field value)                | 0.0030517101287842s   | 0.017919874191284s        | 587%                 |
-| array_map vs Collection::map on 1000 md5 invocations                               | 0.0038059234619141s   | 0.01975724697113s         | 519%                 |
-| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.052967953681946s    | 0.072820711135864s        | 137%                 |
+| array_map vs Collection::map on 10000 integers (addition)                          | 0.030887317657471s    | 0.1881504535675s          | 609%                 |
+| array_map vs Collection::map on 10000 strings (concatenation)                      | 0.034685015678406s    | 0.19358699321747s         | 558%                 |
+| array_map vs Collection::map on 10000 objects (object to field value)              | 0.045831298828125s    | 0.20278341770172s         | 442%                 |
+| array_map vs Collection::map on 10000 md5 invocations                              | 0.042794704437256s    | 0.1973245382309s          | 461%                 |
+| array_map vs Collection::map on 10000 integers n, counting sum(0, n) the naive way | 5.0926527023315s      | 5.2498435258865s          | 103%                 |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 
-### PHP 7 beta 2
+### PHP 7.0.2
 ```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| operation details                                                                  | native execution time | collection execution time | difference           |
+| operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 1000 integers (addition)                           | 9.7393989562988E-5s   | 0.0013259887695313s       | 1361%                |
-| array_map vs Collection::map on 1000 strings (concatenation)                       | 0.0001237154006958s   | 0.0013420820236206s       | 1084%                |
-| array_map vs Collection::map on 1000 object (object to field value)                | 0.00011978149414062s  | 0.0014124155044556s       | 1179%                |
-| array_map vs Collection::map on 1000 md5 invocations                               | 0.00045244693756104s  | 0.0019778966903687s       | 437%                 |
-| array_map vs Collection::map for 1000 integers n, counting sum(0, n) the naive way | 0.011838340759277s    | 0.013077282905579s        | 110%                 |
+| array_map vs Collection::map on 10000 integers (addition)                          | 0.0012169599533081s   | 0.013433384895325s        | 1103%                |
+| array_map vs Collection::map on 10000 strings (concatenation)                      | 0.0014688730239868s   | 0.013579154014587s        | 924%                 |
+| array_map vs Collection::map on 10000 objects (object to field value)              | 0.0023677349090576s   | 0.016839718818665s        | 711%                 |
+| array_map vs Collection::map on 10000 md5 invocations                              | 0.0041363000869751s   | 0.017279839515686s        | 417%                 |
+| array_map vs Collection::map on 10000 integers n, counting sum(0, n) the naive way | 1.4253485679626s      | 1.2336760282516s          | 86%                  |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 

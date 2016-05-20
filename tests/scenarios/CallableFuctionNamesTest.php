@@ -7,6 +7,9 @@ use PHPUnit_Framework_TestCase;
 
 class CallableFunctionNamesTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * Example that it's possible to use callable function names as arguments.
+     */
     public function testIt()
     {
         $result = Collection::from([2, 1])

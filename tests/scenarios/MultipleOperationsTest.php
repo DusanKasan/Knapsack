@@ -7,6 +7,9 @@ use PHPUnit_Framework_TestCase;
 
 class MultipleOperationsTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * Example of a longer pipeline. If this was real code, you should probably split it into smaller chunks.
+     */
     public function testIt()
     {
         $array = [1, 2, 8, 3, 7, 5, 1, 4, 4,];

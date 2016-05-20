@@ -11,6 +11,7 @@ Every change merges to master. No development is done in other branches.
 - If you don't find anything, create new issue
 - Fork this repository and create fix/feature in the fork
 - Write tests/scenarios for your change
+- If you changed API, document the change in README
 - Create pull request, describe what you did
 - Wait for CI to verify you didn't break anything
     - If you did, rewrite it
