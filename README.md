@@ -282,7 +282,7 @@ toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 Combines the values of this collection as keys, with values of $collection as values.  The resulting collection has length equal to the size of smaller collection. If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
 ```php
 Collection::from(['a', 'b'])
-    ->combine([1, 2)
+    ->combine([1, 2])
     ->toArray(); //['a' => 1, 'b' => 2]
 ```
 ```php    
