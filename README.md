@@ -75,7 +75,7 @@ echo $result; //6
 $result = Collection::iterate([1,1], function($v) {
         return [$v[1], $v[0] + $v[1]]; //[1, 2], [2, 3] ...
     })
-    ->map('\Knapsack\first') //one of the collection functions
+    ->map('\DusanKasan\Knapsack\first') //one of the collection functions
     ->take(5);
     
 foreach ($result as $item) {
@@ -282,7 +282,7 @@ toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 Combines the values of this collection as keys, with values of $collection as values.  The resulting collection has length equal to the size of smaller collection. If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
 ```php
 Collection::from(['a', 'b'])
-    ->combine([1, 2)
+    ->combine([1, 2])
     ->toArray(); //['a' => 1, 'b' => 2]
 ```
 ```php    
