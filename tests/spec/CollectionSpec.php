@@ -1098,6 +1098,83 @@ class CollectionSpec extends ObjectBehavior
         $this->intersect([1], [3])->values()->toArray()->shouldReturn([1, 3]);
     }
 
+    function it_can_transpose_a_simple_array()
+    {
+        $this->beConstructedWith([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]);
+
+        $this->transpose()->toArray()->shouldReturn([
+            [1, 4, 7],
+            [2, 5, 8],
+            [3, 6, 9],
+        ]);
+    }
+
+    function it_can_transpose_an_associatve_array()
+    {
+        $this->beConstructedWith([
+            'names' => ['adam', 'ben', 'claire'],
+            'ages' => [24, 32, 52],
+            'emails' => ['adam@example.com', 'ben@example.com', 'claire@example.com'],
+        ]);
+
+        $this->transpose()->toArray()->shouldReturn([
+            ['adam', 24, 'adam@example.com'],
+            ['ben', 32, 'ben@example.com'],
+            ['claire', 52, 'claire@example.com'],
+        ]);
+    }
+
+    function it_can_transpose_arrays_of_different_lengths()
+    {
+        $this->beConstructedWith([['a', 'b', 'c', 'd'], ['apple', 'box', 'car']]);
+
+        $this->transpose()->toArray()->shouldReturn([
+            ['a', 'apple'],
+            ['b', 'box'],
+            ['c', 'car'],
+            ['d', null],
+        ]);
+    }
+
+    function it_can_transpose_collections_of_collections()
+    {
+        $this->beConstructedWith([
+            new Collection([1, 2, 3]),
+            new Collection([4, 5, new Collection(['foo', 'bar'])]),
+            new Collection([7, 8, 9]),
+        ]);
+
+        $this->transpose()->toArray()->shouldBeLike([
+            new Collection([1, 4, 7]),
+            new Collection([2, 5, 8]),
+            new Collection([3, new Collection(['foo', 'bar']), 9]),
+        ]);
+    }
+
+    function it_can_transpose_mixed_collections()
+    {
+        $this->beConstructedWith(new Collection([
+            new Collection([1, 2, 3]),
+            [4, 5, 6],
+        ]));
+
+        $this->transpose()->toArray()->shouldBeLike([
+            new Collection([1, 4]),
+            new Collection([2, 5]),
+            new Collection([3, 6]),
+        ]);
+    }
+
+    function it_should_throw_an_invalid_argument_if_given_anything_but_a_multi_dimensional_array_or_collection()
+    {
+        $this->beConstructedWith(['a', 'b', 'c']);
+        $this->shouldThrow(InvalidArgument::class)->during('transpose');
+    }
+
     function it_can_use_the_utility_methods()
     {
         $this->beConstructedWith([1, 3, 2]);

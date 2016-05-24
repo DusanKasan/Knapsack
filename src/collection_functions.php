@@ -2,6 +2,7 @@
 
 namespace DusanKasan\Knapsack;
 
+use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use Traversable;
@@ -1382,6 +1383,45 @@ function zip(...$collections)
     };
 
     return new Collection($generatorFactory);
+}
+
+/**
+ * Transpose each item in a collection, interchanging the row and column indexes.
+ * Can only transpose multi-dimensional arrays or collections. Otherwise an InvalidArgument is raised.
+ *
+ * @param array|Collection $collection
+ * @return Collection
+ */
+function transpose($collection)
+{
+    if (every($collection, function ($value) {
+        return is_array($value);
+    })) {
+        return new Collection(array_map(null, ...$collection->values()));
+    }
+
+    if (some($collection, function ($value) {
+        return $value instanceof Collection;
+    })) {
+        // if the values are also collections, first convert them to arrays
+        $subArrays = map($collection, function ($value) {
+            if ($value instanceof Collection) {
+                return $value->toArray();
+            }
+            return $value;
+        });
+
+        $transposedSubArrays = transpose($subArrays);
+
+        // then convert the transposed arrays back to collections.
+        $subCollections = map($transposedSubArrays, function ($array) {
+            return new Collection($array);
+        });
+
+        return new Collection($subCollections);
+    }
+
+    throw new InvalidArgument('Can only transpose multi-dimensional arrays or collections of collections.');
 }
 
 /**
