@@ -75,7 +75,7 @@ echo $result; //6
 $result = Collection::iterate([1,1], function($v) {
         return [$v[1], $v[0] + $v[1]]; //[1, 2], [2, 3] ...
     })
-    ->map('\Knapsack\first') //one of the collection functions
+    ->map('\DusanKasan\Knapsack\first') //one of the collection functions
     ->take(5);
     
 foreach ($result as $item) {
