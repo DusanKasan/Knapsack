@@ -1421,3 +1421,98 @@ function extract($collection, $keyPath)
 
     return new Collection($generatorFactory);
 }
+
+/**
+ * Checks whether $collection has exactly $size items.
+ *
+ * @param array|Traversable $collection
+ * @param int $size
+ * @return bool
+ */
+function sizeIs($collection, $size)
+{
+    $itemsTempCount = 0;
+
+    foreach ($collection as $key => $value) {
+        $itemsTempCount++;
+
+        if ($itemsTempCount > $size) {
+            return false;
+        }
+    }
+
+    return $itemsTempCount == $size;
+}
+
+/**
+ * Checks whether $collection has less than $size items.
+ *
+ * @param array|Traversable $collection
+ * @param int $size
+ * @return bool
+ */
+function sizeIsLessThan($collection, $size)
+{
+    $itemsTempCount = 0;
+
+    foreach ($collection as $key => $value) {
+        $itemsTempCount++;
+
+        if ($itemsTempCount > $size) {
+            return false;
+        }
+    }
+
+    return $itemsTempCount < $size;
+}
+
+/**
+ * Checks whether $collection has more than $size items.
+ *
+ * @param array|Traversable $collection
+ * @param int $size
+ * @return bool
+ */
+function sizeIsGreaterThan($collection, $size)
+{
+    $itemsTempCount = 0;
+
+    foreach ($collection as $key => $value) {
+        $itemsTempCount++;
+
+        if ($itemsTempCount > $size) {
+            return true;
+        }
+    }
+
+    return $itemsTempCount > $size;
+}
+
+/**
+ * Checks whether $collection has between $fromSize to $toSize items. $toSize can be
+ * smaller than $fromSize.
+ *
+ * @param array|Traversable $collection
+ * @param int $fromSize
+ * @param int $toSize
+ * @return bool
+ */
+function sizeIsBetween($collection, $fromSize, $toSize)
+{
+    if ($fromSize > $toSize) {
+        $tmp = $toSize;
+        $toSize = $fromSize;
+        $fromSize = $tmp;
+    }
+
+    $itemsTempCount = 0;
+    foreach ($collection as $key => $value) {
+        $itemsTempCount++;
+
+        if ($itemsTempCount > $toSize) {
+            return false;
+        }
+    }
+
+    return $fromSize < $itemsTempCount && $itemsTempCount < $toSize;
+}

@@ -1107,7 +1107,7 @@ class CollectionSpec extends ObjectBehavior
             ->values()
             ->toArray()
             ->shouldReturn([1, 2, 3]);
-        
+
         $this
             ->map('\DusanKasan\Knapsack\compare')
             ->toArray()
@@ -1138,6 +1138,39 @@ class CollectionSpec extends ObjectBehavior
         $this
             ->reduce('\DusanKasan\Knapsack\concatenate', '')
             ->shouldReturn('103122');
+    }
+
+    function it_can_check_if_size_is_exactly_n()
+    {
+        $this->beConstructedWith([1, 2]);
+        $this->sizeIs(2)->shouldReturn(true);
+        $this->sizeIs(3)->shouldReturn(false);
+        $this->sizeIs(0)->shouldReturn(false);
+    }
+
+    function it_can_check_if_size_is_less_than_n()
+    {
+        $this->beConstructedWith([1, 2]);
+        $this->sizeIsLessThan(0)->shouldReturn(false);
+        $this->sizeIsLessThan(2)->shouldReturn(false);
+        $this->sizeIsLessThan(3)->shouldReturn(true);
+    }
+
+    function it_can_check_if_size_is_greater_than_n()
+    {
+        $this->beConstructedWith([1, 2]);
+        $this->sizeIsGreaterThan(2)->shouldReturn(false);
+        $this->sizeIsGreaterThan(1)->shouldReturn(true);
+        $this->sizeIsGreaterThan(0)->shouldReturn(true);
+    }
+
+    function it_can_check_if_size_is_between_n_and_m()
+    {
+        $this->beConstructedWith([1, 2]);
+        $this->sizeIsBetween(1, 3)->shouldReturn(true);
+        $this->sizeIsBetween(3, 4)->shouldReturn(false);
+        $this->sizeIsBetween(0, 0)->shouldReturn(false);
+        $this->sizeIsBetween(3, 1)->shouldReturn(true);
     }
 }
 

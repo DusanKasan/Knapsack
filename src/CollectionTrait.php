@@ -758,6 +758,54 @@ trait CollectionTrait
         return intersect($this->getItems(), ...$collections);
     }
 
+
+
+    /**
+     * Checks whether this collection has exactly $size items.
+     *
+     * @param int $size
+     * @return bool
+     */
+    public function sizeIs($size)
+    {
+        return sizeIs($this->getItems(), $size);
+    }
+
+    /**
+     * Checks whether this collection has less than $size items.
+     *
+     * @param int $size
+     * @return bool
+     */
+    public function sizeIsLessThan($size)
+    {
+        return sizeIsLessThan($this->getItems(), $size);
+    }
+
+    /**
+     * Checks whether this collection has more than $size items.
+     *
+     * @param int $size
+     * @return bool
+     */
+    public function sizeIsGreaterThan($size)
+    {
+        return sizeIsGreaterThan($this->getItems(), $size);
+    }
+
+    /**
+     * Checks whether this collection has between $fromSize to $toSize items. $toSize can be
+     * smaller than $fromSize.
+     *
+     * @param int $fromSize
+     * @param int $toSize
+     * @return bool
+     */
+    public function sizeIsBetween($fromSize, $toSize)
+    {
+        return sizeIsBetween($this->getItems(), $fromSize, $toSize);
+    }
+
     /**
      * @return array|\Traversable
      */

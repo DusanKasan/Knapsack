@@ -72,3 +72,9 @@
 
 ##6.1.0
 - Filter can be called without arguments and it will remove falsy values
+
+##6.2.0
+- sizeIsExactly function added
+- sizeIsGreaterThan function added
+- sizeIsLessThan function added
+- sizeIsBetween function added
