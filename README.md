@@ -787,6 +787,7 @@ Collection::from([1, 3, 3, 2])
     ->mapcat(function ($value) {
         return [[$value]];
     })
+    ->values()
     ->toArray(); //[[1], [3], [3], [2]]
 ```
 ```php
@@ -794,10 +795,11 @@ Collection::from([1, 3, 3, 2])
     ->mapcat(function ($key, $value) {
         return [[$key]];
     })
+    ->values()
     ->toArray(); //[[0], [1], [2], [3]]
 ```
 ```php
-toArray(mapcat([1, 3, 3, 2], function ($value) {return [[$value]];})); //[[1], [3], [3], [2]]
+toArray(values(mapcat([1, 3, 3, 2], function ($value) {return [[$value]];}))); //[[1], [3], [3], [2]]
 ``` 
 
 #### only(array|Traversable $keys) : Collection
