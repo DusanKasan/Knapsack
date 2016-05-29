@@ -8,7 +8,7 @@ use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use Traversable;
 
 /**
-     * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
+ * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
  *
  * @param array|Traversable $collection
  * @return array
@@ -78,11 +78,11 @@ function reverse($collection)
         return map(
             indexBy(
                 array_reverse($array),
-                function($item) {
+                function ($item) {
                     return $item[0];
                 }
             ),
-            function($item) {
+            function ($item) {
                 return $item[1];
             }
         );
@@ -252,9 +252,10 @@ function filter($collection, callable $function = null)
 {
     if (null === $function) {
         $function = function ($value) {
-            return (bool)$value;
+            return (bool) $value;
         };
-    };
+    }
+    ;
 
     $generatorFactory = function () use ($collection, $function) {
         foreach ($collection as $key => $value) {
@@ -415,7 +416,6 @@ function groupBy($collection, callable $function)
     return Collection::from($result);
 }
 
-
 /**
  * Returns a non-lazy collection of items grouped by the value at given key. Ignores non-collection items and items
  * without the given keys
@@ -435,7 +435,7 @@ function groupByKey($collection, $key)
                     return isCollection($item) && has($item, $key);
                 }
             ),
-            function($value) use ($key) {
+            function ($value) use ($key) {
                 return get($value, $key);
             }
         );
@@ -685,7 +685,7 @@ function reject($collection, callable $function)
 {
     return filter(
         $collection,
-        function($value, $key) use ($function) {
+        function ($value, $key) use ($function) {
             return !$function($value, $key);
         }
     );
@@ -1012,7 +1012,7 @@ function partition($collection, $numberOfItems, $step = -1, $padding = [])
                 yield dereferenceKeyValue($buffer);
 
                 $buffer = array_slice($buffer, $tmpStep);
-                $itemsToSkip =  $tmpStep - $numberOfItems;
+                $itemsToSkip = $tmpStep - $numberOfItems;
             }
 
             if ($itemsToSkip <= 0) {
@@ -1099,7 +1099,7 @@ function range($start = 0, $end = null, $step = 1)
     $generatorFactory = function () use ($start, $end, $step) {
         return iterate(
             $start,
-            function($value) use ($step, $end) {
+            function ($value) use ($step, $end) {
                 $result = $value + $step;
 
                 if ($end !== null && $result > $end) {
@@ -1138,7 +1138,7 @@ function duplicate($input)
         return toArray(
             map(
                 $input,
-                function($i) {
+                function ($i) {
                     return duplicate($i);
                 }
             )
@@ -1197,7 +1197,6 @@ function second($collection)
 {
     return get(values($collection), 1);
 }
-
 
 /**
  * Combines $keys and $values into a lazy collection. The resulting collection has length equal to the size of smaller
@@ -1387,41 +1386,31 @@ function zip(...$collections)
 
 /**
  * Transpose each item in a collection, interchanging the row and column indexes.
- * Can only transpose multi-dimensional arrays or collections. Otherwise an InvalidArgument is raised.
+ * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
  *
- * @param array|Collection $collection
+ * @param Collection $collection
  * @return Collection
  */
 function transpose($collection)
 {
-    if (every($collection, function ($value) {
-        return is_array($value);
-    })) {
-        return new Collection(array_map(null, ...$collection->values()));
-    }
-
     if (some($collection, function ($value) {
-        return $value instanceof Collection;
+        return !($value instanceof Collection);
     })) {
-        // if the values are also collections, first convert them to arrays
-        $subArrays = map($collection, function ($value) {
-            if ($value instanceof Collection) {
-                return $value->toArray();
-            }
-            return $value;
-        });
-
-        $transposedSubArrays = transpose($subArrays);
-
-        // then convert the transposed arrays back to collections.
-        $subCollections = map($transposedSubArrays, function ($array) {
-            return new Collection($array);
-        });
-
-        return new Collection($subCollections);
+        throw new InvalidArgument('Can only transpose collections of collections.');
     }
-
-    throw new InvalidArgument('Can only transpose multi-dimensional arrays or collections of collections.');
+    return Collection::from(
+        array_map(
+            function (...$items) {
+                return new Collection($items);
+            },
+            ...toArray(
+                map(
+                    $collection,
+                    'DusanKasan\Knapsack\toArray'
+                )
+            )
+        )
+    );
 }
 
 /**
@@ -1457,7 +1446,6 @@ function extract($collection, $keyPath)
             }
         }
     };
-
 
     return new Collection($generatorFactory);
 }

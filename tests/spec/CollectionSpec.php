@@ -10,11 +10,11 @@ use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
+use function DusanKasan\Knapsack\reverse;
 use Iterator;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
 use Serializable;
-use function DusanKasan\Knapsack\reverse;
 
 /**
  * @mixin Collection
@@ -63,7 +63,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_be_created_to_iterate_over_function_infinitely()
     {
-        $this->beConstructedThrough('iterate', [1, function($i) {return $i+1;}]);
+        $this->beConstructedThrough('iterate', [1, function ($i) {return $i + 1;}]);
         $this->take(2)->toArray()->shouldReturn([1, 2]);
     }
 
@@ -73,13 +73,13 @@ class CollectionSpec extends ObjectBehavior
             'iterate',
             [
                 1,
-                function($i) {
+                function ($i) {
                     if ($i > 3) {
                         throw new NoMoreItems;
                     }
 
-                    return $i+1;
-                }
+                    return $i + 1;
+                },
             ]
         );
         $this->toArray()->shouldReturn([1, 2, 3, 4]);
@@ -93,7 +93,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_filter()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->filter(function ($item) {
@@ -120,7 +120,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_distinct()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->distinct()
@@ -130,7 +130,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_concat()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $collection = $this->concat([4, 5]);
         $collection->toArray()->shouldReturn([4, 5, 3, 2]);
@@ -139,7 +139,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_map()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->map(function ($item) {
@@ -151,7 +151,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_reduce()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->reduce(
@@ -263,16 +263,16 @@ class CollectionSpec extends ObjectBehavior
             ['letter' => 'A', 'type' => 'caps'],
             ['letter' => 'a', 'type' => 'small'],
             ['letter' => 'B', 'type' => 'caps'],
-            ['letter' => 'Z']
+            ['letter' => 'Z'],
         ]);
 
         $collection = $this->groupByKey('type');
         $collection->get('small')->toArray()->shouldReturn([
-            ['letter' => 'a', 'type' => 'small']
+            ['letter' => 'a', 'type' => 'small'],
         ]);
         $collection->get('caps')->toArray()->shouldReturn([
             ['letter' => 'A', 'type' => 'caps'],
-            ['letter' => 'B', 'type' => 'caps']
+            ['letter' => 'B', 'type' => 'caps'],
         ]);
 
         $collection = $this->groupByKey('types');
@@ -294,7 +294,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_get_size()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
         $this->size()->shouldReturn(4);
     }
 
@@ -354,7 +354,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_count_by()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->countBy(function ($v) {
@@ -373,7 +373,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_index_by()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->indexBy(function ($v) {
@@ -392,7 +392,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_if_every_item_passes_predicament_test()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->every(function ($v) {
@@ -421,7 +421,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_if_some_items_pass_predicament_test()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->some(function ($v) {
@@ -450,7 +450,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_if_it_contains_a_value()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->contains(3)
@@ -463,7 +463,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_reverse()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $collection = $this->reverse();
 
@@ -489,7 +489,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_reduce_from_right()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->reduceRight(
@@ -505,7 +505,7 @@ class CollectionSpec extends ObjectBehavior
                 function ($temp, $key, $item) {
                     return $temp + $key + $item;
                 },
-            0
+                0
             )
             ->shouldReturn(15);
 
@@ -522,7 +522,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_return_only_first_x_elements()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this->take(2)
             ->toArray()
@@ -531,7 +531,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_skip_first_x_elements()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this->drop(2)
             ->toArray()
@@ -544,10 +544,9 @@ class CollectionSpec extends ObjectBehavior
         $this->values()->toArray()->shouldReturn([1, 2]);
     }
 
-
     function it_can_reject_elements_from_collection()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->reject(function ($v) {
@@ -566,7 +565,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_get_keys()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->keys()
@@ -576,7 +575,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_interpose()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->interpose('a')
@@ -587,7 +586,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_drop_elements_from_end_of_the_collection()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->dropLast()
@@ -602,7 +601,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_interleave_elements()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->interleave(['a', 'b', 'c', 'd', 'e'])
@@ -613,7 +612,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_repeat_items_of_collection_infinitely()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->cycle()
@@ -625,7 +624,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_prepend_item()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->prepend(1)
@@ -636,7 +635,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_prepend_item_with_key()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->prepend(1, 'a')
@@ -646,7 +645,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_append_item()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->append(1)
@@ -657,7 +656,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_append_item_with_key()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->append(1, 'a')
@@ -667,7 +666,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_drop_items_while_predicament_is_true()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->dropWhile(function ($v) {
@@ -686,7 +685,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_map_and_then_concatenate_a_collection()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->mapcat(function ($v) {
@@ -707,7 +706,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_take_items_while_predicament_is_true()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->takeWhile(function ($v) {
@@ -726,7 +725,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_split_the_collection_at_nth_item()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this->splitAt(2)->size()->shouldBe(2);
         $this->splitAt(2)->first()->toArray()->shouldBeLike([1, 3]);
@@ -735,7 +734,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_split_the_collection_with_predicament()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $s1 = $this->splitWith(function ($v) {
             return $v < 3;
@@ -756,7 +755,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_replace_items_by_items_from_another_collection()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->replace([3 => 'a'])
@@ -766,7 +765,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_get_reduction_steps()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->reductions(
@@ -781,7 +780,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_return_every_nth_item()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this->takeNth(2)
             ->toArray()
@@ -790,7 +789,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_shuffle_itself()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->shuffle()
@@ -805,7 +804,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_partition()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $s1 = $this->partition(3, 2, [0, 1]);
         $s1->size()->shouldBe(2);
@@ -824,7 +823,7 @@ class CollectionSpec extends ObjectBehavior
 
         $s4 = $this->partition(1, 3);
         $s4->size()->shouldBe(2);
-        $s4->first()->toArray()->shouldBe([1,]);
+        $s4->first()->toArray()->shouldBe([1]);
         $s4->second()->toArray()->shouldBe([3 => 2]);
     }
 
@@ -840,7 +839,6 @@ class CollectionSpec extends ObjectBehavior
         $s1->second()->toArray()->shouldBe([1 => 3, 2 => 3]);
         $s1->values()->get(2)->toArray()->shouldBe([3 => 2]);
 
-
         $s2 = $this->partitionBy(function ($v, $k) {
             return $k - $v;
         });
@@ -853,7 +851,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_get_nth_value()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this->first(0)->shouldReturn(1);
         $this->values()->get(3)->shouldReturn(2);
@@ -885,7 +883,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_if_it_is_not_empty()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this->isEmpty()->shouldReturn(false);
         $this->isNotEmpty()->shouldReturn(true);
@@ -901,7 +899,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_check_frequency_of_distinct_items()
     {
-        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->beConstructedWith([1, 3, 3, 2]);
 
         $this
             ->frequencies()
@@ -1050,7 +1048,7 @@ class CollectionSpec extends ObjectBehavior
                 [
                     function (Collection $collection) {
                         return $collection->first();
-                    }
+                    },
                 ]
             );
     }
@@ -1060,27 +1058,27 @@ class CollectionSpec extends ObjectBehavior
         $input = [
             [
                 'a' => [
-                    'b' => 1
-                ]
+                    'b' => 1,
+                ],
             ],
             [
                 'a' => [
-                    'b' => 2
-                ]
+                    'b' => 2,
+                ],
             ],
             [
                 '*' => [
-                    'b' => 3
-                ]
+                    'b' => 3,
+                ],
             ],
             [
                 '.' => [
-                    'b' => 4
+                    'b' => 4,
                 ],
                 'c' => [
-                    'b' => 5
-                ]
-            ]
+                    'b' => 5,
+                ],
+            ],
         ];
         $this->beConstructedWith($input);
 
@@ -1098,48 +1096,6 @@ class CollectionSpec extends ObjectBehavior
         $this->intersect([1], [3])->values()->toArray()->shouldReturn([1, 3]);
     }
 
-    function it_can_transpose_a_simple_array()
-    {
-        $this->beConstructedWith([
-            [1, 2, 3],
-            [4, 5, 6],
-            [7, 8, 9],
-        ]);
-
-        $this->transpose()->toArray()->shouldReturn([
-            [1, 4, 7],
-            [2, 5, 8],
-            [3, 6, 9],
-        ]);
-    }
-
-    function it_can_transpose_an_associatve_array()
-    {
-        $this->beConstructedWith([
-            'names' => ['adam', 'ben', 'claire'],
-            'ages' => [24, 32, 52],
-            'emails' => ['adam@example.com', 'ben@example.com', 'claire@example.com'],
-        ]);
-
-        $this->transpose()->toArray()->shouldReturn([
-            ['adam', 24, 'adam@example.com'],
-            ['ben', 32, 'ben@example.com'],
-            ['claire', 52, 'claire@example.com'],
-        ]);
-    }
-
-    function it_can_transpose_arrays_of_different_lengths()
-    {
-        $this->beConstructedWith([['a', 'b', 'c', 'd'], ['apple', 'box', 'car']]);
-
-        $this->transpose()->toArray()->shouldReturn([
-            ['a', 'apple'],
-            ['b', 'box'],
-            ['c', 'car'],
-            ['d', null],
-        ]);
-    }
-
     function it_can_transpose_collections_of_collections()
     {
         $this->beConstructedWith([
@@ -1155,23 +1111,29 @@ class CollectionSpec extends ObjectBehavior
         ]);
     }
 
-    function it_can_transpose_mixed_collections()
+    function it_can_transpose_arrays_of_different_lengths()
     {
-        $this->beConstructedWith(new Collection([
-            new Collection([1, 2, 3]),
-            [4, 5, 6],
-        ]));
+        $this->beConstructedWith([
+            new Collection(['a', 'b', 'c', 'd']),
+            new Collection(['apple', 'box', 'car']),
+        ]);
 
         $this->transpose()->toArray()->shouldBeLike([
-            new Collection([1, 4]),
-            new Collection([2, 5]),
-            new Collection([3, 6]),
+            new Collection(['a', 'apple']),
+            new Collection(['b', 'box']),
+            new Collection(['c', 'car']),
+            new Collection(['d', null]),
         ]);
     }
 
-    function it_should_throw_an_invalid_argument_if_given_anything_but_a_multi_dimensional_array_or_collection()
+    function it_should_throw_an_invalid_argument_if_collection_items_are_not_collection()
     {
-        $this->beConstructedWith(['a', 'b', 'c']);
+        $this->beConstructedWith([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]);
+
         $this->shouldThrow(InvalidArgument::class)->during('transpose');
     }
 
@@ -1184,7 +1146,7 @@ class CollectionSpec extends ObjectBehavior
             ->values()
             ->toArray()
             ->shouldReturn([1, 2, 3]);
-        
+
         $this
             ->map('\DusanKasan\Knapsack\compare')
             ->toArray()
@@ -1217,4 +1179,3 @@ class CollectionSpec extends ObjectBehavior
             ->shouldReturn('103122');
     }
 }
-
