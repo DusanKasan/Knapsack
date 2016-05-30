@@ -1015,6 +1015,33 @@ Collection::from([1, 3, 3, 2])->size(); //4
 size([1, 3, 3, 2]); //4
 ```
 
+#### sizeBetween(int $fromSize, int $toSize) : bool
+Checks whether this collection has between $fromSize to $toSize items. $toSize can be smaller than $fromSize.
+```php
+Collection::from([1, 3, 3, 2])->sizeIsBetween(3, 5); //true
+```
+```php
+sizeIsBetween([1, 3, 3, 2], 3, 5); //true
+```
+
+#### sizeIsGreaterThan(int $size) : bool
+Checks whether this collection has more than $size items.
+```php
+Collection::from([1, 3, 3, 2])->sizeIsGreaterThan(3); //true
+```
+```php
+sizeIsGreaterThan([1, 3, 3, 2], 3); //true
+```
+
+#### sizeIsLessThan(int $size) : bool
+Checks whether this collection has less than $size items.
+```php
+Collection::from([1, 3, 3, 2])->sizeIsLessThan(5); //true
+```
+```php
+sizeIsLessThan([1, 3, 3, 2], 5); //true
+```
+
 #### slice(int $from, int $to) : Collection
 Returns a lazy collection of items which are part of the original collection from item number $from to item number $to inclusive. The items before $from are also realized, just not returned.
 ```php
