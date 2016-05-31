@@ -1024,6 +1024,15 @@ Collection::from([1, 3, 3, 2])->sizeIsBetween(3, 5); //true
 sizeIsBetween([1, 3, 3, 2], 3, 5); //true
 ```
 
+#### sizeIs(int $size) : bool
+Checks whether this collection has exactly $size items.
+```php
+Collection::from([1, 3, 3, 2])->sizeIs(4); //true
+```
+```php
+sizeIs([1, 3, 3, 2], 4); //true
+```
+
 #### sizeIsGreaterThan(int $size) : bool
 Checks whether this collection has more than $size items.
 ```php
