@@ -78,3 +78,16 @@
 - sizeIsGreaterThan function added
 - sizeIsLessThan function added
 - sizeIsBetween function added
+
+##7.0.0
+- The functionality of sum, average, min, max and concatenate moved into collection. 
+- Sum collection function added
+- Average collection function added
+- Min collection function added
+- Max collection function added
+- ToArrray collection function added
+- **Breaking change: sum utility function removed**
+- **Breaking change: average utility function removed**
+- **Breaking change: min utility function removed**
+- **Breaking change: max utility function removed**
+- **Breaking change: concatenate utility function removed**

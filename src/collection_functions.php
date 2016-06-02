@@ -1516,3 +1516,96 @@ function sizeIsBetween($collection, $fromSize, $toSize)
 
     return $fromSize < $itemsTempCount && $itemsTempCount < $toSize;
 }
+
+/**
+ * Returns a sum of all values in the $collection.
+ *
+ * @param array|Traversable $collection
+ * @return float
+ */
+function sum($collection)
+{
+    $result = 0.0;
+
+    foreach ($collection as $value) {
+        $result += $value;
+    }
+
+    return $result;
+}
+
+/**
+ * Returns average of values from $collection.
+ *
+ * @param array|Traversable $collection
+ * @return float
+ */
+function average($collection)
+{
+    $sum = 0.0;
+    $count = 0;
+
+    foreach ($collection as $value) {
+        $sum += $value;
+        $count++;
+    }
+
+    return $count ? (float) $sum/$count : 0.0;
+}
+
+/**
+ * Returns maximal value from $collection.
+ *
+ * @param array|Traversable $collection
+ * @return mixed
+ */
+function max($collection)
+{
+    $result = null;
+
+    foreach ($collection as $value) {
+        $result = $value > $result ? $value : $result;
+    }
+
+    return $result;
+}
+
+/**
+ * Returns minimal value from $collection.
+ *
+ * @param array|Traversable $collection
+ * @return mixed
+ */
+function min($collection)
+{
+    $result = null;
+    $hasItem = false;
+
+    foreach ($collection as $value) {
+        if (!$hasItem) {
+            $hasItem = true;
+            $result = $value;
+        }
+
+        $result = $value < $result ? $value : $result;
+    }
+
+    return $result;
+}
+
+/**
+ * Returns a string by concatenating the $collection values into a string.
+ *
+ * @param array|Traversable $collection
+ * @return string
+ */
+function toString($collection)
+{
+    $result = '';
+
+    foreach ($collection as $value) {
+        $result .= (string) $value;
+    }
+
+    return $result;
+}

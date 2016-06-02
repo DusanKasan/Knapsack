@@ -1098,48 +1098,6 @@ class CollectionSpec extends ObjectBehavior
         $this->intersect([1], [3])->values()->toArray()->shouldReturn([1, 3]);
     }
 
-    function it_can_use_the_utility_methods()
-    {
-        $this->beConstructedWith([1, 3, 2]);
-
-        $this
-            ->sort('\DusanKasan\Knapsack\compare')
-            ->values()
-            ->toArray()
-            ->shouldReturn([1, 2, 3]);
-
-        $this
-            ->map('\DusanKasan\Knapsack\compare')
-            ->toArray()
-            ->shouldReturn([1, 1, 0]);
-
-        $this
-            ->map('\DusanKasan\Knapsack\decrement')
-            ->toArray()
-            ->shouldReturn([0, 2, 1]);
-
-        $this
-            ->reduce('\DusanKasan\Knapsack\sum', 0)
-            ->shouldReturn(9);
-
-        $this
-            ->reduce('\DusanKasan\Knapsack\max', 0)
-            ->shouldReturn(3);
-
-        $this
-            ->reduce('\DusanKasan\Knapsack\min', 1)
-            ->shouldReturn(0);
-
-        $this
-            ->map('\DusanKasan\Knapsack\average')
-            ->toArray()
-            ->shouldReturn([0.5, 2, 2]);
-
-        $this
-            ->reduce('\DusanKasan\Knapsack\concatenate', '')
-            ->shouldReturn('103122');
-    }
-
     function it_can_check_if_size_is_exactly_n()
     {
         $this->beConstructedWith([1, 2]);
@@ -1172,5 +1130,75 @@ class CollectionSpec extends ObjectBehavior
         $this->sizeIsBetween(0, 0)->shouldReturn(false);
         $this->sizeIsBetween(3, 1)->shouldReturn(true);
     }
+
+    function it_can_sum_the_collection()
+    {
+        $this->beConstructedWith([1, 2, 3, 4]);
+        $this->sum()->shouldReturn(10.0);
+    }
+
+    function it_can_get_average_of_the_collection()
+    {
+        $this->beConstructedWith([1, 2, 2, 3]);
+        $this->average()->shouldReturn(2.0);
+    }
+
+    function it_will_return_zero_when_average_is_called_on_empty_collection()
+    {
+        $this->beConstructedWith([]);
+        $this->average()->shouldReturn(0.0);
+    }
+
+    function it_can_get_maximal_value_in_the_colleciton()
+    {
+        $this->beConstructedWith([1, 2, 3, 2]);
+        $this->max()->shouldReturn(3);
+    }
+    
+    function it_will_return_null_when_max_is_called_on_empty_collection()
+    {
+        $this->beConstructedWith([]);
+        $this->max()->shouldReturn(null);
+    }
+
+    function it_can_get_min_value_in_the_colleciton()
+    {
+        $this->beConstructedWith([2, 1, 3, 2]);
+        $this->min()->shouldReturn(1);
+    }
+
+    function it_will_return_null_when_min_is_called_on_empty_collection()
+    {
+        $this->beConstructedWith([]);
+        $this->min()->shouldReturn(null);
+    }
+
+    function it_can_convert_the_collection_to_string()
+    {
+        $this->beConstructedWith([2, 'a', 3, null]);
+        $this->toString()->shouldReturn('2a3');
+    }
+
+    function it_can_use_the_utility_methods()
+    {
+        $this->beConstructedWith([1, 3, 2]);
+
+        $this
+            ->sort('\DusanKasan\Knapsack\compare')
+            ->values()
+            ->toArray()
+            ->shouldReturn([1, 2, 3]);
+
+        $this
+            ->map('\DusanKasan\Knapsack\compare')
+            ->toArray()
+            ->shouldReturn([1, 1, 0]);
+
+        $this
+            ->map('\DusanKasan\Knapsack\decrement')
+            ->toArray()
+            ->shouldReturn([0, 2, 1]);
+    }
+
 }
 

@@ -278,6 +278,16 @@ Collection::from([1, 3, 3, 2])
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
+#### average() : double
+Returns average of values in this collection.
+```php
+Collection::from([1, 2, 3, 2])->average(); //2.0
+Collection::from([])->average(); //0.0
+```
+```php
+average([1, 2, 3]); //2.0
+```
+
 #### combine(array|Traversable $collection, bool $strict = false) : Collection
 Combines the values of this collection as keys, with values of $collection as values.  The resulting collection has length equal to the size of smaller collection. If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
 ```php
@@ -802,6 +812,26 @@ Collection::from([1, 3, 3, 2])
 toArray(values(mapcat([1, 3, 3, 2], function ($value) {return [[$value]];}))); //[[1], [3], [3], [2]]
 ``` 
 
+#### max() : mixed
+Returns mthe maximal value in this collection.
+```php
+Collection::from([1, 2, 3, 2])->max(); //3
+Collection::from([])->max(); //null
+```
+```php
+max([1, 2, 3, 2]); //3
+```
+
+#### min() : mixed
+Returns mthe minimal value in this collection.
+```php
+Collection::from([1, 2, 3, 2])->min(); //1
+Collection::from([])->min(); //null
+```
+```php
+min([1, 2, 3, 2]); //1
+```
+
 #### only(array|Traversable $keys) : Collection
 Returns a lazy collection of items associated to any of the keys from $keys.
 ```php
@@ -1136,6 +1166,16 @@ Collection::from([1, 3, 3, 2])
 toArray(splitWith([1, 3, 3, 2], function ($value) {return $value < 3;})); //[[1], [1 => 3, 2 => 3, 3 => 2]]
 ```
 
+#### sum() : double
+Returns a sum of all values in this collection.
+```php
+Collection::from([1, 2, 3])->sum(); //6
+Collection::from([])->sum(); //0
+```
+```php
+sum([1, 2, 3]); //6
+```
+
 #### take(int $numberOfItems) : Collection
 A form of slice that returns first $numberOfItems items.
 ```php
@@ -1204,6 +1244,16 @@ Collection::from([1, 3, 3, 2])->toArray(); //[1, 3, 3, 2]
 toArray([1, 3, 3, 2]); //[1, 3, 3, 2]
 ```
 
+#### toString() : string
+Returns a string by concatenating this collection's values into a string.
+```php
+Collection::from([1, 'a', 3, null])->toString(); //'1a3'
+Collection::from([])->toString(); //''
+```
+```php
+toString([1, 'a', 3, null]); //'1a3'
+```
+
 #### zip(array|Traversable[] ...$collections) : Collection
 Returns a lazy collection of non-lazy collections of items from nth position from this collection and each passed collection. Stops when any of the collections don't have an item at the nth position.
 ```php
@@ -1250,37 +1300,4 @@ Returns value of $value decremented by one.
 
 ```php
 decrement(2) === 1; //true
-```
-
-#### sum(... int $values)
-Returns the sum of all arguments.
-
-```php
-sum(1, 2, 3) === 6; //true
-```
-
-#### max(... int $values)
-Returns the maximal value of all arguments.
-
-```php
-max(1, 5, 3) === 5; //true
-```
-
-#### min(... int $values)
-Returns the minimal value of all arguments.
-
-```php
-min(1, 5, 3) === 1; //true
-```
-#### average(... int $values)
-Returns the average value of all arguments.
-
-```php
-average(1, 2, 3) === 2.0; //true
-```
-
-#### concatenate(... string $values)
-Returns a string of all the arguments concatenated together.
-```php
-concatenate('a', 'b', 'c') == 'abc'; //true 
 ```

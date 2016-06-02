@@ -807,6 +807,56 @@ trait CollectionTrait
     }
 
     /**
+     * Returns a sum of all values in this collection.
+     *
+     * @return double
+     */
+    public function sum()
+    {
+        return sum($this->getItems());
+    }
+
+    /**
+     * Returns average of values from this collection.
+     *
+     * @return double
+     */
+    public function average()
+    {
+        return average($this->getItems());
+    }
+
+    /**
+     * Returns maximal value from this collection.
+     *
+     * @return mixed
+     */
+    public function max()
+    {
+        return \DusanKasan\Knapsack\max($this->getItems());
+    }
+
+    /**
+     * Returns minimal value from this collection.
+     *
+     * @return mixed
+     */
+    public function min()
+    {
+        return \DusanKasan\Knapsack\min($this->getItems());
+    }
+
+    /**
+     * Returns a string by concatenating the collection values into a string.
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        return toString($this->getItems());
+    }
+
+    /**
      * @return array|\Traversable
      */
     protected function getItems()
