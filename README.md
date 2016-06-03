@@ -1004,6 +1004,17 @@ Collection::from([1, 3, 3, 2])
 toArray(replace([1, 3, 3, 2], [3 => 'a'])); //[1, 'a', 'a', 2]
 ```
 
+#### replaceByKeys(array|Traversable $replacementMap) : Collection
+Returns a lazy collection with items from $collection, but items with keys  that are found in keys of $replacementMap are replaced by their values.
+```php
+Collection::from([1, 3, 3, 2])
+    ->replace([3 => 'a'])
+    ->toArray(); //[1, 3, 3, 'a']
+```
+```php
+toArray(replace([1, 3, 3, 2], [3 => 'a'])); //[1, 3, 3, 'a']
+```
+
 #### reverse() : Collection
 Returns a non-lazy collection of items in this collection in reverse order.
 ```php

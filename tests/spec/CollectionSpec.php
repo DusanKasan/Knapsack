@@ -1156,7 +1156,7 @@ class CollectionSpec extends ObjectBehavior
         $this->beConstructedWith([1, 2, 3, 2]);
         $this->max()->shouldReturn(3);
     }
-    
+
     function it_will_return_null_when_max_is_called_on_empty_collection()
     {
         $this->beConstructedWith([]);
@@ -1181,6 +1181,12 @@ class CollectionSpec extends ObjectBehavior
         $this->toString()->shouldReturn('2a3');
     }
 
+    function it_can_replace_by_key()
+    {
+        $this->beConstructedWith(['a' => 1, 'b' => 2, 'c' => 3]);
+        $this->replaceByKeys(['b' => 3])->toArray()->shouldReturn(['a' => 1, 'b' => 3, 'c' => 3]);
+    }
+
     function it_can_use_the_utility_methods()
     {
         $this->beConstructedWith([1, 3, 2]);
@@ -1201,6 +1207,5 @@ class CollectionSpec extends ObjectBehavior
             ->toArray()
             ->shouldReturn([0, 2, 1]);
     }
-
 }
 

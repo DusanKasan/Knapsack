@@ -1609,3 +1609,24 @@ function toString($collection)
 
     return $result;
 }
+
+
+/**
+ * Returns a lazy collection with items from $collection, but items with keys  that are found in keys of $replacementMap
+ * are replaced by their values.
+ *
+ * @param array|Traversable $collection
+ * @param array|Traversable $replacementMap
+ * @return Collection
+ */
+function replaceByKeys($collection, $replacementMap)
+{
+    $generatorFactory = function () use ($collection, $replacementMap) {
+        foreach ($collection as $key => $value) {
+            $newValue = getOrDefault($replacementMap, $key, $value);
+            yield $key => $newValue;
+        }
+    };
+
+    return new Collection($generatorFactory);
+}

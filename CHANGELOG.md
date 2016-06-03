@@ -95,3 +95,6 @@
 ##8.0.0
 - **Breaking change: sum function will return integer by default, float if there are float type elements**
 - **Breaking change: average function will not force return float and will return integer if the sum/count result is integer**
+
+##8.1.0
+- ReplaceByKeys function added

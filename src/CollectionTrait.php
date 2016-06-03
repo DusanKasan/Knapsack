@@ -857,6 +857,18 @@ trait CollectionTrait
     }
 
     /**
+     * Returns a lazy collection with items from $collection, but items with keys  that are found in keys of
+     * $replacementMap are replaced by their values.
+     *
+     * @param array|\Traversable $replacementMap
+     * @return Collection
+     */
+    public function replaceByKeys($replacementMap)
+    {
+        return replaceByKeys($this->getItems(), $replacementMap);
+    }
+
+    /**
      * @return array|\Traversable
      */
     protected function getItems()
