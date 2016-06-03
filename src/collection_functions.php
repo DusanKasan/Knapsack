@@ -1259,7 +1259,7 @@ function only($collection, $keys)
     return filter(
         $collection,
         function ($value, $key) use ($keys) {
-            return in_array($key, $keys);
+            return in_array($key, $keys, true);
         }
     );
 }

@@ -1079,6 +1079,9 @@ class CollectionSpec extends ObjectBehavior
                 ],
                 'c' => [
                     'b' => 5
+                ],
+                [
+                    'a'
                 ]
             ]
         ];

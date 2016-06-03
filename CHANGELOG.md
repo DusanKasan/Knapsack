@@ -98,3 +98,6 @@
 
 ##8.1.0
 - ReplaceByKeys function added
+
+##8.1.1
+- Fixed bug: the only function always included the item with key equal to zero in the result. Caused by comparing string == 0. Also affected extract.
