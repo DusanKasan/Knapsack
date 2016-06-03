@@ -278,14 +278,15 @@ Collection::from([1, 3, 3, 2])
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
-#### average() : double
+#### average() : int|float
 Returns average of values in this collection.
 ```php
-Collection::from([1, 2, 3, 2])->average(); //2.0
-Collection::from([])->average(); //0.0
+Collection::from([1, 2, 3, 2])->average(); //2
+Collection::from([1, 2, 3, 2, 2])->average(); //2.2
+Collection::from([])->average(); //0
 ```
 ```php
-average([1, 2, 3]); //2.0
+average([1, 2, 3]); //2
 ```
 
 #### combine(array|Traversable $collection, bool $strict = false) : Collection
@@ -1166,10 +1167,11 @@ Collection::from([1, 3, 3, 2])
 toArray(splitWith([1, 3, 3, 2], function ($value) {return $value < 3;})); //[[1], [1 => 3, 2 => 3, 3 => 2]]
 ```
 
-#### sum() : double
+#### sum() : int|float
 Returns a sum of all values in this collection.
 ```php
 Collection::from([1, 2, 3])->sum(); //6
+Collection::from([1, 2, 3, 1.5])->sum(); //7.5
 Collection::from([])->sum(); //0
 ```
 ```php
