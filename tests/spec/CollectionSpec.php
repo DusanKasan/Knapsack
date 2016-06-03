@@ -1134,19 +1134,21 @@ class CollectionSpec extends ObjectBehavior
     function it_can_sum_the_collection()
     {
         $this->beConstructedWith([1, 2, 3, 4]);
-        $this->sum()->shouldReturn(10.0);
+        $this->sum()->shouldReturn(10);
+        $this->append(1.5)->sum()->shouldReturn(11.5);
     }
 
     function it_can_get_average_of_the_collection()
     {
         $this->beConstructedWith([1, 2, 2, 3]);
-        $this->average()->shouldReturn(2.0);
+        $this->average()->shouldReturn(2);
+        $this->append(3)->average()->shouldReturn(2.2);
     }
 
     function it_will_return_zero_when_average_is_called_on_empty_collection()
     {
         $this->beConstructedWith([]);
-        $this->average()->shouldReturn(0.0);
+        $this->average()->shouldReturn(0);
     }
 
     function it_can_get_maximal_value_in_the_colleciton()

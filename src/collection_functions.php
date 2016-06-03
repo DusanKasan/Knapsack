@@ -1521,11 +1521,11 @@ function sizeIsBetween($collection, $fromSize, $toSize)
  * Returns a sum of all values in the $collection.
  *
  * @param array|Traversable $collection
- * @return float
+ * @return int|float
  */
 function sum($collection)
 {
-    $result = 0.0;
+    $result = 0;
 
     foreach ($collection as $value) {
         $result += $value;
@@ -1538,11 +1538,11 @@ function sum($collection)
  * Returns average of values from $collection.
  *
  * @param array|Traversable $collection
- * @return float
+ * @return int|float
  */
 function average($collection)
 {
-    $sum = 0.0;
+    $sum = 0;
     $count = 0;
 
     foreach ($collection as $value) {
@@ -1550,7 +1550,7 @@ function average($collection)
         $count++;
     }
 
-    return $count ? (float) $sum/$count : 0.0;
+    return $count ? $sum/$count : 0;
 }
 
 /**

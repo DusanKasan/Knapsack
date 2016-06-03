@@ -809,7 +809,7 @@ trait CollectionTrait
     /**
      * Returns a sum of all values in this collection.
      *
-     * @return float
+     * @return int|float
      */
     public function sum()
     {
@@ -819,7 +819,7 @@ trait CollectionTrait
     /**
      * Returns average of values from this collection.
      *
-     * @return float
+     * @return int|float
      */
     public function average()
     {

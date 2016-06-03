@@ -85,9 +85,13 @@
 - Average collection function added
 - Min collection function added
 - Max collection function added
-- ToArrray collection function added
+- ToString collection function added
 - **Breaking change: sum utility function removed**
 - **Breaking change: average utility function removed**
 - **Breaking change: min utility function removed**
 - **Breaking change: max utility function removed**
 - **Breaking change: concatenate utility function removed**
+
+##8.0.0
+- **Breaking change: sum function will return integer by default, float if there are float type elements**
+- **Breaking change: average function will not force return float and will return integer if the sum/count result is integer**
