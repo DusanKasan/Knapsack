@@ -868,6 +868,36 @@ trait CollectionTrait
         return replaceByKeys($this->getItems(), $replacementMap);
     }
 
+
+
+    /**
+     * /**
+     * Dumps this collection into array (recursively).
+     *
+     * - scalars are returned as they are,
+     * - array of class name => properties (name => value) is returned for objects,
+     * - arrays or Traversables are returned as arrays,
+     * - for anything else result of calling gettype($input) is returned
+     *
+     * If specified, $maxItemsPerCollection will only leave specified number of items in collection,
+     * appending a new element at end '>>>' if original collection was longer.
+     *
+     * If specified, $maxDepth will only leave specified n levels of nesting, replacing elements
+     * with '^^^' once the maximum nesting level was reached.
+     *
+     * If a collection with duplicate keys is encountered, the duplicate keys (except the first one)
+     * will be change into a format originalKey//duplicateCounter where duplicateCounter starts from
+     * 1 at the first duplicate. So [0 => 1, 0 => 2] will become [0 => 1, '0//1' => 2]
+     *
+     * @param int|null $maxItemsPerCollection
+     * @param int|null $maxDepth
+     * @return array
+     */
+    public function dump($maxItemsPerCollection = null, $maxDepth = null)
+    {
+        return dump($this->getItems(), $maxItemsPerCollection, $maxDepth);
+    }
+
     /**
      * @return array|\Traversable
      */

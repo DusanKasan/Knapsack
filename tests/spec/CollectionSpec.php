@@ -1210,5 +1210,94 @@ class CollectionSpec extends ObjectBehavior
             ->toArray()
             ->shouldReturn([0, 2, 1]);
     }
+
+    function it_can_dump_the_collection()
+    {
+        $datetime = new \DateTime(
+            '2016-06-08 19:57:02.000000',
+            new \DateTimeZone('Europe/Berlin')
+        );
+
+        $this->beConstructedWith(
+            [
+                [
+                    [1, [2], 3],
+                    ['a' => 'b'],
+                    new ArrayIterator([1, 2, 3])
+                ],
+                [1, 2, 3],
+                new ArrayIterator(['a', 'b', 'c']),
+                true,
+                $datetime,
+                \DusanKasan\Knapsack\concat([1], [1])
+            ]
+        );
+
+        $this->dump()->shouldReturn(
+            [
+                [
+                    [1, [2], 3],
+                    ['a' => 'b'],
+                    [1, 2, 3]
+                ],
+                [1, 2, 3],
+                ['a', 'b', 'c'],
+                true,
+                [
+                    'DateTime' => [
+                        'date' => "2016-06-08 19:57:02.000000",
+                        'timezone_type' => 3,
+                        'timezone' => "Europe/Berlin",
+                    ],
+                ],
+                [1, '0//1' => 1]
+            ]
+        );
+
+        $this->dump(2)->shouldReturn(
+            [
+                [
+                    [1, [2], '>>>'],
+                    ['a' => 'b'],
+                    '>>>'
+                ],
+                [1, 2, '>>>'],
+                '>>>'
+            ]
+        );
+
+        $this->dump(null, 3)->shouldReturn(
+            [
+                [
+                    [1, '^^^', 3],
+                    ['a' => 'b'],
+                    [1, 2, 3]
+                ],
+                [1, 2, 3],
+                ['a', 'b', 'c'],
+                true,
+                [
+                    'DateTime' => [
+                        'date' => "2016-06-08 19:57:02.000000",
+                        'timezone_type' => 3,
+                        'timezone' => "Europe/Berlin",
+                    ],
+                ],
+                [1, '0//1' => 1]
+            ]
+        );
+
+        $this->dump(2, 3)->shouldReturn(
+            [
+                [
+                    [1, '^^^', '>>>'],
+                    ['a' => 'b'],
+                    '>>>'
+                ],
+                [1, 2, '>>>'],
+                '>>>'
+            ]
+        );
+    }
 }
 

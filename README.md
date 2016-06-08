@@ -422,7 +422,84 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php
 toArray(values(dropWhile([1, 3, 3, 2], function ($v) {return $v < 3;}))); // [3, 3, 2]
-```    
+```
+    
+#### dump(int $maxItemsPerCollection = null, $maxDepth = null) : Collection
+Dumps this collection into array (recursively).
+
+- scalars are returned as they are,
+- array of class name => properties (name => value) is returned for objects,
+- arrays or Traversables are returned as arrays,
+- for anything else result of calling gettype($input) is returned
+
+If specified, $maxItemsPerCollection will only leave specified number of items in collection,
+appending a new element at end '>>>' if original collection was longer.
+
+If specified, $maxDepth will only leave specified n levels of nesting, replacing elements
+with '^^^' once the maximum nesting level was reached.
+
+If a collection with duplicate keys is encountered, the duplicate keys (except the first one)
+will be change into a format originalKey//duplicateCounter where duplicateCounter starts from
+1 at the first duplicate. So [0 => 1, 0 => 2] will become [0 => 1, '0//1' => 2]
+
+```php
+Collection::from([1, 3, 3, 2])->dump(); //[1, 3, 3, 2]
+```
+```php
+$datetime = new \DateTime(
+    '2016-06-08 19:57:02.000000',
+    new \DateTimeZone('Europe/Berlin')
+);
+
+$collection = Collection::from(
+    [
+        [
+            [1, [2], 3],
+            ['a' => 'b'],
+            new ArrayIterator([1, 2, 3])
+        ],
+        [1, 2, 3],
+        new ArrayIterator(['a', 'b', 'c']),
+        true,
+        $datetime,
+        \DusanKasan\Knapsack\concat([1], [1])
+    ]
+);
+
+$collection->dump(2, 3);
+//[
+//    [
+//        [1, '^^^', '>>>'],
+//        ['a' => 'b'],
+//        '>>>'
+//    ],
+//    [1, 2, '>>>'],
+//    '>>>'
+//]
+
+$collection->dump();
+//[
+//    [
+//        [1, [2], 3],
+//        ['a' => 'b'],
+//        [1, 2, 3]
+//    ],
+//    [1, 2, 3],
+//    ['a', 'b', 'c'],
+//    true,
+//    [
+//        'DateTime' => [
+//            'date' => "2016-06-08 19:57:02.000000",
+//            'timezone_type' => 3,
+//            'timezone' => "Europe/Berlin",
+//        ],
+//    ],
+//    [1, '0//1' => 1]
+//]
+```
+```php
+dump([1, 3, 3, 2], 2); // [1, 3, '>>>']
+```
 
 #### each(callable $function) : Collection
 Returns a lazy collection in which $function(value, key) is executed for each item.

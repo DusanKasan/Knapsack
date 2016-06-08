@@ -1630,3 +1630,77 @@ function replaceByKeys($collection, $replacementMap)
 
     return new Collection($generatorFactory);
 }
+
+/**
+ * Dumps a variable into scalar or array (recursively).
+ *
+ * - scalars are returned as they are,
+ * - array of class name => properties (name => value) is returned for objects,
+ * - arrays or Traversables are returned as arrays,
+ * - for anything else result of calling gettype($input) is returned
+ *
+ * If specified, $maxItemsPerCollection will only leave specified number of items in collection,
+ * appending a new element at end '>>>' if original collection was longer.
+ *
+ * If specified, $maxDepth will only leave specified n levels of nesting, replacing elements
+ * with '^^^' once the maximum nesting level was reached.
+ *
+ * If a collection with duplicate keys is encountered, the duplicate keys (except the first one)
+ * will be change into a format originalKey//duplicateCounter where duplicateCounter starts from
+ * 1 at the first duplicate. So [0 => 1, 0 => 2] will become [0 => 1, '0//1' => 2]
+ *
+ * @param mixed $input
+ * @param int|null $maxItemsPerCollection
+ * @param int|null $maxDepth
+ * @return array|mixed
+ */
+function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
+{
+    if (is_scalar($input)) {
+        return $input;
+    }
+
+    if (isCollection($input)) {
+        if ($maxDepth === 0) {
+            return '^^^';
+        }
+
+        $normalizedProperties = [];
+        foreach ($input as $key => $value) {
+            if ($maxItemsPerCollection && count($normalizedProperties) >= $maxItemsPerCollection) {
+                $normalizedProperties[] = '>>>';
+                break;
+            }
+
+            for ($affix = 0; true; $affix++) {
+                $betterKey = $affix ? "$key//$affix" : $key;
+                if (!array_key_exists($betterKey, $normalizedProperties)) {
+                    $normalizedProperties[$betterKey] = dump(
+                        $value,
+                        $maxItemsPerCollection,
+                        $maxDepth>0 ? $maxDepth-1 : null
+                    );
+
+                    break;
+                }
+            }
+        }
+
+        return $normalizedProperties;
+    }
+
+    if (is_object($input)) {
+        if ($maxDepth === 0) {
+            return '^^^';
+        }
+
+        $reflection = new \ReflectionObject($input);
+        $normalizedProperties = [];
+        foreach ($reflection->getProperties() as $property) {
+            $normalizedProperties[$property->getName()] = $property->getValue($input);
+        }
+        return [get_class($input) => dump($normalizedProperties, null, $maxDepth>0 ? $maxDepth-1 : null)];
+    }
+
+    return gettype($input);
+}
