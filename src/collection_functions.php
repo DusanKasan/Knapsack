@@ -1635,7 +1635,8 @@ function replaceByKeys($collection, $replacementMap)
  * Dumps a variable into scalar or array (recursively).
  *
  * - scalars are returned as they are,
- * - array of class name => properties (name => value) is returned for objects,
+ * - array of class name => properties (name => value and only properties accessible for this class)
+ *   is returned for objects,
  * - arrays or Traversables are returned as arrays,
  * - for anything else result of calling gettype($input) is returned
  *
@@ -1697,6 +1698,7 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
         $reflection = new \ReflectionObject($input);
         $normalizedProperties = [];
         foreach ($reflection->getProperties() as $property) {
+            $property->setAccessible(true);
             $normalizedProperties[$property->getName()] = $property->getValue($input);
         }
         return [get_class($input) => dump($normalizedProperties, null, $maxDepth>0 ? $maxDepth-1 : null)];

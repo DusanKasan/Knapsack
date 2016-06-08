@@ -875,7 +875,8 @@ trait CollectionTrait
      * Dumps this collection into array (recursively).
      *
      * - scalars are returned as they are,
-     * - array of class name => properties (name => value) is returned for objects,
+     * - array of class name => properties (name => value and only properties accessible for this class)
+     *   is returned for objects,
      * - arrays or Traversables are returned as arrays,
      * - for anything else result of calling gettype($input) is returned
      *

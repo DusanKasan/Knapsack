@@ -1213,11 +1213,6 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_dump_the_collection()
     {
-        $datetime = new \DateTime(
-            '2016-06-08 19:57:02.000000',
-            new \DateTimeZone('Europe/Berlin')
-        );
-
         $this->beConstructedWith(
             [
                 [
@@ -1228,8 +1223,8 @@ class CollectionSpec extends ObjectBehavior
                 [1, 2, 3],
                 new ArrayIterator(['a', 'b', 'c']),
                 true,
-                $datetime,
-                \DusanKasan\Knapsack\concat([1], [1])
+                new \DusanKasan\Knapsack\Tests\Helpers\Car('sedan', 5),
+                \DusanKasan\Knapsack\concat([1], [1]),
             ]
         );
 
@@ -1244,11 +1239,10 @@ class CollectionSpec extends ObjectBehavior
                 ['a', 'b', 'c'],
                 true,
                 [
-                    'DateTime' => [
-                        'date' => "2016-06-08 19:57:02.000000",
-                        'timezone_type' => 3,
-                        'timezone' => "Europe/Berlin",
-                    ],
+                    'DusanKasan\Knapsack\Tests\Helpers\Car' => [
+                        'numberOfSeats' => 5,
+                     ],
+
                 ],
                 [1, '0//1' => 1]
             ]
@@ -1277,10 +1271,8 @@ class CollectionSpec extends ObjectBehavior
                 ['a', 'b', 'c'],
                 true,
                 [
-                    'DateTime' => [
-                        'date' => "2016-06-08 19:57:02.000000",
-                        'timezone_type' => 3,
-                        'timezone' => "Europe/Berlin",
+                    'DusanKasan\Knapsack\Tests\Helpers\Car' => [
+                        'numberOfSeats' => 5,
                     ],
                 ],
                 [1, '0//1' => 1]

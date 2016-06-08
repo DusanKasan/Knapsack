@@ -428,7 +428,7 @@ toArray(values(dropWhile([1, 3, 3, 2], function ($v) {return $v < 3;}))); // [3,
 Dumps this collection into array (recursively).
 
 - scalars are returned as they are,
-- array of class name => properties (name => value) is returned for objects,
+- array of class name => properties (name => value and only properties accessible for this class) is returned for objects,
 - arrays or Traversables are returned as arrays,
 - for anything else result of calling gettype($input) is returned
 
@@ -446,11 +446,6 @@ will be change into a format originalKey//duplicateCounter where duplicateCounte
 Collection::from([1, 3, 3, 2])->dump(); //[1, 3, 3, 2]
 ```
 ```php
-$datetime = new \DateTime(
-    '2016-06-08 19:57:02.000000',
-    new \DateTimeZone('Europe/Berlin')
-);
-
 $collection = Collection::from(
     [
         [
@@ -461,7 +456,7 @@ $collection = Collection::from(
         [1, 2, 3],
         new ArrayIterator(['a', 'b', 'c']),
         true,
-        $datetime,
+        new \DusanKasan\Knapsack\Tests\Helpers\Car('sedan', 5),
         \DusanKasan\Knapsack\concat([1], [1])
     ]
 );
@@ -488,10 +483,8 @@ $collection->dump();
 //    ['a', 'b', 'c'],
 //    true,
 //    [
-//        'DateTime' => [
-//            'date' => "2016-06-08 19:57:02.000000",
-//            'timezone_type' => 3,
-//            'timezone' => "Europe/Berlin",
+//        'DusanKasan\Knapsack\Tests\Helpers\Car' => [
+//            'numberOfSeats' => 5,
 //        ],
 //    ],
 //    [1, '0//1' => 1]
