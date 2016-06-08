@@ -2,7 +2,6 @@
 
 namespace DusanKasan\Knapsack\Tests\Helpers;
 
-
 class Machine
 {
     /**

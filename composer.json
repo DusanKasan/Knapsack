@@ -31,7 +31,11 @@
       "src/utility_functions.php"
     ],
     "psr-4": {
-      "DusanKasan\\Knapsack\\": "src/",
+      "DusanKasan\\Knapsack\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "DusanKasan\\Knapsack\\Tests\\Helpers\\": "tests/helpers/"
     }
   }

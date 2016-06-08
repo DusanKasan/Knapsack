@@ -1661,14 +1661,14 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
         return $input;
     }
 
-    if (isCollection($input)) {
+    if (is_array($input) || $input instanceof Traversable) {
         if ($maxDepth === 0) {
             return '^^^';
         }
 
         $normalizedProperties = [];
         foreach ($input as $key => $value) {
-            if ($maxItemsPerCollection && count($normalizedProperties) >= $maxItemsPerCollection) {
+            if ($maxItemsPerCollection !== null && count($normalizedProperties) >= $maxItemsPerCollection) {
                 $normalizedProperties[] = '>>>';
                 break;
             }
