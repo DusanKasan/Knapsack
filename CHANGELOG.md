@@ -101,3 +101,6 @@
 
 ##8.1.1
 - Fixed bug: the only function always included the item with key equal to zero in the result. Caused by comparing string == 0. Also affected extract.
+
+##8.2.0
+- Dump function added, to make debugging easier.
