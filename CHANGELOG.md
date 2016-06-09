@@ -104,3 +104,6 @@
 
 ##8.2.0
 - Dump function added, to make debugging easier.
+
+##8.2.0
+- PrintDump function added, to make debugging easier. Prints debug output, but returns the original collection.  

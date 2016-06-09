@@ -900,6 +900,18 @@ trait CollectionTrait
     }
 
     /**
+     * Calls dump on this collection and then prints it using the var_export.
+     *
+     * @param null|int $maxItemsPerCollection
+     * @param null|int $maxDepth
+     * @return Collection
+     */
+    public function printDump($maxItemsPerCollection = null, $maxDepth = null)
+    {
+        return printDump($this->getItems(), $maxItemsPerCollection, $maxDepth);
+    }
+
+    /**
      * @return array|\Traversable
      */
     protected function getItems()

@@ -1706,3 +1706,17 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
 
     return gettype($input);
 }
+
+/**
+ * Calls dump on $input and then prints it using the var_export. Returns $input.
+ *
+ * @param mixed $input
+ * @param null|int $maxItemsPerCollection
+ * @param null|int $maxDepth
+ * @return mixed
+ */
+function printDump($input, $maxItemsPerCollection = null, $maxDepth = null)
+{
+    var_export(dump($input, $maxItemsPerCollection, $maxDepth));
+    return $input;
+}

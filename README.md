@@ -95,7 +95,7 @@ $result = Collection::from([[[1]]])
     ->first(true)
     ->first();
     
-vardump($result); //[1]
+var_dump($result); //[1]
 ```
 
 
@@ -424,7 +424,7 @@ Collection::from([1, 3, 3, 2])
 toArray(values(dropWhile([1, 3, 3, 2], function ($v) {return $v < 3;}))); // [3, 3, 2]
 ```
     
-#### dump(int $maxItemsPerCollection = null, $maxDepth = null) : Collection
+#### dump(int $maxItemsPerCollection = null, $maxDepth = null) : array
 Dumps this collection into array (recursively).
 
 - scalars are returned as they are,
@@ -960,6 +960,17 @@ Collection::from([1, 3, 3, 2])
 Collection::from([1, 3, 3, 2])
     ->prepend('a', 1)
     ->toArray(); //['a' => 1, 0 => 1, 1 => 3, 2 => 3, 3 => 2]
+```
+
+#### printDump(int $maxItemsPerCollection = null, $maxDepth = null) : Collection
+Calls dump on $input and then prints it using the var_export. Returns the collection. See dump function for arguments and output documentation.
+```php
+Collection::from([1, 3, 3, 2])
+    ->printDump()
+    ->toArray(); //[1, 3, 3, 2]
+```
+```php
+toArray(printDump([1, 3, 3, 2])); //[1, 3, 3, 2]
 ```
 
 #### realize() : Collection

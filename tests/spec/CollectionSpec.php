@@ -1291,5 +1291,16 @@ class CollectionSpec extends ObjectBehavior
             ]
         );
     }
+
+    function it_can_print_dump()
+    {
+        $this->beConstructedWith([1, [2], 3]);
+        
+        ob_start();
+        $this->printDump()->shouldReturn($this);
+        $this->printDump(2)->shouldReturn($this);
+        $this->printDump(2, 2)->shouldReturn($this);
+        ob_clean();
+    }
 }
 
