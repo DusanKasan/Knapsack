@@ -735,6 +735,17 @@ trait CollectionTrait
     }
 
     /**
+     * Transpose each item in a collection, interchanging the row and column indexes.
+     * Can only transpose multi-dimensional arrays or collections. Otherwise an InvalidArgument is raised.
+     *
+     * @return Collection
+     */
+    public function transpose()
+    {
+        return transpose($this->getItems());
+    }
+
+    /**
      * Extracts data from collection items by dot separated key path. Supports the * wildcard.  If a key contains \ or
      * it must be escaped using \ character.
      *

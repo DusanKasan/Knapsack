@@ -10,11 +10,11 @@ use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
+use function DusanKasan\Knapsack\reverse;
 use Iterator;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
 use Serializable;
-use function DusanKasan\Knapsack\reverse;
 
 /**
  * @mixin Collection
@@ -63,7 +63,7 @@ class CollectionSpec extends ObjectBehavior
 
     function it_can_be_created_to_iterate_over_function_infinitely()
     {
-        $this->beConstructedThrough('iterate', [1, function($i) {return $i+1;}]);
+        $this->beConstructedThrough('iterate', [1, function ($i) {return $i + 1;}]);
         $this->take(2)->toArray()->shouldReturn([1, 2]);
     }
 
@@ -73,13 +73,13 @@ class CollectionSpec extends ObjectBehavior
             'iterate',
             [
                 1,
-                function($i) {
+                function ($i) {
                     if ($i > 3) {
                         throw new NoMoreItems;
                     }
 
-                    return $i+1;
-                }
+                    return $i + 1;
+                },
             ]
         );
         $this->toArray()->shouldReturn([1, 2, 3, 4]);
@@ -263,16 +263,16 @@ class CollectionSpec extends ObjectBehavior
             ['letter' => 'A', 'type' => 'caps'],
             ['letter' => 'a', 'type' => 'small'],
             ['letter' => 'B', 'type' => 'caps'],
-            ['letter' => 'Z']
+            ['letter' => 'Z'],
         ]);
 
         $collection = $this->groupByKey('type');
         $collection->get('small')->toArray()->shouldReturn([
-            ['letter' => 'a', 'type' => 'small']
+            ['letter' => 'a', 'type' => 'small'],
         ]);
         $collection->get('caps')->toArray()->shouldReturn([
             ['letter' => 'A', 'type' => 'caps'],
-            ['letter' => 'B', 'type' => 'caps']
+            ['letter' => 'B', 'type' => 'caps'],
         ]);
 
         $collection = $this->groupByKey('types');
@@ -505,7 +505,7 @@ class CollectionSpec extends ObjectBehavior
                 function ($temp, $key, $item) {
                     return $temp + $key + $item;
                 },
-            0
+                0
             )
             ->shouldReturn(15);
 
@@ -543,7 +543,6 @@ class CollectionSpec extends ObjectBehavior
         $this->beConstructedWith(['a' => 1, 'b' => 2]);
         $this->values()->toArray()->shouldReturn([1, 2]);
     }
-
 
     function it_can_reject_elements_from_collection()
     {
@@ -840,7 +839,6 @@ class CollectionSpec extends ObjectBehavior
         $s1->second()->toArray()->shouldBe([1 => 3, 2 => 3]);
         $s1->values()->get(2)->toArray()->shouldBe([3 => 2]);
 
-
         $s2 = $this->partitionBy(function ($v, $k) {
             return $k - $v;
         });
@@ -1050,7 +1048,7 @@ class CollectionSpec extends ObjectBehavior
                 [
                     function (Collection $collection) {
                         return $collection->first();
-                    }
+                    },
                 ]
             );
     }
@@ -1058,40 +1056,40 @@ class CollectionSpec extends ObjectBehavior
     function it_can_extract_data_from_nested_collections()
     {
         $input = [
-            [
-                'a' => [
-                    'b' => 1
-                ]
-            ],
-            [
-                'a' => [
-                    'b' => 2
-                ]
-            ],
-            [
-                '*' => [
-                    'b' => 3
-                ]
-            ],
-            [
-                '.' => [
-                    'b' => 4
-                ],
-                'c' => [
-                    'b' => 5
-                ],
-                [
-                    'a'
-                ]
-            ]
-        ];
-        $this->beConstructedWith($input);
+                    [
+                        'a' => [
+                            'b' => 1
+                        ]
+                    ],
+                    [
+                        'a' => [
+                            'b' => 2
+                        ]
+                    ],
+                    [
+                        '*' => [
+                            'b' => 3
+                        ]
+                    ],
+                    [
+                        '.' => [
+                            'b' => 4
+                        ],
+                        'c' => [
+                            'b' => 5
+                        ],
+                        [
+                            'a'
+                        ]
+                    ]
+                ];
+                $this->beConstructedWith($input);
 
-        $this->extract('')->toArray()->shouldReturn($input);
-        $this->extract('a.b')->toArray()->shouldReturn([1, 2]);
-        $this->extract('*.b')->toArray()->shouldReturn([1, 2, 3, 4, 5]);
-        $this->extract('\*.b')->toArray()->shouldReturn([3]);
-        $this->extract('\..b')->toArray()->shouldReturn([4]);
+                $this->extract('')->toArray()->shouldReturn($input);
+                $this->extract('a.b')->toArray()->shouldReturn([1, 2]);
+                $this->extract('*.b')->toArray()->shouldReturn([1, 2, 3, 4, 5]);
+                $this->extract('\*.b')->toArray()->shouldReturn([3]);
+                $this->extract('\..b')->toArray()->shouldReturn([4]);
     }
 
     function it_can_get_the_intersect_of_collections()
@@ -1188,6 +1186,47 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith(['a' => 1, 'b' => 2, 'c' => 3]);
         $this->replaceByKeys(['b' => 3])->toArray()->shouldReturn(['a' => 1, 'b' => 3, 'c' => 3]);
+    }
+
+    function it_can_transpose_collections_of_collections()
+    {
+        $this->beConstructedWith([
+            new Collection([1, 2, 3]),
+            new Collection([4, 5, new Collection(['foo', 'bar'])]),
+            new Collection([7, 8, 9]),
+        ]);
+
+        $this->transpose()->toArray()->shouldBeLike([
+            new Collection([1, 4, 7]),
+            new Collection([2, 5, 8]),
+            new Collection([3, new Collection(['foo', 'bar']), 9]),
+        ]);
+    }
+
+    function it_can_transpose_arrays_of_different_lengths()
+    {
+        $this->beConstructedWith([
+            new Collection(['a', 'b', 'c', 'd']),
+            new Collection(['apple', 'box', 'car']),
+        ]);
+
+        $this->transpose()->toArray()->shouldBeLike([
+            new Collection(['a', 'apple']),
+            new Collection(['b', 'box']),
+            new Collection(['c', 'car']),
+            new Collection(['d', null]),
+        ]);
+    }
+
+    function it_should_throw_an_invalid_argument_if_collection_items_are_not_collection()
+    {
+        $this->beConstructedWith([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]);
+
+        $this->shouldThrow(InvalidArgument::class)->during('transpose');
     }
 
     function it_can_use_the_utility_methods()
@@ -1295,7 +1334,7 @@ class CollectionSpec extends ObjectBehavior
     function it_can_print_dump()
     {
         $this->beConstructedWith([1, [2], 3]);
-        
+
         ob_start();
         $this->printDump()->shouldReturn($this);
         $this->printDump(2)->shouldReturn($this);
@@ -1303,4 +1342,3 @@ class CollectionSpec extends ObjectBehavior
         ob_clean();
     }
 }
-
