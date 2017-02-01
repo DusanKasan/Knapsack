@@ -982,8 +982,8 @@ $realizedCollection = Collection::from([1, 3, 3, 2])
     ->map(function ($item) use ($helper) {return $helper->getValue() + $item;})
     ->realize();
     
-$helper->setValue(2);
-$realizedCollection->toArray([2, 4, 4, 3]);
+$helper->setValue(10);
+$realizedCollection->toArray(); // [2, 4, 4, 3]
 ```
 ```php
 toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
