@@ -1348,6 +1348,26 @@ Collection::from([])->toString(); //''
 toString([1, 'a', 3, null]); //'1a3'
 ```
 
+#### transpose(array|Traversable $collection) : string
+Returns a non-lazy collection by interchanging each row and the corresponding column. The input must be a multi-dimensional collection or an InvalidArgumentException is thrown.
+```php
+$arr = Collection::from([
+    [1, 2, 3],
+    new Collection([4, 5, new Collection(['foo', 'bar'])]),
+    new Collection([7, 8, 9]),
+])->transpose()->toArray();
+
+// $arr =
+// [
+//    new Collection([1, 4, 7]),
+//    new Collection([2, 5, 8]),
+//    new Collection([3, new Collection(['foo', 'bar']), 9]),
+// ]
+```
+```php
+toString([1, 'a', 3, null]); //'1a3'
+```
+
 #### zip(array|Traversable[] ...$collections) : Collection
 Returns a lazy collection of non-lazy collections of items from nth position from this collection and each passed collection. Stops when any of the collections don't have an item at the nth position.
 ```php
