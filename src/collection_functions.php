@@ -409,11 +409,13 @@ function groupBy($collection, callable $function)
     foreach ($collection as $key => $value) {
         $newKey = $function($value, $key);
 
-        $group = isset($result[$newKey]) ? $result[$newKey] : new Collection([]);
-        $result[$newKey] = $group->append($value);
+        $result[$newKey][] = $value;
     }
 
-    return Collection::from($result);
+    return Collection::from($result)
+        ->map(function ($entry) {
+            return new Collection($entry);
+        });
 }
 
 /**
