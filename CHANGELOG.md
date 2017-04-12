@@ -107,3 +107,9 @@
 
 ##8.3.0
 - PrintDump function added, to make debugging easier. Prints debug output, but returns the original collection.  
+
+##8.4.0
+- Transpose functionality added.
+
+##8.4.1
+- Issue where group by could blow the stack fixed by internally using array to group the items.
