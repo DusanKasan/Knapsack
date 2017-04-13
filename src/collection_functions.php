@@ -255,7 +255,6 @@ function filter($collection, callable $function = null)
             return (bool) $value;
         };
     }
-    ;
 
     $generatorFactory = function () use ($collection, $function) {
         foreach ($collection as $key => $value) {
