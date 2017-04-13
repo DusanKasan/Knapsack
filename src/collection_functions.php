@@ -751,21 +751,22 @@ function interpose($collection, $separator)
 function interleave(...$collections)
 {
     $generatorFactory = function () use ($collections) {
-        $normalizedCollection = array_map(
+        /* @var \Iterator[] $iterators */
+        $iterators = array_map(
             function ($collection) {
-                $traversable = new Collection($collection);
-                $traversable->rewind();
-                return $traversable;
+                $it = new \IteratorIterator(new Collection($collection));
+                $it->rewind();
+                return $it;
             },
             $collections
         );
 
         do {
             $valid = false;
-            foreach ($normalizedCollection as $collection) {
-                if ($collection->valid()) {
-                    yield $collection->key() => $collection->current();
-                    $collection->next();
+            foreach ($iterators as $it) {
+                if ($it->valid()) {
+                    yield $it->key() => $it->current();
+                    $it->next();
                     $valid = true;
                 }
             }
@@ -1211,17 +1212,17 @@ function second($collection)
 function combine($keys, $values)
 {
     $generatorFactory = function () use ($keys, $values) {
-        $keyCollection = new Collection($keys);
-        $valueCollection = new Collection($values);
-        $valueCollection->rewind();
+        $keyIt = new \IteratorIterator(new Collection($keys));
+        $valueIt = new \IteratorIterator(new Collection($values));
+        $valueIt->rewind();
 
-        foreach ($keyCollection as $key) {
-            if (!$valueCollection->valid()) {
+        foreach ($keyIt as $key) {
+            if (!$valueIt->valid()) {
                 break;
             }
 
-            yield $key => $valueCollection->current();
-            $valueCollection->next();
+            yield $key => $valueIt->current();
+            $valueIt->next();
         }
     };
 
@@ -1353,26 +1354,26 @@ function has($collection, $key)
  */
 function zip(...$collections)
 {
-    $normalizedCollections = [];
+    $iterators = [];
     foreach ($collections as $collection) {
-        $traversable = new Collection($collection);
-        $traversable->rewind();
-        $normalizedCollections[] = $traversable;
+        $iterator = new \IteratorIterator(new Collection($collection));
+        $iterator->rewind();
+        $iterators[] = $iterator;
     }
 
-    $generatorFactory = function () use ($normalizedCollections) {
+    $generatorFactory = function () use ($iterators) {
         while (true) {
             $isMissingItems = false;
             $zippedItem = new Collection([]);
 
-            foreach ($normalizedCollections as $collection) {
-                if (!$collection->valid()) {
+            foreach ($iterators as $it) {
+                if (!$it->valid()) {
                     $isMissingItems = true;
                     break;
                 }
 
-                $zippedItem = append($zippedItem, $collection->current(), $collection->key());
-                $collection->next();
+                $zippedItem = append($zippedItem, $it->current(), $it->key());
+                $it->next();
             }
 
             if (!$isMissingItems) {
