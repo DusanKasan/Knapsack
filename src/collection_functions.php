@@ -5,6 +5,8 @@ namespace DusanKasan\Knapsack;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
+use Iterator;
+use IteratorIterator;
 use Traversable;
 
 /**
@@ -751,10 +753,10 @@ function interpose($collection, $separator)
 function interleave(...$collections)
 {
     $generatorFactory = function () use ($collections) {
-        /* @var \Iterator[] $iterators */
+        /* @var Iterator[] $iterators */
         $iterators = array_map(
             function ($collection) {
-                $it = new \IteratorIterator(new Collection($collection));
+                $it = new IteratorIterator(new Collection($collection));
                 $it->rewind();
                 return $it;
             },
@@ -1212,8 +1214,8 @@ function second($collection)
 function combine($keys, $values)
 {
     $generatorFactory = function () use ($keys, $values) {
-        $keyIt = new \IteratorIterator(new Collection($keys));
-        $valueIt = new \IteratorIterator(new Collection($values));
+        $keyIt = new IteratorIterator(new Collection($keys));
+        $valueIt = new IteratorIterator(new Collection($values));
         $valueIt->rewind();
 
         foreach ($keyIt as $key) {
@@ -1356,7 +1358,7 @@ function zip(...$collections)
 {
     $iterators = [];
     foreach ($collections as $collection) {
-        $iterator = new \IteratorIterator(new Collection($collection));
+        $iterator = new IteratorIterator(new Collection($collection));
         $iterator->rewind();
         $iterators[] = $iterator;
     }

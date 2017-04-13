@@ -3,7 +3,6 @@
 namespace DusanKasan\Knapsack;
 
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
-use Iterator;
 use IteratorAggregate;
 use RecursiveArrayIterator;
 use Traversable;

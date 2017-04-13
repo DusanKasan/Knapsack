@@ -10,11 +10,10 @@ use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
-use function DusanKasan\Knapsack\reverse;
-use Iterator;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
 use Serializable;
+use Traversable;
 
 /**
  * @mixin Collection
@@ -25,8 +24,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 2, 3]);
         $this->shouldHaveType(Collection::class);
-        $this->shouldHaveType(\Traversable::class);
-        $this->shouldHaveType(\Serializable::class);
+        $this->shouldHaveType(Traversable::class);
+        $this->shouldHaveType(Serializable::class);
     }
 
     function it_can_be_instantiated_from_iterator()
