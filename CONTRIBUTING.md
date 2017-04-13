@@ -1,6 +1,6 @@
 ## How to contribute
 
-This project is open to contribution from anyone, as long as you cover your changes with specs and if it is a bigger change with scenario. Your pull requests will be merged after your code passe CI and manual code review.
+This project is open to contribution from anyone, as long as you cover your changes with specs and if it is a bigger change with scenario. Your pull requests will be merged after your code passes CI and manual code review.
 
 Every change merges to master. No development is done in other branches.
 
