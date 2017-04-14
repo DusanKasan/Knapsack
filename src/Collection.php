@@ -2,19 +2,17 @@
 
 namespace DusanKasan\Knapsack;
 
-use Closure;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
-use Iterator;
 use IteratorAggregate;
 use RecursiveArrayIterator;
 use Traversable;
 
-class Collection implements Iterator, \Serializable
+class Collection implements IteratorAggregate, \Serializable
 {
     use CollectionTrait;
 
     /**
-     * @var Iterator
+     * @var Traversable
      */
     protected $input;
 
@@ -24,7 +22,7 @@ class Collection implements Iterator, \Serializable
     private $inputFactory;
 
     /**
-     * @param callable|Closure|array|Traversable $input If callable is passed, it must return an array|Traversable.
+     * @param callable|array|Traversable $input If callable is passed, it must return an array|Traversable.
      */
     public function __construct($input)
     {
@@ -32,12 +30,8 @@ class Collection implements Iterator, \Serializable
             $this->inputFactory = $input;
             $this->input = $input();
         } elseif (is_array($input)) {
-            $input = new RecursiveArrayIterator($input);
-            $this->input = $input;
-        } elseif ($input instanceof IteratorAggregate) {
-            $input = $input->getIterator();
-            $this->input = $input;
-        } elseif ($input instanceof Iterator) {
+            $this->input = new RecursiveArrayIterator($input);
+        } elseif ($input instanceof Traversable) {
             $this->input = $input;
         } else {
             throw new InvalidArgument;
@@ -47,7 +41,7 @@ class Collection implements Iterator, \Serializable
     /**
      * Static alias of normal constructor.
      *
-     * @param array|Traversable $input
+     * @param callable|array|Traversable $input
      * @return Collection
      */
     public static function from($input)
@@ -95,47 +89,15 @@ class Collection implements Iterator, \Serializable
     }
 
     /**
-     * @inheritdoc
-     */
-    public function current()
-    {
-        return $this->input->current();
-    }
-
-    /**
      * {@inheritdoc}
      */
-    public function next()
-    {
-        $this->input->next();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->input->key();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return $this->input->valid();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
+    public function getIterator()
     {
         if ($this->inputFactory) {
             $this->input = call_user_func($this->inputFactory);
         }
 
-        $this->input->rewind();
+        return $this->input;
     }
 
     /**

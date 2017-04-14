@@ -10,11 +10,10 @@ use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
-use function DusanKasan\Knapsack\reverse;
-use Iterator;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
 use Serializable;
+use Traversable;
 
 /**
  * @mixin Collection
@@ -25,7 +24,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 2, 3]);
         $this->shouldHaveType(Collection::class);
-        $this->shouldHaveType(Iterator::class);
+        $this->shouldHaveType(Traversable::class);
+        $this->shouldHaveType(Serializable::class);
     }
 
     function it_can_be_instantiated_from_iterator()
@@ -465,26 +465,16 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 3, 3, 2,]);
 
-        $collection = $this->reverse();
-
-        $collection->rewind();
-        $collection->valid()->shouldReturn(true);
-        $collection->key()->shouldReturn(3);
-        $collection->current()->shouldReturn(2);
-        $collection->next();
-        $collection->valid()->shouldReturn(true);
-        $collection->key()->shouldReturn(2);
-        $collection->current()->shouldReturn(3);
-        $collection->next();
-        $collection->valid()->shouldReturn(true);
-        $collection->key()->shouldReturn(1);
-        $collection->current()->shouldReturn(3);
-        $collection->next();
-        $collection->valid()->shouldReturn(true);
-        $collection->key()->shouldReturn(0);
-        $collection->current()->shouldReturn(1);
-        $collection->next();
-        $collection->valid()->shouldReturn(false);
+        $this
+            ->reverse()
+            ->toArray()
+            ->shouldReturn([
+                3 => 2,
+                2 => 3,
+                1 => 3,
+                0 => 1,
+            ])
+        ;
     }
 
     function it_can_reduce_from_right()
