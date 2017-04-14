@@ -5,7 +5,7 @@
 
 Knapsack is a collection library for PHP >= 5.6 that implements most of the sequence operations proposed by [Clojures sequences](http://clojure.org/sequences) plus some additional ones. All its features are available as functions (for functional programming) and as a [collection pipeline](http://martinfowler.com/articles/collection-pipeline/) object methods.
 
-The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `DusanKasan\Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/collection_functions.php). Collection is an iterator implementor that accepts Traversable object, array or even a callable that produces a Traversable object or array as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
+The heart of Knapsack is its [Collection class](https://github.com/DusanKasan/Knapsack/blob/master/src/Collection.php). However its every method calls a simple function with the same name that does the actual heavy lifting. These are located in `DusanKasan\Knapsack` namespace and you can find them [here](https://github.com/DusanKasan/Knapsack/blob/master/src/collection_functions.php). Collection is a [Traversable](https://secure.php.net/manual/en/class.traversable.php) implementor (via [IteratorAggregate](https://secure.php.net/manual/en/class.iteratoraggregate.php)) that accepts Traversable object, array or even a callable that produces a Traversable object or array as constructor argument. It provides most of Clojures sequence functionality plus some extra features. It is also immutable - operations preformed on the collection will return new collection (or value) instead of modifying the original collection.
  
 Most of the methods of Collection return lazy collections (such as filter/map/etc.). However, some return non-lazy collections (reverse) or simple values (count). For these operations all of the items in the collection must be iterated over (and realized). There are also operations (drop) that iterate over some items of the collection but do not affect/return them in the result. This behaviour as well as laziness is noted for each of the operations.  
 
@@ -170,24 +170,24 @@ $iterator->size(); //3
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 10000 integers (addition)                          | 0.030887317657471s    | 0.1881504535675s          | 609%                 |
-| array_map vs Collection::map on 10000 strings (concatenation)                      | 0.034685015678406s    | 0.19358699321747s         | 558%                 |
-| array_map vs Collection::map on 10000 objects (object to field value)              | 0.045831298828125s    | 0.20278341770172s         | 442%                 |
-| array_map vs Collection::map on 10000 md5 invocations                              | 0.042794704437256s    | 0.1973245382309s          | 461%                 |
-| array_map vs Collection::map on 10000 integers n, counting sum(0, n) the naive way | 5.0926527023315s      | 5.2498435258865s          | 103%                 |
+| array_map vs Collection::map on 10000 integers (addition)                          | 0.0034945011138916s   | 0.0034625053405762s       | 99%                  |
+| array_map vs Collection::map on 10000 strings (concatenation)                      | 0.004361891746521s    | 0.0049739360809326s       | 114%                 |
+| array_map vs Collection::map on 10000 objects (object to field value)              | 0.02332329750061s     | 0.027161455154419s        | 116%                 |
+| array_map vs Collection::map on 10000 md5 invocations                              | 0.0086771726608276s   | 0.0080755949020386s       | 93%                  |
+| array_map vs Collection::map on 10000 integers n, counting sum(0, n) the naive way | 1.5985415458679s      | 1.580038356781s           | 98%                  |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 
-### PHP 7.0.2
+### PHP 7.1.1
 ```php
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 | operation details                                                                  | native execution time | collection execution time | difference (percent) |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
-| array_map vs Collection::map on 10000 integers (addition)                          | 0.0012169599533081s   | 0.013433384895325s        | 1103%                |
-| array_map vs Collection::map on 10000 strings (concatenation)                      | 0.0014688730239868s   | 0.013579154014587s        | 924%                 |
-| array_map vs Collection::map on 10000 objects (object to field value)              | 0.0023677349090576s   | 0.016839718818665s        | 711%                 |
-| array_map vs Collection::map on 10000 md5 invocations                              | 0.0041363000869751s   | 0.017279839515686s        | 417%                 |
-| array_map vs Collection::map on 10000 integers n, counting sum(0, n) the naive way | 1.4253485679626s      | 1.2336760282516s          | 86%                  |
+| array_map vs Collection::map on 10000 integers (addition)                          | 0.00082111358642578s  | 0.001681661605835s        | 204%                 |
+| array_map vs Collection::map on 10000 strings (concatenation)                      | 0.00081214904785156s  | 0.0015116214752197s       | 186%                 |
+| array_map vs Collection::map on 10000 objects (object to field value)              | 0.0015491008758545s   | 0.0036969423294067s       | 238%                 |
+| array_map vs Collection::map on 10000 md5 invocations                              | 0.0032038688659668s   | 0.0039427280426025s       | 123%                 |
+| array_map vs Collection::map on 10000 integers n, counting sum(0, n) the naive way | 0.93844709396362s     | 0.93354930877686s         | 99%                  |
 +------------------------------------------------------------------------------------+-----------------------+---------------------------+----------------------+
 ```
 

@@ -113,3 +113,7 @@
 
 ##8.4.1
 - Issue where group by could blow the stack fixed by internally using array to group the items.
+
+##9.0.0
+- **Breaking change: Collection no longer implements Iterator but instead implements Traversable via IteratorAggregate**
+- Moving from Iterator to Traversable allows for huge performance gains (some 4x improvement at the very least)
