@@ -1214,11 +1214,11 @@ function second($collection)
 function combine($keys, $values)
 {
     $generatorFactory = function () use ($keys, $values) {
-        $keyIt = new IteratorIterator(new Collection($keys));
+        $keyCollection = new Collection($keys);
         $valueIt = new IteratorIterator(new Collection($values));
         $valueIt->rewind();
 
-        foreach ($keyIt as $key) {
+        foreach ($keyCollection as $key) {
             if (!$valueIt->valid()) {
                 break;
             }
@@ -1356,12 +1356,15 @@ function has($collection, $key)
  */
 function zip(...$collections)
 {
-    $iterators = [];
-    foreach ($collections as $collection) {
-        $iterator = new IteratorIterator(new Collection($collection));
-        $iterator->rewind();
-        $iterators[] = $iterator;
-    }
+    /* @var Iterator[] $iterators */
+    $iterators = array_map(
+        function ($collection) {
+            $it = new IteratorIterator(new Collection($collection));
+            $it->rewind();
+            return $it;
+        },
+        $collections
+    );
 
     $generatorFactory = function () use ($iterators) {
         while (true) {
