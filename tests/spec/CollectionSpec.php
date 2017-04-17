@@ -91,6 +91,34 @@ class CollectionSpec extends ObjectBehavior
         $this->take(2)->toArray()->shouldReturn([1, 1]);
     }
 
+    function it_can_convert_to_array()
+    {
+        $iterator = new \ArrayIterator([
+            'foo',
+        ]);
+
+        $this->beConstructedWith(function () use ($iterator) {
+            yield 'no key';
+            yield 'with key' => 'this value is overwritten by the same key';
+            yield 'nested' => [
+                'y' => 'z',
+            ];
+            yield 'iterator is not converted' => $iterator;
+            yield 'with key' => 'x';
+        });
+
+        $this
+            ->toArray()
+            ->shouldReturn([
+                'no key',
+                'with key' => 'x',
+                'nested' => [
+                    'y' => 'z',
+                ],
+                'iterator is not converted' => $iterator,
+            ]);
+    }
+
     function it_can_filter()
     {
         $this->beConstructedWith([1, 3, 3, 2,]);
