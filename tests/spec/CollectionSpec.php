@@ -115,7 +115,6 @@ class CollectionSpec extends ObjectBehavior
         $this->beConstructedWith([false, null, '', 0, 0.0, []]);
 
         $this->filter()->isEmpty()->shouldReturn(true);
-
     }
 
     function it_can_distinct()
