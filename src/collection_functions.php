@@ -17,12 +17,7 @@ use Traversable;
  */
 function toArray($collection)
 {
-    $arr = [];
-    foreach ($collection as $key => $value) {
-        $arr[$key] = $value;
-    }
-
-    return $arr;
+    return is_array($collection) ? $collection : iterator_to_array($collection);
 }
 
 /**

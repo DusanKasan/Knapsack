@@ -879,8 +879,6 @@ trait CollectionTrait
         return replaceByKeys($this->getItems(), $replacementMap);
     }
 
-
-
     /**
      * /**
      * Dumps this collection into array (recursively).
