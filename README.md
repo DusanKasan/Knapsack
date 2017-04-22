@@ -1194,15 +1194,15 @@ toArray(slice([1, 2, 3, 4, 5], 4)); //[4 => 5]
 Returns true if $function(value, key) returns true for at least one item in this collection, false otherwise.
 ```php
 Collection::from([1, 3, 3, 2])
-    ->every(function ($value) {
+    ->some(function ($value) {
        return $value < 3;
     }); //true
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($value, $key) {
+    ->some(function ($value, $key) {
        return $value < 4 && $key < 2;
-    }, 10); //true
+    }); //true
 ```
 ```php
 some([1, 3, 3 ,2], function ($value) {return $value < 3;}); //true
