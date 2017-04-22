@@ -529,9 +529,9 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->find(function ($v. $k) {
+    ->every(function ($v, $k) {
        return $v < 4 && $k < 2;
-    }, 10); //false
+    }); //false
 ```
 ```php
 every([1, 3, 3, 2], function ($v) {return $v < 5;}); //true
