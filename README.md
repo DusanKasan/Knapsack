@@ -194,7 +194,7 @@ $iterator->size(); //3
 ## Constructors
 These are ways how to create the Collection class. There is one default constructor and few named (static) ones.
 
-#### new(array|Traversable|callback $input)
+#### new(iterable|callable $input)
 The default constructor accepts array, Traversable or a callable that takes no arguments and produces Traversable or array. The use case for the callable argument is for example a Generator, which can not be rewound so the Collection must be able to reconstruct it when rewinding itself.
 
 ```php
@@ -213,7 +213,7 @@ $generatorFactory = function () {
 $collection = new Collection($generatorFactory);
 ```
 
-#### from(array|Traversable|callback $input)
+#### from(iterable|callable $input)
 Collection::from is a static alias of the default constructor. This is the preferred way to create a Collection. 
 
 ```php
@@ -269,12 +269,12 @@ Collection::from([1, 3, 3, 2])
     ->append(1)
     ->toArray(); //[1, 3, 3, 2, 1]
 ```
-```php    
+```php
 Collection::from([1, 3, 3, 2])
     ->append(1, 'key')
     ->toArray(); //[1, 3, 3, 2, 'key' => 1]
-```    
-```php    
+```
+```php
 toArray(append([1, 3, 3, 2], 1, 'key')); //[1, 3, 3, 2, 'key' => 1]
 ```
 
@@ -289,18 +289,18 @@ Collection::from([])->average(); //0
 average([1, 2, 3]); //2
 ```
 
-#### combine(array|Traversable $collection, bool $strict = false) : Collection
+#### combine(iterable $collection, bool $strict = false) : Collection
 Combines the values of this collection as keys, with values of $collection as values.  The resulting collection has length equal to the size of smaller collection. If $strict is true, the size of both collections must be equal, otherwise ItemNotFound is thrown. When strict, the collection is realized immediately.
 ```php
 Collection::from(['a', 'b'])
     ->combine([1, 2])
     ->toArray(); //['a' => 1, 'b' => 2]
 ```
-```php    
+```php
 toArray(combine(['a', 'b'], [1, 2])); //['a' => 1, 'b' => 2]
 ```
 
-#### concat(...array|Traversable) : Collection
+#### concat(iterable ...$collections) : Collection
 Returns a lazy collection with items from this collection followed by items from the collection from first argument, then second and so on.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -308,7 +308,7 @@ Collection::from([1, 3, 3, 2])
     ->values() 
     ->toArray(); //[1, 3, 3, 2, 4, 5]
 ```
-```php    
+```php
 toArray(values(concat([1, 3, 3, 2], [4, 5]))); //[1, 3, 3, 2, 4, 5]  
 ```
 
@@ -330,7 +330,7 @@ Collection::from([1, 2, 3, 4, 5])
     })
     ->toArray(); //['odd' => [1, 3, 5], 'even' => [2, 4]]  
 ```
-```php      
+```php
 toArray(countBy([1, 2, 3, 4, 5], function ($value) {return $value % 2 == 0 ? 'even' : 'odd';}));      
 ```
 
@@ -343,18 +343,18 @@ Collection::from([1, 3, 3, 2])
     ->values()
     ->toArray(); //[1, 3, 3, 2, 1, 3, 3, 2]
 ```
-```php    
+```php
 toArray(values(take(cycle([1, 3, 3, 2]), 8))); //[1, 3, 3, 2, 1, 3, 3, 2]
 ```
 
-#### diff(array|Traversable ...$collections) : Collection
-Returns a lazy collection of items that are in $this but are not in any of the other arguments. Note that the ...$collections are iterated non-lazily.
+#### diff(iterable ...$collections) : Collection
+Returns a lazy collection of items that are in $collection but are not in any of the other arguments, indexed by the keys from the first collection. Note that the ...$collections are iterated non-lazily.
 ```php
 Collection::from([1, 3, 3, 2])
     ->diff([1, 3])
     ->toArray() //[3 => 2]
 ```
-```php    
+```php
 toArray(diff([1, 3, 3, 2], [1, 3])); //[3 => 2]
 ```
 
@@ -365,7 +365,7 @@ Collection::from([1, 3, 3, 2])
     ->distinct()
     ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
 ```
-```php    
+```php
 toArray(distinct([1, 3, 3, 2])); //[1, 3, 3 => 2] - each item has key of the first occurrence
 ```
 
@@ -393,7 +393,7 @@ $collection
     ->dropLast(2)
     ->toArray(); //[1]
 ```    
-```php    
+```php
 toArray(dropLast([1, 2, 3], 2)); //[1]    
 ```
 
@@ -537,7 +537,7 @@ Collection::from([1, 3, 3, 2])
 every([1, 3, 3, 2], function ($v) {return $v < 5;}); //true
 ```
 
-#### except(array|Traversable $keys) : Collection
+#### except(iterable $keys) : Collection
 Returns a lazy collection without the items associated to any of the keys from $keys.
 ```php
 Collection::from(['a' => 1, 'b' => 2])
@@ -592,7 +592,7 @@ isEmpty(values(filter([0, 0.0, false, null, "", []]))); //true
 
 
 #### find(callable $function, mixed $ifNotFound = null, bool $convertToCollection = false) : mixed|Collection
-Returns first value for which $function(value, key) returns true. If no item is matched, returns $ifNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
+Returns first value for which $function(value, key) returns true. If no item is matched, returns $ifNotFound. If $convertToCollection is true and the return value is an iterable an instance of Collection will be returned.
 ```php
 Collection::from([1, 3, 3, 2])
     ->find(function ($value) {
@@ -616,7 +616,7 @@ Collection::from([1, 3, 3, 2])
 Collection::from([1, [4, 5], 3, 2])
     ->find(function ($value) {
       return is_array($value);
-    }, true)
+    }, [], true)
     ->size(); //2 
 ```
 ```php
@@ -624,7 +624,7 @@ find([1, 3, 3, 2], function ($value) {return $value > 2;}); //3
 ```
 
 #### first(bool $convertToCollection = false) : mixed|Collection
-Returns first value in the collection or throws ItemNotFound if the collection is empty. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
+Returns first value in the collection or throws ItemNotFound if the collection is empty. If $convertToCollection is true and the return value is an iterable an instance of Collection will be returned.
 ```php
 Collection::from([1, 2, 3])->first(); //1
 ```
@@ -679,7 +679,7 @@ toArray(frequencies([1, 3, 3, 2])); //[1 => 1, 3 => 2, 2 => 1]
 ```
 
 #### get(mixed $key, bool $convertToCollection = false) : mixed|Collection
-Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection will be returned.
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw `ItemNotFound`. If $convertToCollection is true and the return value is an iterable an instance of Collection will be returned.
 ```php
 Collection::from([1, 3, 3, 2])->get(2); //3
 ```
@@ -694,7 +694,7 @@ get([1, 3, 3, 2], 2); //3
 ```
 
 #### getOrDefault(mixed $key, mixed $default = null, bool $convertToCollection = false) : mixed|Collection
-Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $default. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+Returns value at the key $key. If multiple values have this key, return first. If no value has this key, return $default. If $convertToCollection is true and the return value is an iterable an instance of Collection is returned.
 ```php
 Collection::from([1, 3, 3, 2])->getOrDefault(2); //3
 ```
@@ -705,7 +705,7 @@ Collection::from([1, 3, 3, 2])->getOrDefault(5); //null
 Collection::from([1, 3, 3, 2])->getOrDefault(5, 'asd'); //'asd'
 ```
 ```php
-Collection::from([1, 3, 3, 2])->getOrDefault(5, [1, 2], null, true)->toArray(); //[1, 2]
+Collection::from([1, 3, 3, 2])->getOrDefault(5, [1, 2], true)->toArray(); //[1, 2]
 ```
 ```php
 getOrDefault([1, 3, 3, 2], 5, 'asd'); //'asd'
@@ -769,7 +769,7 @@ Collection::from([1, 3, 3, 2])
 toArray(indexBy([1, 3, 3, 2], '\DusanKasan\Knapsack\identity')); //[1 => 1, 3 => 3, 2 => 2]
 ```
 
-#### interleave(...array|Traversable $collection) : Collection
+#### interleave(iterable ...$collections) : Collection
 Returns a lazy collection of first item from first collection, first item from second, second from first and so on. Works with any number of arguments.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -793,7 +793,7 @@ Collection::from([1, 2, 3])
 toArray(interpose([1, 3, 3, 2], 'a')); //[1, 'a', 2, 'a', 3] 
 ```
 
-#### intersect(array|Traversable) : Collection
+#### intersect(iterable ...$collections) : Collection
 Returns a lazy collection of items that are in $collection and all the other arguments, indexed by the keys from the first collection. Note that the ...$collections are iterated non-lazily.
 ```php
 Collection::from([1, 2, 3])
@@ -834,7 +834,7 @@ toArray(keys(['a' => [1, 2], 'b' => [2, 3]])); //['a', 'b']
 ```
 
 #### last(bool $convertToCollection = false) : mixed|Collection
-Returns last value in the collection or throws ItemNotFound if the collection is empty. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+Returns last value in the collection or throws ItemNotFound if the collection is empty. If $convertToCollection is true and the return value is an iterable an instance of Collection is returned.
 ```php
 Collection::from([1, 2, 3])->last(); //3
 ```
@@ -903,7 +903,7 @@ Collection::from([])->min(); //null
 min([1, 2, 3, 2]); //1
 ```
 
-#### only(array|Traversable $keys) : Collection
+#### only(iterable $keys) : Collection
 Returns a lazy collection of items associated to any of the keys from $keys.
 ```php
 Collection::from(['a' => 1, 'b' => 2])
@@ -914,7 +914,7 @@ Collection::from(['a' => 1, 'b' => 2])
 toArray(only(['a' => 1, 'b' => 2], ['b'])); //['b' => 2]
 ```
 
-#### partition(int $numberOfItems, int $step = 0, array|Traversable $padding = []) : Collection
+#### partition(int $numberOfItems, int $step = 0, iterable $padding = []) : Collection
 Returns a lazy collection of collections of $numberOfItems items each, at $step step apart. If $step is not supplied, defaults to $numberOfItems, i.e. the partitionsdo not overlap. If a $padding collection is supplied, use its elements asnecessary to complete last partition up to $numberOfItems items. In case there are not enough padding elements, return a partition with less than $numberOfItems items.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -958,7 +958,7 @@ Collection::from([1, 3, 3, 2])
 ```
 ```php
 Collection::from([1, 3, 3, 2])
-    ->prepend('a', 1)
+    ->prepend(1, 'a')
     ->toArray(); //['a' => 1, 0 => 1, 1 => 3, 2 => 3, 3 => 2]
 ```
 
@@ -989,13 +989,13 @@ $realizedCollection->toArray(); // [2, 4, 4, 3]
 toArray(realize([1, 3, 3, 2])); //[1, 3, 3, 2]
 ```
 
-#### reduce(callable $function, mixed $start, bool $convertToCollectionv = false) : mixed
-Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function. If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+#### reduce(callable $function, mixed $start, bool $convertToCollection = false) : mixed|Collection
+Reduces the collection to single value by iterating over the collection and calling $function(tmp, value, key) while passing $start and current key/item as parameters. The output of callable is used as $start in next iteration. The output of callable on last element is the return value of this function. If $convertToCollection is true and the return value is an iterable an instance of Collection is returned.
 ```php
 Collection::from([1, 3, 3, 2])
     ->reduce(
         function ($tmp, $i) {
-        return $tmp + $i;
+            return $tmp + $i;
         }, 
         0
     ); //9
@@ -1015,8 +1015,8 @@ Collection::from([1, 3, 3, 2])
 reduce([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
-#### reduceRight(callable $function, mixed $start, bool $convertToColleciton = false) : mixed
-Like reduce, but walks from last item to the first one.  If $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+#### reduceRight(callable $function, mixed $start, bool $convertToCollection = false) : mixed|Collection
+Like reduce, but walks from last item to the first one.  If $convertToCollection is true and the return value is an iterable an instance of Collection is returned.
 ```php
 Collection::from([1, 3, 3, 2])
     ->reduceRight(
@@ -1041,7 +1041,7 @@ Collection::from([1, 3, 3, 2])
 reduceRight([1, 3, 3, 2], function ($tmp, $value) {return $tmp + $value;}, 0); //9
 ```
 
-#### reductions(callable $reduction, $start) : Collection
+#### reductions(callable $reduction, mixed $start) : Collection
 Returns a lazy collection of reduction steps.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -1074,7 +1074,7 @@ Collection::from([1, 3, 3, 2])
 toArray(reject([1, 3, 3, 2], function ($value) {return $value > 2;})); //[1, 1 => 3, 3 => 2]
 ```
 
-#### replace(array|Traversable $replacementMap) : Collection
+#### replace(iterable $replacementMap) : Collection
 Returns a lazy collection with items from this collection equal to any key in $replacementMap replaced for their value.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -1085,7 +1085,7 @@ Collection::from([1, 3, 3, 2])
 toArray(replace([1, 3, 3, 2], [3 => 'a'])); //[1, 'a', 'a', 2]
 ```
 
-#### replaceByKeys(array|Traversable $replacementMap) : Collection
+#### replaceByKeys(iterable $replacementMap) : Collection
 Returns a lazy collection with items from $collection, but items with keys  that are found in keys of $replacementMap are replaced by their values.
 ```php
 Collection::from([1, 3, 3, 2])
@@ -1108,8 +1108,8 @@ toArray(reverse([1, 2, 3])); //[2 => 3, 1 => 2, 0 => 1]
 ```
 
 
-#### second(bool $convertToCollection = false) : mixed
-Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item. If $convertToCollection is true and the return value is a collection (array|Traversable) it is converted to Collection.
+#### second(bool $convertToCollection = false) : mixed|Collection
+Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item. If $convertToCollection is true and the return value is an iterable it is converted to Collection.
 ```php
 Collection::from([1, 3, 3, 2])->second(); //3
 ```
@@ -1348,11 +1348,11 @@ Collection::from([])->toString(); //''
 toString([1, 'a', 3, null]); //'1a3'
 ```
 
-#### transpose(array|Traversable $collection) : string
+#### transpose(iterable<Collection> $collection) : string
 Returns a non-lazy collection by interchanging each row and the corresponding column. The input must be a multi-dimensional collection or an InvalidArgumentException is thrown.
 ```php
 $arr = Collection::from([
-    [1, 2, 3],
+    new Collection([1, 2, 3]),
     new Collection([4, 5, new Collection(['foo', 'bar'])]),
     new Collection([7, 8, 9]),
 ])->transpose()->toArray();
@@ -1364,11 +1364,8 @@ $arr = Collection::from([
 //    new Collection([3, new Collection(['foo', 'bar']), 9]),
 // ]
 ```
-```php
-toString([1, 'a', 3, null]); //'1a3'
-```
 
-#### zip(array|Traversable[] ...$collections) : Collection
+#### zip(iterable ...$collections) : Collection
 Returns a lazy collection of non-lazy collections of items from nth position from this collection and each passed collection. Stops when any of the collections don't have an item at the nth position.
 ```php
 Collection::from([1, 2, 3])

@@ -590,7 +590,7 @@ function some($collection, callable $function)
 /**
  * Returns true if $needle is found in $collection values.
  *
- * @param $collection
+ * @param array|Traversable $collection
  * @param mixed $needle
  * @return bool
  */
@@ -994,7 +994,7 @@ function takeNth($collection, $step)
  * not enough padding elements, return a partition with less than $numberOfItems items.
  *
  * @param array|Traversable $collection
- * @param $numberOfItems
+ * @param int $numberOfItems
  * @param int $step
  * @param array|Traversable $padding
  * @return Collection
@@ -1128,7 +1128,7 @@ function isCollection($input)
  * Returns duplicated/cloned $input that has no relation to the original one. Used for making sure there are no side
  * effect in functions.
  *
- * @param $input
+ * @param mixed $input
  * @return mixed
  */
 function duplicate($input)
@@ -1264,8 +1264,8 @@ function only($collection, $keys)
 }
 
 /**
- * Returns a lazy collection of items that are in $collection but are not in any of the other arguments. Note that the
- * ...$collections are iterated non-lazily.
+ * Returns a lazy collection of items that are in $collection but are not in any of the other arguments, indexed by the
+ * keys from the first collection. Note that the ...$collections are iterated non-lazily.
  *
  * @param array|Traversable $collection
  * @param array|Traversable ...$collections
@@ -1345,7 +1345,7 @@ function has($collection, $key)
  * Returns a lazy collection of non-lazy collections of items from nth position from each passed collection. Stops when
  * any of the collections don't have an item at the nth position.
  *
- * @param array|Traversable[] ...$collections
+ * @param array|Traversable ...$collections
  * @return Collection
  */
 function zip(...$collections)
@@ -1390,7 +1390,7 @@ function zip(...$collections)
  * Transpose each item in a collection, interchanging the row and column indexes.
  * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
  *
- * @param Collection $collection
+ * @param Collection[] $collection
  * @return Collection
  */
 function transpose($collection)
@@ -1400,6 +1400,7 @@ function transpose($collection)
     })) {
         throw new InvalidArgument('Can only transpose collections of collections.');
     }
+
     return Collection::from(
         array_map(
             function (...$items) {
@@ -1741,8 +1742,8 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
  * Calls dump on $input and then prints it using the var_export. Returns $input.
  *
  * @param mixed $input
- * @param null|int $maxItemsPerCollection
- * @param null|int $maxDepth
+ * @param int|null $maxItemsPerCollection
+ * @param int|null $maxDepth
  * @return mixed
  */
 function printDump($input, $maxItemsPerCollection = null, $maxDepth = null)
