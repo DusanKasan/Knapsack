@@ -80,7 +80,7 @@ class CollectionSpec extends ObjectBehavior
     function it_will_throw_when_passed_callable_will_return_something_other_than_array_or_traversable()
     {
         $this->beConstructedWith(function () { return 1; });
-        $this->shouldThrow(InvalidArgument::class)->duringInstantiation();
+        $this->shouldThrow(InvalidReturnValue::class)->duringInstantiation();
     }
 
     function it_can_be_created_statically()
