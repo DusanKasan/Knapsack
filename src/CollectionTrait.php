@@ -75,7 +75,7 @@ trait CollectionTrait
     {
         $result = reduce($this->getItems(), $function, $startValue);
 
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -172,7 +172,7 @@ trait CollectionTrait
     {
         $result = get($this->getItems(), $key);
 
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -190,7 +190,7 @@ trait CollectionTrait
     {
         $result = getOrDefault($this->getItems(), $key, $default);
 
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -206,7 +206,7 @@ trait CollectionTrait
     {
         $result = find($this->getItems(), $function, $default);
 
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -290,7 +290,7 @@ trait CollectionTrait
     {
         $result = reduceRight($this->getItems(), $function, $startValue);
 
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -589,7 +589,7 @@ trait CollectionTrait
     public function first($convertToCollection = false)
     {
         $result = first($this->getItems());
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -603,7 +603,7 @@ trait CollectionTrait
     public function last($convertToCollection = false)
     {
         $result = last($this->getItems());
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
@@ -628,7 +628,7 @@ trait CollectionTrait
     public function second($convertToCollection = false)
     {
         $result = second($this->getItems());
-        return (isCollection($result) && $convertToCollection) ? new Collection($result) : $result;
+        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
     /**
