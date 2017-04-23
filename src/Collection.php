@@ -28,8 +28,10 @@ class Collection implements IteratorAggregate, \Serializable
     {
         if (is_callable($input)) {
             $this->inputFactory = $input;
-            $this->input = $input();
-        } elseif (is_array($input)) {
+            $input = $input();
+        }
+
+        if (is_array($input)) {
             $this->input = new RecursiveArrayIterator($input);
         } elseif ($input instanceof Traversable) {
             $this->input = $input;
@@ -94,7 +96,13 @@ class Collection implements IteratorAggregate, \Serializable
     public function getIterator()
     {
         if ($this->inputFactory) {
-            $this->input = call_user_func($this->inputFactory);
+            $input = call_user_func($this->inputFactory);
+
+            if (is_array($input)) {
+                $input = new RecursiveArrayIterator($input);
+            }
+
+            $this->input = $input;
         }
 
         return $this->input;
