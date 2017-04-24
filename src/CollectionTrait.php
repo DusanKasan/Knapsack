@@ -40,7 +40,7 @@ trait CollectionTrait
     /**
      * Returns a lazy collection with items from all $collections passed as argument appended together
      *
-     * @param \Traversable[]|array ...$collections
+     * @param array|\Traversable ...$collections
      * @return Collection
      */
     public function concat(...$collections)
@@ -129,7 +129,7 @@ trait CollectionTrait
     /**
      * Returns collection where items are separated into groups indexed by the value at given key.
      *
-     * @param $key
+     * @param mixed $key
      * @return Collection
      */
     public function groupByKey($key)
@@ -160,12 +160,12 @@ trait CollectionTrait
 
     /**
      * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw
-     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable an
+     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
      * instance of Collection will be returned.
      *
      * @param mixed $key
      * @param bool $convertToCollection
-     * @return Collection|mixed
+     * @return mixed|Collection
      * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function get($key, $convertToCollection = false)
@@ -195,12 +195,12 @@ trait CollectionTrait
 
     /**
      * Returns first value matched by $function. If no value matches, return $default. If $convertToCollection is true
-     * and the return value is a collection (array|Traversable an instance of Collection will be returned.
+     * and the return value is a collection (array|Traversable) an instance of Collection will be returned.
      *
      * @param callable $function
      * @param mixed|null $default
      * @param bool $convertToCollection
-     * @return Collection|mixed
+     * @return mixed|Collection
      */
     public function find(callable $function, $default = null, $convertToCollection = false)
     {
@@ -277,11 +277,10 @@ trait CollectionTrait
     }
 
     /**
-     * Reduce the collection to single value. Walks from right to left.
+     * Reduce the collection to single value. Walks from right to left. If $convertToCollection is true and the return
+     * value is a collection (array|Traversable) an instance of Collection is returned.
      *
-     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.  If
-     * $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection
-     * is returned.
+     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
      * @param mixed $startValue
      * @param bool $convertToCollection
      * @return mixed|Collection
@@ -477,7 +476,7 @@ trait CollectionTrait
      * Returns a lazy collection with items from this collection but values that are found in keys of $replacementMap
      * are replaced by their values.
      *
-     * @param \Traversable|array $replacementMap
+     * @param array|\Traversable $replacementMap
      * @return Collection
      */
     public function replace($replacementMap)
@@ -580,7 +579,7 @@ trait CollectionTrait
 
     /**
      * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable an instance of Collection is returned.
+     * is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
@@ -589,6 +588,7 @@ trait CollectionTrait
     public function first($convertToCollection = false)
     {
         $result = first($this->getItems());
+
         return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
@@ -603,6 +603,7 @@ trait CollectionTrait
     public function last($convertToCollection = false)
     {
         $result = last($this->getItems());
+
         return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
@@ -622,12 +623,13 @@ trait CollectionTrait
      * Collection.
      *
      * @param bool $convertToCollection
-     * @return Collection|mixed
+     * @return mixed|Collection
      * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function second($convertToCollection = false)
     {
         $result = second($this->getItems());
+
         return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
     }
 
@@ -667,8 +669,8 @@ trait CollectionTrait
     }
 
     /**
-     * Returns a lazy collection of items that are in $this but are not in any of the other arguments. Note that the
-     * ...$collections are iterated non-lazily.
+     * Returns a lazy collection of items that are in $this but are not in any of the other arguments, indexed by the
+     * keys from the first collection. Note that the ...$collections are iterated non-lazily.
      *
      * @param array|\Traversable ...$collections
      * @return Collection
@@ -677,7 +679,6 @@ trait CollectionTrait
     {
         return diff($this->getItems(), ...$collections);
     }
-
 
     /**
      * Returns a lazy collection where keys and values are flipped.
@@ -700,17 +701,17 @@ trait CollectionTrait
         return has($this->getItems(), $key);
     }
 
-
     /**
      * Returns a lazy collection of non-lazy collections of items from nth position from this collection and each
      * passed collection. Stops when any of the collections don't have an item at the nth position.
      *
-     * @param array|\Traversable[] ...$collections
+     * @param array|\Traversable ...$collections
      * @return Collection
      */
     public function zip(...$collections)
     {
         array_unshift($collections, $this->getItems());
+
         return zip(...$collections);
     }
 
@@ -736,7 +737,7 @@ trait CollectionTrait
 
     /**
      * Transpose each item in a collection, interchanging the row and column indexes.
-     * Can only transpose multi-dimensional arrays or collections. Otherwise an InvalidArgument is raised.
+     * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
      *
      * @return Collection
      */
@@ -758,18 +759,16 @@ trait CollectionTrait
     }
 
     /**
-     * Returns a lazy collection of items that are in $collection and all the other arguments, indexed by the keys from
+     * Returns a lazy collection of items that are in $this and all the other arguments, indexed by the keys from
      * the first collection. Note that the ...$collections are iterated non-lazily.
      *
-     * @param array|\Traversable[] ...$collections
+     * @param array|\Traversable ...$collections
      * @return Collection
      */
     public function intersect(...$collections)
     {
         return intersect($this->getItems(), ...$collections);
     }
-
-
 
     /**
      * Checks whether this collection has exactly $size items.
@@ -911,8 +910,8 @@ trait CollectionTrait
     /**
      * Calls dump on this collection and then prints it using the var_export.
      *
-     * @param null|int $maxItemsPerCollection
-     * @param null|int $maxDepth
+     * @param int|null $maxItemsPerCollection
+     * @param int|null $maxDepth
      * @return Collection
      */
     public function printDump($maxItemsPerCollection = null, $maxDepth = null)
