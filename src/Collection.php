@@ -3,6 +3,7 @@
 namespace DusanKasan\Knapsack;
 
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
+use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use IteratorAggregate;
 use RecursiveArrayIterator;
 use Traversable;
@@ -28,13 +29,15 @@ class Collection implements IteratorAggregate, \Serializable
     {
         if (is_callable($input)) {
             $this->inputFactory = $input;
-            $this->input = $input();
-        } elseif (is_array($input)) {
+            $input = $input();
+        }
+
+        if (is_array($input)) {
             $this->input = new RecursiveArrayIterator($input);
         } elseif ($input instanceof Traversable) {
             $this->input = $input;
         } else {
-            throw new InvalidArgument;
+            throw $this->inputFactory ? new InvalidReturnValue : new InvalidArgument;
         }
     }
 
@@ -90,11 +93,22 @@ class Collection implements IteratorAggregate, \Serializable
 
     /**
      * {@inheritdoc}
+     * @throws InvalidReturnValue
      */
     public function getIterator()
     {
         if ($this->inputFactory) {
-            $this->input = call_user_func($this->inputFactory);
+            $input = call_user_func($this->inputFactory);
+
+            if (is_array($input)) {
+                $input = new RecursiveArrayIterator($input);
+            }
+
+            if (!($input instanceof Traversable)) {
+                throw new InvalidReturnValue;
+            }
+
+            $this->input = $input;
         }
 
         return $this->input;

@@ -55,6 +55,34 @@ class CollectionSpec extends ObjectBehavior
         $this->shouldThrow(InvalidArgument::class)->duringInstantiation();
     }
 
+    function it_can_be_instantiated_from_callable_returning_an_array()
+    {
+        $this->beConstructedWith(function () { return [1, 2, 3]; });
+        $this->toArray()->shouldReturn([1, 2, 3]);
+    }
+
+    function it_can_be_instantiated_from_callable_returning_an_iterator()
+    {
+        $this->beConstructedWith(function () { return new ArrayIterator([1, 2, 3]); });
+        $this->toArray()->shouldReturn([1, 2, 3]);
+    }
+
+    function it_can_be_instantiated_from_callable_returning_a_generator()
+    {
+        $this->beConstructedWith(function () {
+            foreach ([1, 2, 3] as $value) {
+                yield $value;
+            }
+        });
+        $this->toArray()->shouldReturn([1, 2, 3]);
+    }
+
+    function it_will_throw_when_passed_callable_will_return_something_other_than_array_or_traversable()
+    {
+        $this->beConstructedWith(function () { return 1; });
+        $this->shouldThrow(InvalidReturnValue::class)->duringInstantiation();
+    }
+
     function it_can_be_created_statically()
     {
         $this->beConstructedThrough('from', [[1, 2]]);
