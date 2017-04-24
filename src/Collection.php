@@ -2,10 +2,10 @@
 
 namespace DusanKasan\Knapsack;
 
+use ArrayIterator;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use IteratorAggregate;
-use RecursiveArrayIterator;
 use Traversable;
 
 class Collection implements IteratorAggregate, \Serializable
@@ -33,7 +33,7 @@ class Collection implements IteratorAggregate, \Serializable
         }
 
         if (is_array($input)) {
-            $this->input = new RecursiveArrayIterator($input);
+            $this->input = new ArrayIterator($input);
         } elseif ($input instanceof Traversable) {
             $this->input = $input;
         } else {
@@ -101,7 +101,7 @@ class Collection implements IteratorAggregate, \Serializable
             $input = call_user_func($this->inputFactory);
 
             if (is_array($input)) {
-                $input = new RecursiveArrayIterator($input);
+                $input = new ArrayIterator($input);
             }
 
             if (!($input instanceof Traversable)) {
