@@ -117,3 +117,6 @@
 ##9.0.0
 - **Breaking change: Collection no longer implements Iterator but instead implements Traversable via IteratorAggregate**
 - Moving from Iterator to Traversable allows for huge performance gains (some 4x improvement at the very least)
+
+##10.0.0
+- **Breaking change: If inputFactory returns non-collection, throw InvalidReturnValue**
