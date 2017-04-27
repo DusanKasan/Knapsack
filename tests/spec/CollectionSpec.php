@@ -1101,40 +1101,40 @@ class CollectionSpec extends ObjectBehavior
     function it_can_extract_data_from_nested_collections()
     {
         $input = [
-                    [
-                        'a' => [
-                            'b' => 1
-                        ]
-                    ],
-                    [
-                        'a' => [
-                            'b' => 2
-                        ]
-                    ],
-                    [
-                        '*' => [
-                            'b' => 3
-                        ]
-                    ],
-                    [
-                        '.' => [
-                            'b' => 4
-                        ],
-                        'c' => [
-                            'b' => 5
-                        ],
-                        [
-                            'a'
-                        ]
-                    ]
-                ];
-                $this->beConstructedWith($input);
+            [
+                'a' => [
+                    'b' => 1
+                ]
+            ],
+            [
+                'a' => [
+                    'b' => 2
+                ]
+            ],
+            [
+                '*' => [
+                    'b' => 3
+                ]
+            ],
+            [
+                '.' => [
+                    'b' => 4
+                ],
+                'c' => [
+                    'b' => 5
+                ],
+                [
+                    'a'
+                ]
+            ]
+        ];
+        $this->beConstructedWith($input);
 
-                $this->extract('')->toArray()->shouldReturn($input);
-                $this->extract('a.b')->toArray()->shouldReturn([1, 2]);
-                $this->extract('*.b')->toArray()->shouldReturn([1, 2, 3, 4, 5]);
-                $this->extract('\*.b')->toArray()->shouldReturn([3]);
-                $this->extract('\..b')->toArray()->shouldReturn([4]);
+        $this->extract('')->toArray()->shouldReturn($input);
+        $this->extract('a.b')->toArray()->shouldReturn([1, 2]);
+        $this->extract('*.b')->toArray()->shouldReturn([1, 2, 3, 4, 5]);
+        $this->extract('\*.b')->toArray()->shouldReturn([3]);
+        $this->extract('\..b')->toArray()->shouldReturn([4]);
     }
 
     function it_can_get_the_intersect_of_collections()
