@@ -3,6 +3,7 @@
 namespace spec\DusanKasan\Knapsack;
 
 use ArrayIterator;
+use Countable;
 use DOMXPath;
 use DusanKasan\Knapsack\Collection;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
@@ -25,6 +26,7 @@ class CollectionSpec extends ObjectBehavior
         $this->beConstructedWith([1, 2, 3]);
         $this->shouldHaveType(Collection::class);
         $this->shouldHaveType(Traversable::class);
+        $this->shouldHaveType(Countable::class);
         $this->shouldHaveType(Serializable::class);
     }
 
@@ -351,6 +353,13 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 3, 3, 2,]);
         $this->size()->shouldReturn(4);
+    }
+
+    function it_should_be_countable()
+    {
+        $this->beConstructedWith([1, 3, 3, 2,]);
+        $this->shouldHaveType(Countable::class);
+        $this->count()->shouldReturn(4);
     }
 
     function it_can_get_item_by_key()
