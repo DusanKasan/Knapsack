@@ -8,7 +8,7 @@ use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use IteratorAggregate;
 use Traversable;
 
-class Collection implements IteratorAggregate, \Serializable
+class Collection implements IteratorAggregate, \Countable, \Serializable
 {
     use CollectionTrait;
 
@@ -112,6 +112,14 @@ class Collection implements IteratorAggregate, \Serializable
         }
 
         return $this->input;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return $this->size();
     }
 
     /**
