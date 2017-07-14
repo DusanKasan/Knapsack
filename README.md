@@ -816,7 +816,7 @@ isEmpty([1]); //false
 #### isNotEmpty() : bool
 Opposite of isEmpty
 ```php
-Collection::from([1, 3, 3, 2])>isNotEmpty(); //true
+Collection::from([1, 3, 3, 2])->isNotEmpty(); //true
 ```
 ```php
 isNotEmpty([1]); //true
