@@ -328,7 +328,7 @@ Collection::from([1, 2, 3, 4, 5])
     ->countBy(function ($value) {
         return $value % 2 == 0 ? 'even' : 'odd';
     })
-    ->toArray(); //['odd' => [1, 3, 5], 'even' => [2, 4]]  
+    ->toArray(); //['odd' => 3, 'even' => 2]  
 ```
 ```php
 toArray(countBy([1, 2, 3, 4, 5], function ($value) {return $value % 2 == 0 ? 'even' : 'odd';}));      
