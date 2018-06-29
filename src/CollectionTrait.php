@@ -919,6 +919,17 @@ trait CollectionTrait
         return printDump($this->getItems(), $maxItemsPerCollection, $maxDepth);
     }
 
+	/**
+	 * Join collection elements with a string
+	 *
+	 * @param string $glue
+	 * @return string
+	 */
+	public function implode($glue)
+	{
+		return \implode($glue, $this->toArray());
+	}
+
     /**
      * @return array|\Traversable
      */
