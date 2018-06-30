@@ -790,7 +790,7 @@ Collection::from([1, 2, 3])
     ->toArray(); //[1, 'a', 2, 'a', 3]
 ```
 ```php
-toArray(interpose([1, 3, 3, 2], 'a')); //[1, 'a', 2, 'a', 3] 
+toArray(interpose([1, 2, 3], 'a')); //[1, 'a', 2, 'a', 3] 
 ```
 
 #### intersect(iterable ...$collections) : Collection
