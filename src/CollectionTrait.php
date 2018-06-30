@@ -927,7 +927,7 @@ trait CollectionTrait
 	 */
 	public function implode($glue)
 	{
-		return \implode($glue, $this->toArray());
+		return \implode($glue, $this->values()->toArray());
 	}
 
     /**
