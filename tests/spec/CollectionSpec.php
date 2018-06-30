@@ -204,6 +204,25 @@ class CollectionSpec extends ObjectBehavior
             ->shouldReturn([2, 4, 4, 3]);
     }
 
+
+	function it_can_implode()
+	{
+		$this->beConstructedWith(['a', 'b', 'c',]);
+
+		$this
+			->implode(', ')
+			->shouldReturn('a, b, c');
+	}
+
+	function it_can_implode_concat()
+	{
+		$this->beConstructedWith(\DusanKasan\Knapsack\concat(['a', 'b', 'c',], [3, 4,]));
+
+		$this
+			->implode(', ')
+			->shouldReturn('a, b, c, 3, 4');
+	}
+
     function it_can_reduce()
     {
         $this->beConstructedWith([1, 3, 3, 2,]);
