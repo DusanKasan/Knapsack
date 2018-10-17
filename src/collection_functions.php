@@ -1751,3 +1751,53 @@ function printDump($input, $maxItemsPerCollection = null, $maxDepth = null)
     var_export(dump($input, $maxItemsPerCollection, $maxDepth));
     return $input;
 }
+
+/**
+ * Returns lazy collection calling selected method of each item. Optionally takes arguments to be passed to method.
+ * Each element of a result collection contains result of a called method
+ *
+ * @param iterable $input
+ * @param string $method
+ * @param array $arguments
+ * @return Collection
+ */
+function invoke($input, $method, ...$arguments)
+{
+    $generatorFactory = function () use ($input, $method, $arguments) {
+        foreach ($input as $key => $item) {
+            yield $key => call_user_func([$item, $method], ...$arguments);
+        }
+    };
+
+    return new Collection($generatorFactory);
+}
+
+/**
+ * Returns lazy collection containing value of:
+ *   - selected index in array/ArrayAccess class
+ *   - selected property if it exists
+ *   - null if none of the above was found
+ *
+ * @param iterable $input
+ * @param string $prop
+ * @return Collection
+ */
+function pluck($input, $prop)
+{
+    $generatorFactory = function () use ($input, $prop) {
+        foreach ($input as $key => $item) {
+            if (
+                (is_array($item) || $item instanceof \ArrayAccess) &&
+                isset($item[$prop])
+            ) {
+                yield $key => $item[$prop];
+            } elseif (property_exists($item, $prop)) {
+                yield $key => $item->{$prop};
+            } else {
+                yield $key => null;
+            }
+        }
+    };
+
+    return new Collection($generatorFactory);
+}

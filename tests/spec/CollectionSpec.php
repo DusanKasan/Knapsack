@@ -9,6 +9,7 @@ use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
+use DusanKasan\Knapsack\Tests\Helpers\Invoker;
 use DusanKasan\Knapsack\Tests\Helpers\PlusOneAdder;
 use IteratorAggregate;
 use PhpSpec\ObjectBehavior;
@@ -1385,5 +1386,45 @@ class CollectionSpec extends ObjectBehavior
         $this->printDump(2)->shouldReturn($this);
         $this->printDump(2, 2)->shouldReturn($this);
         ob_clean();
+    }
+
+    function it_can_invoke()
+    {
+        $this->beConstructedWith([new Invoker, new Invoker]);
+        $this
+            ->invoke('increment')
+            ->toArray()
+            ->shouldReturn([2, 2]);
+
+        $this
+            ->invoke('multiply', 3)
+            ->toArray()
+            ->shouldReturn([3, 3]);
+    }
+
+    function it_can_pluck_array()
+    {
+        $this->beConstructedWith([
+            ['id' => 1, 'name' => 'sth'],
+            ['id' => 2, 'name' => 'sth'],
+            ['id' => 3, 'name' => 'sth'],
+        ]);
+        $this
+            ->pluck('id')
+            ->toArray()
+            ->shouldReturn([1, 2, 3]);
+    }
+
+    function it_can_pluck_object()
+    {
+        $this->beConstructedWith([
+            (object)['id' => 1, 'name' => 'sth'],
+            (object)['id' => 2, 'name' => 'else'],
+            (object)['id' => 3, 'name' => 'other'],
+        ]);
+        $this
+            ->pluck('name')
+            ->toArray()
+            ->shouldReturn(['sth', 'else', 'other']);
     }
 }

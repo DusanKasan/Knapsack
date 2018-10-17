@@ -920,6 +920,29 @@ trait CollectionTrait
     }
 
     /**
+     * Returns lazy collection invoking selected method of each item
+     *
+     * @param string $method
+     * @param array $arguments
+     * @return Collection
+     */
+    public function invoke($method, ...$arguments)
+    {
+        return invoke($this->getItems(), $method, ...$arguments);
+    }
+
+    /**
+     * Returns lazy collection containing value of selected property/index
+     *
+     * @param string $prop
+     * @return Collection
+     */
+    public function pluck($prop)
+    {
+        return pluck($this->getItems(), $prop);
+    }
+
+    /**
      * @return array|\Traversable
      */
     protected function getItems()

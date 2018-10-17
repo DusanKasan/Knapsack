@@ -1382,6 +1382,42 @@ Collection::from([1, 2, 3])
 toArray(map(zip([1, 2, 3], ['a' => 1, 'b' => 2, 'c' => 4]), '\DusanKasan\Knapsack\toArray')); //[[1, 'a' => 1], [1 => 2, 'b' => 2], [2 => 3, 'c' => 4]]
 ```
 
+#### invoke(string $method, mixed ...$arguments) : Collection
+Returns lazy collection invoking selected method of each item.
+If arguments are provided, they are passed to each method call
+```php
+Collection::from([
+    new Collection([]),
+    new Collection([1, 2])
+])->invoke('size')->toArray() //[0, 2]
+```
+```php
+toArray(invoke([
+   new Collection(['id' => 1]),
+   new Collection(['id' => 2])
+], 'get', 'id')) //[1, 2]
+```
+
+#### pluck(string $prop) : Collection
+Returns lazy collection containing value of:
+  - selected index in array/ArrayAccess class
+  - selected property if it exists
+  - null if none of the above was found
+
+Values are extracted for each item in source collection. 
+```php
+Collection::from([
+    ['id' => 1, 'name' => 'element'],
+    ['id' => 2, 'name' => 'other'],
+])->pluck('id')->toArray() //[1, 2]
+```
+```php
+toArray(pluck([
+   (object)['id' => 1, 'name' => 'element'],
+   (object)['id' => 2, 'name' => 'other'],
+], 'name')) //['element', 'other']
+```
+
 ## Utility functions
 These are the functions bundled with Knapsack to make your life easier when transitioning into functional programming.
 
