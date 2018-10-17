@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: nie_u
- * Date: 17.10.2018
- * Time: 22:33
- */
 
 namespace DusanKasan\Knapsack\Tests\Helpers;
 
