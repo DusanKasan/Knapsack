@@ -1406,8 +1406,8 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([
             ['id' => 1, 'name' => 'sth'],
-            ['id' => 2, 'name' => 'sth'],
-            ['id' => 3, 'name' => 'sth'],
+            ['id' => 2, 'name' => 'else'],
+            ['id' => 3, 'name' => 'other'],
         ]);
         $this
             ->pluck('id')
@@ -1418,13 +1418,13 @@ class CollectionSpec extends ObjectBehavior
     function it_can_pluck_object()
     {
         $this->beConstructedWith([
-            (object)['id' => 1, 'name' => 'sth'],
-            (object)['id' => 2, 'name' => 'else'],
-            (object)['id' => 3, 'name' => 'other'],
+            (object)['name' => 'some object', 'childIds' => [1,2,3]],
+            (object)['name' => 'other object', 'childIds' => [4,5]],
+            (object)['name' => 'different one', 'childIds' => []],
         ]);
         $this
             ->pluck('name')
             ->toArray()
-            ->shouldReturn(['sth', 'else', 'other']);
+            ->shouldReturn(['some object', 'other object', 'different one']);
     }
 }
