@@ -1,6 +1,6 @@
 build:
   environment:
-          php: '5.6.16'
+          php: '7.0.20'
 
   tests:
     override:
