@@ -11,10 +11,7 @@ build:
           format: 'php-clover'
       -
         command: 'vendor/bin/phpunit'
-      -
-        command: 'phpenv global hhvm && vendor/bin/phpspec run -vvv'
-      -
-        command: 'phpenv global hhvm vendor/bin/phpunit'
+
       -
         command: 'phpenv global 7.0.0 && vendor/bin/phpspec run -vvv'
       -
