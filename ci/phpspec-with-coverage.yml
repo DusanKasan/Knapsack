@@ -1,5 +1,5 @@
 extensions:
-    - PhpSpec\Extension\CodeCoverageExtension
+  PhpSpecCodeCoverage\CodeCoverageExtension: ~
 
 code_coverage:
   format:

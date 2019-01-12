@@ -1,5 +1,5 @@
 extensions:
-  - Cjm\PhpSpec\Extension\TypeHintedMethodsExtension
+  Cjm\PhpSpec\Extension\TypeHintedMethodsExtension: ~
 
 suites:
   default:
