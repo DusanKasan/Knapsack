@@ -39,4 +39,4 @@ build_failure_conditions:
 
 filter:
     excluded_paths:
-        - tests/performance/*
+        - tests/
