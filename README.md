@@ -352,7 +352,7 @@ Returns a lazy collection of items that are in $collection but are not in any of
 ```php
 Collection::from([1, 3, 3, 2])
     ->diff([1, 3])
-    ->toArray() //[3 => 2]
+    ->toArray(); //[3 => 2]
 ```
 ```php
 toArray(diff([1, 3, 3, 2], [1, 3])); //[3 => 2]
@@ -363,7 +363,7 @@ Returns a lazy collection of distinct items. The comparison whether the item is 
 ```php
 Collection::from([1, 3, 3, 2])
     ->distinct()
-    ->toArray() //[1, 3, 3 => 2] - each item has key of the first occurrence
+    ->toArray(); //[1, 3, 3 => 2] - each item has key of the first occurrence
 ```
 ```php
 toArray(distinct([1, 3, 3, 2])); //[1, 3, 3 => 2] - each item has key of the first occurrence
@@ -567,14 +567,14 @@ Collection::from([1, 3, 3, 2])
         return $value > 2;
     })
     ->values()
-    ->toArray() //[3, 3]
+    ->toArray(); //[3, 3]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
     ->filter(function ($value, $key) {
         return $value > 2 && $key > 1;
     })
-    ->toArray() //[2 => 3]
+    ->toArray(); //[2 => 3]
 ```
 ```php
 toArray(values(filter([1, 3, 3, 2], function ($value) {return $value > 2;}))); //[3, 3]
@@ -584,7 +584,7 @@ If `$function` is not provided, `\DusanKasan\Knapsack\identity` is used so every
 ```php
 Collection::from([0, 0.0, false, null, "", []])
     ->filter()
-    ->isEmpty() //true
+    ->isEmpty(); //true
 ```
 ```php
 isEmpty(values(filter([0, 0.0, false, null, "", []]))); //true
@@ -644,13 +644,13 @@ Returns a lazy collection with one or multiple levels of nesting flattened. Remo
 Collection::from([1,[2, [3]]])
     ->flatten()
     ->values() //1, 2 and 3 have all key 0
-    ->toArray() //[1, 2, 3]
+    ->toArray(); //[1, 2, 3]
 ```
 ```php
 Collection::from([1,[2, [3]]])
     ->flatten(1)
     ->values() //1, 2 and 3 have all key 0
-    ->toArray() //[1, 2, [3]]
+    ->toArray(); //[1, 2, [3]]
 ```
 ```php
 toArray(values(flatten([1, [2, [3]]]))); //[1, 2, 3]
@@ -661,7 +661,7 @@ Returns a lazy collection where keys and values are flipped.
 ```php
 Collection::from(['a' => 0, 'b' => 1])
     ->flip()
-    ->toArray() //['a', 'b']
+    ->toArray(); //['a', 'b']
 ```
 ```php
 toArray(flip(['a' => 0, 'b' => 1])); //['a', 'b']
@@ -855,7 +855,7 @@ Collection::from([1, 3, 3, 2])
     ->map(function ($value) {
         return $value + 1;
     })
-    ->toArray() //[2, 4, 4, 3]
+    ->toArray(); //[2, 4, 4, 3]
 ```
 ```php
 toArray(map([1, 3, 3, 2], '\DusanKasan\Knapsack\increment')); //[2, 4, 4, 3]
@@ -1061,14 +1061,14 @@ Collection::from([1, 3, 3, 2])
     ->reject(function ($value) {
         return $value > 2;
     })
-    ->toArray() //[1, 3 => 2]
+    ->toArray(); //[1, 3 => 2]
 ```
 ```php
 Collection::from([1, 3, 3, 2])
     ->reject(function ($value, $key) {
         return $value > 2 && $key > 1;
     })
-    ->toArray() //[1, 1 => 3, 3 => 2]
+    ->toArray(); //[1, 1 => 3, 3 => 2]
 ```
 ```php
 toArray(reject([1, 3, 3, 2], function ($value) {return $value > 2;})); //[1, 1 => 3, 3 => 2]
