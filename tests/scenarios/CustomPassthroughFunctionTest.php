@@ -3,6 +3,7 @@
 namespace DusanKasan\Knapsack\Tests\Scenarios;
 
 use DusanKasan\Knapsack\Collection;
+use DusanKasan\Knapsack\CollectionInterface;
 use PHPUnit_Framework_TestCase;
 
 class CustomPassthroughFunctionTest extends PHPUnit_Framework_TestCase
@@ -33,7 +34,7 @@ class CustomPassthroughFunctionTest extends PHPUnit_Framework_TestCase
         ];
 
         //Must take and return a Collection
-        $transpose = function (Collection $collections) {
+        $transpose = function (CollectionInterface $collections) {
             $transposed = array_map(
                 function (...$items) {
                     return $items;

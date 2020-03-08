@@ -20,17 +20,17 @@ trait CollectionTrait
      * Returns a lazy collection of items for which $function returned true.
      *
      * @param callable|null $function ($value, $key)
-     * @return Collection
+     * @return CollectionInterface
      */
     public function filter(callable $function = null)
     {
-        return filter($this->getItems(), $function);
+        return $this->buildFromCollection(filter($this->getItems(), $function));
     }
 
     /**
      * Returns a lazy collection of distinct items. The comparison is the same as in in_array.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function distinct()
     {
@@ -41,7 +41,7 @@ trait CollectionTrait
      * Returns a lazy collection with items from all $collections passed as argument appended together
      *
      * @param array|\Traversable ...$collections
-     * @return Collection
+     * @return CollectionInterface
      */
     public function concat(...$collections)
     {
@@ -52,7 +52,7 @@ trait CollectionTrait
      * Returns collection where each item is changed to the output of executing $function on each key/item.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function map(callable $function)
     {
@@ -83,7 +83,7 @@ trait CollectionTrait
      * is passed.
      *
      * @param int $depth How many levels should be flatten, default (-1) is infinite.
-     * @return Collection
+     * @return CollectionInterface
      */
     public function flatten($depth = -1)
     {
@@ -95,7 +95,7 @@ trait CollectionTrait
      * return true if first item is larger than the second and false otherwise.
      *
      * @param callable $function ($value1, $value2, $key1, $key2)
-     * @return Collection
+     * @return CollectionInterface
      */
     public function sort(callable $function)
     {
@@ -108,7 +108,7 @@ trait CollectionTrait
      *
      * @param int $from
      * @param int $to If omitted, will slice until end
-     * @return Collection
+     * @return CollectionInterface
      */
     public function slice($from, $to = -1)
     {
@@ -119,7 +119,7 @@ trait CollectionTrait
      * Returns collection which items are separated into groups indexed by the return value of $function.
      *
      * @param callable $function ($value, $key)
-     * @return Collection
+     * @return CollectionInterface
      */
     public function groupBy(callable $function)
     {
@@ -130,7 +130,7 @@ trait CollectionTrait
      * Returns collection where items are separated into groups indexed by the value at given key.
      *
      * @param mixed $key
-     * @return Collection
+     * @return CollectionInterface
      */
     public function groupByKey($key)
     {
@@ -141,7 +141,7 @@ trait CollectionTrait
      * Returns a lazy collection in which $function is executed for each item.
      *
      * @param callable $function ($value, $key)
-     * @return Collection
+     * @return CollectionInterface
      */
     public function each(callable $function)
     {
@@ -214,7 +214,7 @@ trait CollectionTrait
      * items in this collection for which the $function returned this value.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function countBy(callable $function)
     {
@@ -226,7 +226,7 @@ trait CollectionTrait
      * that item.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function indexBy(callable $function)
     {
@@ -269,7 +269,7 @@ trait CollectionTrait
     /**
      * Returns collection of items in this collection in reverse order.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function reverse()
     {
@@ -296,7 +296,7 @@ trait CollectionTrait
      * A form of slice that returns first $numberOfItems items.
      *
      * @param int $numberOfItems
-     * @return Collection
+     * @return CollectionInterface
      */
     public function take($numberOfItems)
     {
@@ -307,7 +307,7 @@ trait CollectionTrait
      * A form of slice that returns all but first $numberOfItems items.
      *
      * @param int $numberOfItems
-     * @return Collection
+     * @return CollectionInterface
      */
     public function drop($numberOfItems)
     {
@@ -317,7 +317,7 @@ trait CollectionTrait
     /**
      * Returns collection of values from this collection but with keys being numerical from 0 upwards.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function values()
     {
@@ -328,7 +328,7 @@ trait CollectionTrait
      * Returns a lazy collection without elements matched by $function.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function reject(callable $function)
     {
@@ -338,7 +338,7 @@ trait CollectionTrait
     /**
      * Returns a lazy collection of the keys of this collection.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function keys()
     {
@@ -349,7 +349,7 @@ trait CollectionTrait
      * Returns a lazy collection of items of this collection separated by $separator
      *
      * @param mixed $separator
-     * @return Collection
+     * @return CollectionInterface
      */
     public function interpose($separator)
     {
@@ -360,7 +360,7 @@ trait CollectionTrait
      * Returns a lazy collection with last $numberOfItems items skipped. These are still iterated over, just skipped.
      *
      * @param int $numberOfItems
-     * @return Collection
+     * @return CollectionInterface
      */
     public function dropLast($numberOfItems = 1)
     {
@@ -372,7 +372,7 @@ trait CollectionTrait
      * so on. Accepts any number of collections.
      *
      * @param array|\Traversable ...$collections
-     * @return Collection
+     * @return CollectionInterface
      */
     public function interleave(...$collections)
     {
@@ -382,7 +382,7 @@ trait CollectionTrait
     /**
      * Returns an infinite lazy collection of items in this collection repeated infinitely.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function cycle()
     {
@@ -395,7 +395,7 @@ trait CollectionTrait
      *
      * @param mixed $value
      * @param mixed|null $key
-     * @return Collection
+     * @return CollectionInterface
      */
     public function prepend($value, $key = null)
     {
@@ -408,7 +408,7 @@ trait CollectionTrait
      *
      * @param mixed $value
      * @param mixed $key
-     * @return Collection
+     * @return CollectionInterface
      */
     public function append($value, $key = null)
     {
@@ -420,7 +420,7 @@ trait CollectionTrait
      * false.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function dropWhile(callable $function)
     {
@@ -431,7 +431,7 @@ trait CollectionTrait
      * Returns a lazy collection which is a result of calling map($function) and then flatten(1)
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function mapcat(callable $function)
     {
@@ -443,7 +443,7 @@ trait CollectionTrait
      * returns false.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function takeWhile(callable $function)
     {
@@ -454,7 +454,7 @@ trait CollectionTrait
      * Returns a collection of [take($position), drop($position)]
      *
      * @param int $position
-     * @return Collection
+     * @return CollectionInterface
      */
     public function splitAt($position)
     {
@@ -465,7 +465,7 @@ trait CollectionTrait
      * Returns a collection of [takeWhile($predicament), dropWhile($predicament]
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function splitWith(callable $function)
     {
@@ -477,7 +477,7 @@ trait CollectionTrait
      * are replaced by their values.
      *
      * @param array|\Traversable $replacementMap
-     * @return Collection
+     * @return CollectionInterface
      */
     public function replace($replacementMap)
     {
@@ -489,7 +489,7 @@ trait CollectionTrait
      *
      * @param callable $function
      * @param mixed $startValue
-     * @return Collection
+     * @return CollectionInterface
      */
     public function reductions(callable $function, $startValue)
     {
@@ -500,7 +500,7 @@ trait CollectionTrait
      * Returns a lazy collection of every nth item in this collection
      *
      * @param int $step
-     * @return Collection
+     * @return CollectionInterface
      */
     public function takeNth($step)
     {
@@ -510,7 +510,7 @@ trait CollectionTrait
     /**
      * Returns a non-collection of shuffled items from this collection
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function shuffle()
     {
@@ -527,7 +527,7 @@ trait CollectionTrait
      * @param int $numberOfItems
      * @param int $step
      * @param array|\Traversable $padding
-     * @return Collection
+     * @return CollectionInterface
      */
     public function partition($numberOfItems, $step = 0, $padding = [])
     {
@@ -539,7 +539,7 @@ trait CollectionTrait
      * return different result.
      *
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public function partitionBy(callable $function)
     {
@@ -570,7 +570,7 @@ trait CollectionTrait
      * Returns a collection where keys are distinct items from this collection and their values are number of
      * occurrences of each value.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function frequencies()
     {
@@ -610,7 +610,7 @@ trait CollectionTrait
     /**
      * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function realize()
     {
@@ -638,7 +638,7 @@ trait CollectionTrait
      * has length equal to the size of smaller collection.
      *
      * @param array|\Traversable $collection
-     * @return Collection
+     * @return CollectionInterface
      * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function combine($collection)
@@ -650,7 +650,7 @@ trait CollectionTrait
      * Returns a lazy collection without the items associated to any of the keys from $keys.
      *
      * @param array|\Traversable $keys
-     * @return Collection
+     * @return CollectionInterface
      */
     public function except($keys)
     {
@@ -661,7 +661,7 @@ trait CollectionTrait
      * Returns a lazy collection of items associated to any of the keys from $keys.
      *
      * @param array|\Traversable $keys
-     * @return Collection
+     * @return CollectionInterface
      */
     public function only($keys)
     {
@@ -673,7 +673,7 @@ trait CollectionTrait
      * keys from the first collection. Note that the ...$collections are iterated non-lazily.
      *
      * @param array|\Traversable ...$collections
-     * @return Collection
+     * @return CollectionInterface
      */
     public function diff(...$collections)
     {
@@ -683,7 +683,7 @@ trait CollectionTrait
     /**
      * Returns a lazy collection where keys and values are flipped.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function flip()
     {
@@ -706,7 +706,7 @@ trait CollectionTrait
      * passed collection. Stops when any of the collections don't have an item at the nth position.
      *
      * @param array|\Traversable ...$collections
-     * @return Collection
+     * @return CollectionInterface
      */
     public function zip(...$collections)
     {
@@ -719,16 +719,16 @@ trait CollectionTrait
      * Uses a $transformer callable that takes a Collection and returns Collection on itself.
      *
      * @param callable $transformer Collection => Collection
-     * @return Collection
+     * @return CollectionInterface
      * @throws InvalidReturnValue
      */
     public function transform(callable $transformer)
     {
         $items = $this->getItems();
 
-        $transformed = $transformer($items instanceof Collection ? $items : new Collection($items));
+        $transformed = $transformer($items instanceof CollectionInterface ? $items : new Collection($items));
 
-        if (!($transformed instanceof Collection)) {
+        if (!($transformed instanceof CollectionInterface)) {
             throw new InvalidReturnValue;
         }
 
@@ -739,7 +739,7 @@ trait CollectionTrait
      * Transpose each item in a collection, interchanging the row and column indexes.
      * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function transpose()
     {
@@ -751,7 +751,7 @@ trait CollectionTrait
      * it must be escaped using \ character.
      *
      * @param mixed $keyPath
-     * @return Collection
+     * @return CollectionInterface
      */
     public function extract($keyPath)
     {
@@ -763,7 +763,7 @@ trait CollectionTrait
      * the first collection. Note that the ...$collections are iterated non-lazily.
      *
      * @param array|\Traversable ...$collections
-     * @return Collection
+     * @return CollectionInterface
      */
     public function intersect(...$collections)
     {
@@ -871,7 +871,7 @@ trait CollectionTrait
      * $replacementMap are replaced by their values.
      *
      * @param array|\Traversable $replacementMap
-     * @return Collection
+     * @return CollectionInterface
      */
     public function replaceByKeys($replacementMap)
     {
@@ -912,7 +912,7 @@ trait CollectionTrait
      *
      * @param int|null $maxItemsPerCollection
      * @param int|null $maxDepth
-     * @return Collection
+     * @return CollectionInterface
      */
     public function printDump($maxItemsPerCollection = null, $maxDepth = null)
     {
@@ -926,4 +926,10 @@ trait CollectionTrait
     {
         return $this;
     }
+
+    /**
+     * @param Collection $collection
+     * @return CollectionInterface
+     */
+    protected abstract function buildFromCollection(CollectionInterface $collection);
 }

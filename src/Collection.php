@@ -45,7 +45,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      * Static alias of normal constructor.
      *
      * @param callable|array|Traversable $input
-     * @return Collection
+     * @return CollectionInterface
      */
     public static function from($input)
     {
@@ -59,7 +59,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      *
      * @param mixed $input
      * @param callable $function
-     * @return Collection
+     * @return CollectionInterface
      */
     public static function iterate($input, callable $function)
     {
@@ -71,7 +71,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      *
      * @param mixed $value
      * @param int $times
-     * @return Collection
+     * @return CollectionInterface
      */
     public static function repeat($value, $times = -1)
     {
@@ -84,7 +84,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      * @param int $start
      * @param int|null $end
      * @param int $step
-     * @return Collection
+     * @return CollectionInterface
      */
     public static function range($start = 0, $end = null, $step = 1)
     {
@@ -137,5 +137,13 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
     public function unserialize($serialized)
     {
         $this->input = dereferenceKeyValue(unserialize($serialized));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function buildFromCollection(Collection $collection)
+    {
+        return $collection;
     }
 }

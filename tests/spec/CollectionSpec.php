@@ -5,6 +5,7 @@ namespace spec\DusanKasan\Knapsack;
 use ArrayIterator;
 use DOMXPath;
 use DusanKasan\Knapsack\Collection;
+use DusanKasan\Knapsack\CollectionInterface;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
@@ -242,7 +243,7 @@ class CollectionSpec extends ObjectBehavior
 
         $this
             ->reduce(
-                function (Collection $temp, $item) {
+                function (CollectionInterface $temp, $item) {
                     return $temp->append($item);
                 },
                 new Collection([])
@@ -556,7 +557,7 @@ class CollectionSpec extends ObjectBehavior
 
         $this
             ->reduceRight(
-                function (Collection $temp, $item) {
+                function (CollectionInterface $temp, $item) {
                     return $temp->append($item);
                 },
                 new Collection([])
@@ -1080,7 +1081,7 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 2, 3]);
         $this
-            ->transform(function (Collection $collection) {
+            ->transform(function (CollectionInterface $collection) {
                 return $collection->map('\DusanKasan\Knapsack\increment');
             })
             ->toArray()
@@ -1091,7 +1092,7 @@ class CollectionSpec extends ObjectBehavior
             ->during(
                 'transform',
                 [
-                    function (Collection $collection) {
+                    function (CollectionInterface $collection) {
                         return $collection->first();
                     },
                 ]

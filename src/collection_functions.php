@@ -24,7 +24,7 @@ function toArray($collection)
  * Returns a lazy collection of distinct items in $collection.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function distinct($collection)
 {
@@ -62,7 +62,7 @@ function size($collection)
  * Returns a non-lazy collection with items from $collection in reversed order.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function reverse($collection)
 {
@@ -92,7 +92,7 @@ function reverse($collection)
  * Returns a lazy collection of values from $collection (i.e. the keys are reset).
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function values($collection)
 {
@@ -109,7 +109,7 @@ function values($collection)
  * Returns a lazy collection of keys from $collection.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function keys($collection)
 {
@@ -126,7 +126,7 @@ function keys($collection)
  * Returns a lazy collection of items from $collection repeated infinitely.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function cycle($collection)
 {
@@ -145,7 +145,7 @@ function cycle($collection)
  * Returns a non-lazy collection of shuffled items from $collection.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function shuffle($collection)
 {
@@ -190,7 +190,7 @@ function isNotEmpty($collection)
  * value.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function frequencies($collection)
 {
@@ -225,7 +225,7 @@ function last($collection)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function map($collection, callable $function)
 {
@@ -243,7 +243,7 @@ function map($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable|null $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function filter($collection, callable $function = null)
 {
@@ -268,7 +268,7 @@ function filter($collection, callable $function = null)
  * Returns a lazy collection with items from all $collections passed as argument appended together
  *
  * @param array|Traversable ...$collections
- * @return Collection
+ * @return CollectionInterface
  */
 function concat(...$collections)
 {
@@ -310,7 +310,7 @@ function reduce($collection, callable $function, $startValue)
  *
  * @param array|Traversable $collection
  * @param int $levelsToFlatten -1 to flatten everything
- * @return Collection
+ * @return CollectionInterface
  */
 function flatten($collection, $levelsToFlatten = -1)
 {
@@ -338,7 +338,7 @@ function flatten($collection, $levelsToFlatten = -1)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value1, $value2, $key1, $key2)
- * @return Collection
+ * @return CollectionInterface
  */
 function sort($collection, callable $function)
 {
@@ -371,7 +371,7 @@ function sort($collection, callable $function)
  * @param array|Traversable $collection
  * @param int $from
  * @param int $to -1 to slice until end
- * @return Collection
+ * @return CollectionInterface
  */
 function slice($collection, $from, $to = -1)
 {
@@ -396,7 +396,7 @@ function slice($collection, $from, $to = -1)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function groupBy($collection, callable $function)
 {
@@ -420,7 +420,7 @@ function groupBy($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param mixed $key
- * @return Collection
+ * @return CollectionInterface
  */
 function groupByKey($collection, $key)
 {
@@ -446,7 +446,7 @@ function groupByKey($collection, $key)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function each($collection, callable $function)
 {
@@ -522,7 +522,7 @@ function find($collection, callable $function, $default = null)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function indexBy($collection, callable $function)
 {
@@ -541,7 +541,7 @@ function indexBy($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function countBy($collection, callable $function)
 {
@@ -623,7 +623,7 @@ function reduceRight($collection, callable $function, $startValue)
  *
  * @param array|Traversable $collection
  * @param int $numberOfItems
- * @return Collection
+ * @return CollectionInterface
  */
 function take($collection, $numberOfItems)
 {
@@ -635,7 +635,7 @@ function take($collection, $numberOfItems)
  *
  * @param array|Traversable $collection
  * @param int $numberOfItems
- * @return Collection
+ * @return CollectionInterface
  */
 function drop($collection, $numberOfItems)
 {
@@ -649,7 +649,7 @@ function drop($collection, $numberOfItems)
  *
  * @param mixed $value
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function iterate($value, callable $function)
 {
@@ -677,7 +677,7 @@ function iterate($value, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function reject($collection, callable $function)
 {
@@ -694,7 +694,7 @@ function reject($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param int $numberOfItems
- * @return Collection
+ * @return CollectionInterface
  */
 function dropLast($collection, $numberOfItems = 1)
 {
@@ -719,7 +719,7 @@ function dropLast($collection, $numberOfItems = 1)
  *
  * @param array|Traversable $collection
  * @param mixed $separator
- * @return Collection
+ * @return CollectionInterface
  */
 function interpose($collection, $separator)
 {
@@ -742,7 +742,7 @@ function interpose($collection, $separator)
  * so on. Accepts any number of collections.
  *
  * @param array|Traversable ...$collections
- * @return Collection
+ * @return CollectionInterface
  */
 function interleave(...$collections)
 {
@@ -779,7 +779,7 @@ function interleave(...$collections)
  * @param array|Traversable $collection
  * @param mixed $value
  * @param mixed|null $key
- * @return Collection
+ * @return CollectionInterface
  */
 function prepend($collection, $value, $key = null)
 {
@@ -805,7 +805,7 @@ function prepend($collection, $value, $key = null)
  * @param array|Traversable $collection
  * @param mixed $value
  * @param mixed|null $key
- * @return Collection
+ * @return CollectionInterface
  */
 function append($collection, $value, $key = null)
 {
@@ -829,7 +829,7 @@ function append($collection, $value, $key = null)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function dropWhile($collection, callable $function)
 {
@@ -854,7 +854,7 @@ function dropWhile($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function takeWhile($collection, callable $function)
 {
@@ -879,7 +879,7 @@ function takeWhile($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function mapcat($collection, callable $function)
 {
@@ -891,7 +891,7 @@ function mapcat($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param int $position
- * @return Collection
+ * @return CollectionInterface
  */
 function splitAt($collection, $position)
 {
@@ -908,7 +908,7 @@ function splitAt($collection, $position)
  *
  * @param array|Traversable $collection
  * @param callable $function ($value, $key)
- * @return Collection
+ * @return CollectionInterface
  */
 function splitWith($collection, callable $function)
 {
@@ -926,7 +926,7 @@ function splitWith($collection, callable $function)
  *
  * @param array|Traversable $collection
  * @param array|Traversable $replacementMap
- * @return Collection
+ * @return CollectionInterface
  */
 function replace($collection, $replacementMap)
 {
@@ -946,7 +946,7 @@ function replace($collection, $replacementMap)
  * @param array|Traversable $collection
  * @param callable $function
  * @param mixed $startValue
- * @return Collection
+ * @return CollectionInterface
  */
 function reductions($collection, callable $function, $startValue)
 {
@@ -968,7 +968,7 @@ function reductions($collection, callable $function, $startValue)
  *
  * @param array|Traversable $collection
  * @param int $step
- * @return Collection
+ * @return CollectionInterface
  */
 function takeNth($collection, $step)
 {
@@ -997,7 +997,7 @@ function takeNth($collection, $step)
  * @param int $numberOfItems
  * @param int $step
  * @param array|Traversable $padding
- * @return Collection
+ * @return CollectionInterface
  */
 function partition($collection, $numberOfItems, $step = -1, $padding = [])
 {
@@ -1035,7 +1035,7 @@ function partition($collection, $numberOfItems, $step = -1, $padding = [])
  *
  * @param array|Traversable $collection
  * @param callable $function
- * @return Collection
+ * @return CollectionInterface
  */
 function partitionBy($collection, callable $function)
 {
@@ -1068,7 +1068,7 @@ function partitionBy($collection, callable $function)
  *
  * @param mixed $value
  * @param int $times
- * @return Collection
+ * @return CollectionInterface
  */
 function repeat($value, $times = -1)
 {
@@ -1091,7 +1091,7 @@ function repeat($value, $times = -1)
  * @param int $start
  * @param int|null $end
  * @param int $step
- * @return Collection
+ * @return CollectionInterface
  */
 function range($start = 0, $end = null, $step = 1)
 {
@@ -1153,7 +1153,7 @@ function duplicate($input)
  * Transforms [[$key, $value], [$key2, $value2]] into [$key => $value, $key2 => $value2]. Used as a helper
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function dereferenceKeyValue($collection)
 {
@@ -1170,7 +1170,7 @@ function dereferenceKeyValue($collection)
  * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function realize($collection)
 {
@@ -1203,7 +1203,7 @@ function second($collection)
  *
  * @param array|Traversable $keys
  * @param array|Traversable $values
- * @return Collection
+ * @return CollectionInterface
  */
 function combine($keys, $values)
 {
@@ -1230,7 +1230,7 @@ function combine($keys, $values)
  *
  * @param array|Traversable $collection
  * @param array|Traversable $keys
- * @return Collection
+ * @return CollectionInterface
  */
 function except($collection, $keys)
 {
@@ -1249,7 +1249,7 @@ function except($collection, $keys)
  *
  * @param array|Traversable $collection
  * @param array|Traversable $keys
- * @return Collection
+ * @return CollectionInterface
  */
 function only($collection, $keys)
 {
@@ -1269,7 +1269,7 @@ function only($collection, $keys)
  *
  * @param array|Traversable $collection
  * @param array|Traversable ...$collections
- * @return Collection
+ * @return CollectionInterface
  */
 function diff($collection, ...$collections)
 {
@@ -1291,7 +1291,7 @@ function diff($collection, ...$collections)
  *
  * @param array|Traversable $collection
  * @param array|Traversable ...$collections
- * @return Collection
+ * @return CollectionInterface
  */
 function intersect($collection, ...$collections)
 {
@@ -1311,7 +1311,7 @@ function intersect($collection, ...$collections)
  * Returns a lazy collection where keys and values are flipped.
  *
  * @param array|Traversable $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function flip($collection)
 {
@@ -1346,7 +1346,7 @@ function has($collection, $key)
  * any of the collections don't have an item at the nth position.
  *
  * @param array|Traversable ...$collections
- * @return Collection
+ * @return CollectionInterface
  */
 function zip(...$collections)
 {
@@ -1391,12 +1391,12 @@ function zip(...$collections)
  * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
  *
  * @param Collection[] $collection
- * @return Collection
+ * @return CollectionInterface
  */
 function transpose($collection)
 {
     if (some($collection, function ($value) {
-        return !($value instanceof Collection);
+        return !($value instanceof CollectionInterface);
     })) {
         throw new InvalidArgument('Can only transpose collections of collections.');
     }
@@ -1422,7 +1422,7 @@ function transpose($collection)
  *
  * @param array|Traversable $collection
  * @param mixed $keyPath
- * @return Collection
+ * @return CollectionInterface
  */
 function extract($collection, $keyPath)
 {
@@ -1648,7 +1648,7 @@ function toString($collection)
  *
  * @param array|Traversable $collection
  * @param array|Traversable $replacementMap
- * @return Collection
+ * @return CollectionInterface
  */
 function replaceByKeys($collection, $replacementMap)
 {
