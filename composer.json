@@ -14,16 +14,16 @@
     }
   ],
   "require-dev": {
-    "phpspec/phpspec": "^3.4",
-    "henrikbjorn/phpspec-code-coverage": "^3.0",
-    "squizlabs/php_codesniffer": "^3.4",
-    "phpmd/phpmd" : "^2.0",
-    "ciaranmcnulty/phpspec-typehintedmethods": "^2.0",
-    "phpunit/phpunit": "^5.7",
-    "symfony/console": "^2.7"
+    "phpspec/phpspec": "^6.1",
+    "friends-of-phpspec/phpspec-code-coverage": "^4.3",
+    "squizlabs/php_codesniffer": "^3.5",
+    "phpmd/phpmd" : "^2.8",
+    "phpunit/phpunit": "^8.5",
+    "symfony/console": "^5.0",
+    "vimeo/psalm": "^3.11"
   },
   "require": {
-    "php": ">=5.6.0"
+    "php": ">=7.2"
   },
   "autoload": {
     "files": [

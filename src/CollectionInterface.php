@@ -3,8 +3,13 @@
 namespace DusanKasan\Knapsack;
 
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
+use Traversable;
 
-interface CollectionInterface
+/**
+ * @template TKey
+ * @template TVal
+ */
+interface CollectionInterface extends Traversable
 {
     /**
      * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
@@ -16,31 +21,32 @@ interface CollectionInterface
     /**
      * Returns a lazy collection of items for which $function returned true.
      *
-     * @param callable|null $function ($value, $key)
-     * @return CollectionInterface
+     * @param callable(TVal, TKey): bool|null $function
+     * @return static<TKey, TVal>
      */
     public function filter(callable $function = null);
 
     /**
      * Returns a lazy collection of distinct items. The comparison is the same as in in_array.
      *
-     * @return CollectionInterface
+     * @return static<TKey, TVal>
      */
     public function distinct();
 
     /**
      * Returns a lazy collection with items from all $collections passed as argument appended together
      *
-     * @param array|\Traversable ...$collections
-     * @return CollectionInterface
+     * @param iterable<TKey, TVal> ...$collections
+     * @return static<TKey, TVal>
      */
     public function concat(...$collections);
 
     /**
      * Returns collection where each item is changed to the output of executing $function on each key/item.
      *
-     * @param callable $function
-     * @return CollectionInterface
+     * @template TRes
+     * @param callable(TVal, TKey):TRes $function
+     * @return static<TKey, TRes>
      */
     public function map(callable $function);
 
@@ -48,7 +54,7 @@ interface CollectionInterface
      * Reduces the collection to single value by iterating over the collection and calling $function while
      * passing $startValue and current key/item as parameters. The output of $function is used as $startValue in
      * next iteration. The output of $function on last element is the return value of this function. If
-     * $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection
+     * $convertToCollection is true and the return value is a collection (iterable) an instance of Collection
      * is returned.
      *
      * @param callable $function ($tmpValue, $value, $key)
@@ -71,8 +77,8 @@ interface CollectionInterface
      * Returns a non-lazy collection sorted using $function($item1, $item2, $key1, $key2 ). $function should
      * return true if first item is larger than the second and false otherwise.
      *
-     * @param callable $function ($value1, $value2, $key1, $key2)
-     * @return CollectionInterface
+     * @param callable(TVal, TVal, TKey, TKey): bool $function
+     * @return static<TKey, TVal>
      */
     public function sort(callable $function);
 
@@ -81,32 +87,33 @@ interface CollectionInterface
      * number $to. The items before $from are also iterated over, just not returned.
      *
      * @param int $from
-     * @param int $to If omitted, will slice until end
-     * @return CollectionInterface
+     * @param int $to -1 to slice until end
+     * @return static<TKey, TVal>
      */
-    public function slice($from, $to = -1);
+    public function slice(int $from, int $to = -1);
 
     /**
      * Returns collection which items are separated into groups indexed by the return value of $function.
      *
-     * @param callable $function ($value, $key)
-     * @return CollectionInterface
+     * @template TRes
+     * @param callable(TVal, TKey): TRes $function
+     * @return CollectionInterface<TRes, static<int, TVal>>
      */
-    public function groupBy(callable $function);
+    public function groupBy(callable $function): CollectionInterface;
 
     /**
      * Returns collection where items are separated into groups indexed by the value at given key.
      *
      * @param mixed $key
-     * @return CollectionInterface
+     * @return CollectionInterface<mixed, mixed>
      */
-    public function groupByKey($key);
+    public function groupByKey($key): CollectionInterface;
 
     /**
      * Returns a lazy collection in which $function is executed for each item.
      *
-     * @param callable $function ($value, $key)
-     * @return CollectionInterface
+     * @param callable(TVal, TKey): void $function
+     * @return static<TKey, TVal>
      */
     public function each(callable $function);
 
@@ -119,7 +126,7 @@ interface CollectionInterface
 
     /**
      * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw
-     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * ItemNotFound. If $convertToCollection is true and the return value is a collection (iterable) an
      * instance of Collection will be returned.
      *
      * @param mixed $key
@@ -132,7 +139,7 @@ interface CollectionInterface
     /**
      * Returns item at the key $key. If multiple items have this key, return first. If no item has this key, return
      * $ifNotFound. If no value has this key, throw ItemNotFound. If $convertToCollection is true and the return value
-     * is a collection (array|Traversable) an instance of Collection will be returned.
+     * is a collection (iterable) an instance of Collection will be returned.
      *
      * @param mixed $key
      * @param mixed $default
@@ -144,12 +151,12 @@ interface CollectionInterface
 
     /**
      * Returns first value matched by $function. If no value matches, return $default. If $convertToCollection is true
-     * and the return value is a collection (array|Traversable) an instance of Collection will be returned.
+     * and the return value is a collection (iterable) an instance of Collection will be returned.
      *
-     * @param callable $function
-     * @param mixed|null $default
+     * @param callable(TVal, TKey): bool $function
+     * @param TVal|null $default
      * @param bool $convertToCollection
-     * @return mixed|Collection
+     * @return TVal|CollectionInterface
      */
     public function find(callable $function, $default = null, $convertToCollection = false);
 
@@ -157,24 +164,26 @@ interface CollectionInterface
      * Returns a non-lazy collection of items whose keys are the return values of $function and values are the number of
      * items in this collection for which the $function returned this value.
      *
-     * @param callable $function
-     * @return CollectionInterface
+     * @template TRes
+     * @param callable(TVal, TKey): TRes $function
+     * @return CollectionInterface<TRes, int>
      */
-    public function countBy(callable $function);
+    public function countBy(callable $function): CollectionInterface;
 
     /**
      * Returns a lazy collection by changing keys of this collection for each item to the result of $function for
      * that item.
      *
-     * @param callable $function
-     * @return CollectionInterface
+     * @template TNewKey
+     * @param callable(TVal, TKey): TNewKey $function
+     * @return static<TNewKey, TVal>
      */
     public function indexBy(callable $function);
 
     /**
      * Returns true if $function returns true for every item in this collection, false otherwise.
      *
-     * @param callable $function
+     * @param callable(TVal, TKey): bool $function
      * @return bool
      */
     public function every(callable $function);
@@ -182,7 +191,7 @@ interface CollectionInterface
     /**
      * Returns true if $function returns true for at least one item in this collection, false otherwise.
      *
-     * @param callable $function
+     * @param callable(TVal, TKey): bool $function
      * @return bool
      */
     public function some(callable $function);
@@ -190,7 +199,7 @@ interface CollectionInterface
     /**
      * Returns true if $value is present in the collection.
      *
-     * @param mixed $value
+     * @param TVal $value
      * @return bool
      */
     public function contains($value);
@@ -198,18 +207,19 @@ interface CollectionInterface
     /**
      * Returns collection of items in this collection in reverse order.
      *
-     * @return CollectionInterface
+     * @return static<TKey, TVal>
      */
     public function reverse();
 
     /**
      * Reduce the collection to single value. Walks from right to left. If $convertToCollection is true and the return
-     * value is a collection (array|Traversable) an instance of Collection is returned.
+     * value is a collection (iterable) an instance of Collection is returned.
      *
-     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
-     * @param mixed $startValue
+     * @template TRes
+     * @param callable $function
+     * @param TRes $startValue
      * @param bool $convertToCollection
-     * @return mixed|Collection
+     * @return TRes|CollectionInterface
      */
     public function reduceRight(callable $function, $startValue, $convertToCollection = false);
 
@@ -217,45 +227,45 @@ interface CollectionInterface
      * A form of slice that returns first $numberOfItems items.
      *
      * @param int $numberOfItems
-     * @return CollectionInterface
+     * @return static<TKey, TVal>
      */
-    public function take($numberOfItems);
+    public function take(int $numberOfItems);
 
     /**
      * A form of slice that returns all but first $numberOfItems items.
      *
      * @param int $numberOfItems
-     * @return CollectionInterface
+     * @return static<TKey, TVal>
      */
-    public function drop($numberOfItems);
+    public function drop(int $numberOfItems);
 
     /**
      * Returns collection of values from this collection but with keys being numerical from 0 upwards.
      *
-     * @return CollectionInterface
+     * @return static<int, TVal>
      */
     public function values();
 
     /**
      * Returns a lazy collection without elements matched by $function.
      *
-     * @param callable $function
-     * @return CollectionInterface
+     * @param callable(TVal, TKey): bool $function
+     * @return static<TKey, TVal>
      */
     public function reject(callable $function);
 
     /**
      * Returns a lazy collection of the keys of this collection.
      *
-     * @return CollectionInterface
+     * @return CollectionInterface<int, TKey>
      */
     public function keys();
 
     /**
      * Returns a lazy collection of items of this collection separated by $separator
      *
-     * @param mixed $separator
-     * @return CollectionInterface
+     * @param TVal $separator
+     * @return static<TKey|int, TVal>
      */
     public function interpose($separator);
 
@@ -263,23 +273,23 @@ interface CollectionInterface
      * Returns a lazy collection with last $numberOfItems items skipped. These are still iterated over, just skipped.
      *
      * @param int $numberOfItems
-     * @return CollectionInterface
+     * @return static<TKey, TVal>
      */
-    public function dropLast($numberOfItems = 1);
+    public function dropLast(int $numberOfItems = 1);
 
     /**
      * Returns a lazy collection of first item from first collection, first item from second, second from first and
      * so on. Accepts any number of collections.
      *
-     * @param array|\Traversable ...$collections
-     * @return CollectionInterface
+     * @param iterable<TKey, TVal> ...$collections
+     * @return static<TKey, TVal>
      */
     public function interleave(...$collections);
 
     /**
      * Returns an infinite lazy collection of items in this collection repeated infinitely.
      *
-     * @return CollectionInterface
+     * @return static<TKey, TVal>
      */
     public function cycle();
 
@@ -287,9 +297,9 @@ interface CollectionInterface
      * Returns a lazy collection of items of this collection with $value added as first element. If $key is not provided
      * it will be next integer index.
      *
-     * @param mixed $value
-     * @param mixed|null $key
-     * @return CollectionInterface
+     * @param TVal $value
+     * @param TKey|null $key
+     * @return static<TKey|null, TVal>
      */
     public function prepend($value, $key = null);
 
@@ -297,9 +307,9 @@ interface CollectionInterface
      * Returns a lazy collection of items of this collection with $value added as last element. If $key is not provided
      * it will be next integer index.
      *
-     * @param mixed $value
-     * @param mixed $key
-     * @return CollectionInterface
+     * @param TVal $value
+     * @param TKey|null $key
+     * @return static<TKey|null, TVal>
      */
     public function append($value, $key = null);
 
@@ -307,8 +317,8 @@ interface CollectionInterface
      * Returns a lazy collection by removing items from this collection until first item for which $function returns
      * false.
      *
-     * @param callable $function
-     * @return CollectionInterface
+     * @param callable(TVal, TKey): bool $function
+     * @return static<TKey, TVal>
      */
     public function dropWhile(callable $function);
 
@@ -349,7 +359,7 @@ interface CollectionInterface
      * Returns a lazy collection with items from this collection but values that are found in keys of $replacementMap
      * are replaced by their values.
      *
-     * @param array|\Traversable $replacementMap
+     * @param iterable $replacementMap
      * @return CollectionInterface
      */
     public function replace($replacementMap);
@@ -387,7 +397,7 @@ interface CollectionInterface
      *
      * @param int $numberOfItems
      * @param int $step
-     * @param array|\Traversable $padding
+     * @param iterable $padding
      * @return CollectionInterface
      */
     public function partition($numberOfItems, $step = 0, $padding = []);
@@ -425,7 +435,7 @@ interface CollectionInterface
 
     /**
      * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+     * is true and the return value is a collection (iterable) an instance of Collection is returned.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
@@ -435,7 +445,7 @@ interface CollectionInterface
 
     /**
      * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable) it is converted to Collection.
+     * is true and the return value is a collection (iterable) it is converted to Collection.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
@@ -452,7 +462,7 @@ interface CollectionInterface
 
     /**
      * Returns the second item in this collection or throws ItemNotFound if the collection is empty or has 1 item. If
-     * $convertToCollection is true and the return value is a collection (array|Traversable) it is converted to
+     * $convertToCollection is true and the return value is a collection (iterable) it is converted to
      * Collection.
      *
      * @param bool $convertToCollection
@@ -465,33 +475,33 @@ interface CollectionInterface
      * Combines the values of this collection as keys, with values of $collection as values.  The resulting collection
      * has length equal to the size of smaller collection.
      *
-     * @param array|\Traversable $collection
+     * @param iterable $collection
      * @return CollectionInterface
      * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
-    public function combine($collection);
+    public function combine(iterable $collection);
 
     /**
      * Returns a lazy collection without the items associated to any of the keys from $keys.
      *
-     * @param array|\Traversable $keys
+     * @param iterable $keys
      * @return CollectionInterface
      */
-    public function except($keys);
+    public function except(iterable $keys);
 
     /**
      * Returns a lazy collection of items associated to any of the keys from $keys.
      *
-     * @param array|\Traversable $keys
+     * @param iterable $keys
      * @return CollectionInterface
      */
-    public function only($keys);
+    public function only(iterable $keys);
 
     /**
      * Returns a lazy collection of items that are in $this but are not in any of the other arguments, indexed by the
      * keys from the first collection. Note that the ...$collections are iterated non-lazily.
      *
-     * @param array|\Traversable ...$collections
+     * @param iterable ...$collections
      * @return CollectionInterface
      */
     public function diff(...$collections);
@@ -515,10 +525,10 @@ interface CollectionInterface
      * Returns a lazy collection of non-lazy collections of items from nth position from this collection and each
      * passed collection. Stops when any of the collections don't have an item at the nth position.
      *
-     * @param array|\Traversable ...$collections
+     * @param iterable ...$collections
      * @return CollectionInterface
      */
-    public function zip(...$collections);
+    public function zip(iterable ...$collections);
 
     /**
      * Uses a $transformer callable that takes a Collection and returns Collection on itself.
@@ -550,10 +560,10 @@ interface CollectionInterface
      * Returns a lazy collection of items that are in $this and all the other arguments, indexed by the keys from
      * the first collection. Note that the ...$collections are iterated non-lazily.
      *
-     * @param array|\Traversable ...$collections
+     * @param iterable ...$collections
      * @return CollectionInterface
      */
-    public function intersect(...$collections);
+    public function intersect(iterable ...$collections);
 
     /**
      * Checks whether this collection has exactly $size items.
@@ -561,7 +571,7 @@ interface CollectionInterface
      * @param int $size
      * @return bool
      */
-    public function sizeIs($size);
+    public function sizeIs(int $size): bool;
 
     /**
      * Checks whether this collection has less than $size items.
@@ -569,7 +579,7 @@ interface CollectionInterface
      * @param int $size
      * @return bool
      */
-    public function sizeIsLessThan($size);
+    public function sizeIsLessThan(int $size): bool;
 
     /**
      * Checks whether this collection has more than $size items.
@@ -577,7 +587,7 @@ interface CollectionInterface
      * @param int $size
      * @return bool
      */
-    public function sizeIsGreaterThan($size);
+    public function sizeIsGreaterThan(int $size): bool;
 
     /**
      * Checks whether this collection has between $fromSize to $toSize items. $toSize can be
@@ -587,7 +597,7 @@ interface CollectionInterface
      * @param int $toSize
      * @return bool
      */
-    public function sizeIsBetween($fromSize, $toSize);
+    public function sizeIsBetween(int $fromSize, int $toSize): bool;
 
     /**
      * Returns a sum of all values in this collection.
@@ -628,10 +638,10 @@ interface CollectionInterface
      * Returns a lazy collection with items from $collection, but items with keys  that are found in keys of
      * $replacementMap are replaced by their values.
      *
-     * @param array|\Traversable $replacementMap
-     * @return CollectionInterface
+     * @param iterable<TKey, TVal> $replacementMap
+     * @return CollectionInterface<TKey, TVal>
      */
-    public function replaceByKeys($replacementMap);
+    public function replaceByKeys(iterable $replacementMap);
 
     /**
      * /**
@@ -657,7 +667,7 @@ interface CollectionInterface
      * @param int|null $maxDepth
      * @return array
      */
-    public function dump($maxItemsPerCollection = null, $maxDepth = null);
+    public function dump(int $maxItemsPerCollection = null, int $maxDepth = null): array;
 
     /**
      * Calls dump on this collection and then prints it using the var_export.
@@ -666,5 +676,5 @@ interface CollectionInterface
      * @param int|null $maxDepth
      * @return CollectionInterface
      */
-    public function printDump($maxItemsPerCollection = null, $maxDepth = null);
+    public function printDump(int $maxItemsPerCollection = null, int $maxDepth = null);
 }

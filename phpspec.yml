@@ -1,6 +1,3 @@
-extensions:
-  Cjm\PhpSpec\Extension\TypeHintedMethodsExtension: ~
-
 suites:
   default:
     spec_path: tests
