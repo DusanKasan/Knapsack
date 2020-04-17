@@ -8,22 +8,31 @@ use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use IteratorAggregate;
 use Traversable;
 
+/**
+ * @template TKey
+ * @template TVal
+ * @implements CollectionInterface<TKey, TVal>
+ * @implements IteratorAggregate<TKey, TVal>
+ */
 class Collection implements IteratorAggregate, \Serializable, CollectionInterface
 {
+    /**
+     * @use CollectionTrait<TKey, TVal>
+     */
     use CollectionTrait;
 
     /**
-     * @var Traversable
+     * @var Traversable<TKey, TVal>
      */
     protected $input;
 
     /**
-     * @var callable
+     * @var callable():iterable<TKey, TVal>|null
      */
-    private $inputFactory;
+    private $inputFactory = null;
 
     /**
-     * @param callable|array|Traversable $input If callable is passed, it must return an array|Traversable.
+     * @param callable(): iterable<TKey, TVal>|iterable<TKey, TVal> $input
      */
     public function __construct($input)
     {
@@ -44,12 +53,14 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
     /**
      * Static alias of normal constructor.
      *
-     * @param callable|array|Traversable $input
-     * @return Collection
+     * @template CKey
+     * @template CVal
+     * @param callable():iterable<CKey, CVal>|iterable<CKey, CVal> $input
+     * @return static<CKey, CVal>
      */
     public static function from($input)
     {
-        return new self($input);
+        return new static($input);
     }
 
     /**
@@ -58,24 +69,25 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      * end the collection by throwing a NoMoreItems exception.
      *
      * @param mixed $input
-     * @param callable $function
-     * @return Collection
+     * @param callable(mixed):mixed $function
+     * @return static
      */
     public static function iterate($input, callable $function)
     {
-        return iterate($input, $function);
+        return static::from(iterate($input, $function));
     }
 
     /**
      * Returns a lazy collection of $value repeated $times times. If $times is not provided the collection is infinite.
      *
-     * @param mixed $value
+     * @template TItem
+     * @param TItem $value
      * @param int $times
-     * @return Collection
+     * @return static<int, TItem>
      */
-    public static function repeat($value, $times = -1)
+    public static function repeat($value, int $times = -1)
     {
-        return repeat($value, $times);
+        return static::from(repeat($value, $times));
     }
 
     /**
@@ -84,16 +96,17 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      * @param int $start
      * @param int|null $end
      * @param int $step
-     * @return Collection
+     * @return static<int, int>
      */
     public static function range($start = 0, $end = null, $step = 1)
     {
-        return \DusanKasan\Knapsack\range($start, $end, $step);
+        return static::from(\DusanKasan\Knapsack\range($start, $end, $step));
     }
 
     /**
      * {@inheritdoc}
      * @throws InvalidReturnValue
+     * @return Traversable<TKey, TVal>
      */
     public function getIterator()
     {
@@ -123,7 +136,12 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
             toArray(
                 map(
                     $this->input,
-                    function ($value, $key) {
+                    /**
+                     * @param mixed $value
+                     * @param mixed $key
+                     * @return array
+                     */
+                    function ($value, $key): array {
                         return [$key, $value];
                     }
                 )
@@ -137,5 +155,14 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
     public function unserialize($serialized)
     {
         $this->input = dereferenceKeyValue(unserialize($serialized));
+    }
+
+
+    /**
+     * @return iterable<TKey, TVal>
+     */
+    protected function getItems(): iterable
+    {
+        return $this;
     }
 }

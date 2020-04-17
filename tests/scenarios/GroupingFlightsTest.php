@@ -3,6 +3,7 @@
 namespace DusanKasan\Knapsack\Tests\Scenarios;
 
 use DusanKasan\Knapsack\Collection;
+use DusanKasan\Knapsack\CollectionInterface;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -54,7 +55,7 @@ class GroupingFlightsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function summarize(Collection $flights)
+    public function summarize(CollectionInterface $flights)
     {
         $numCancellations = $flights
             ->filter(function ($f) {

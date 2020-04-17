@@ -2,6 +2,10 @@
 
 namespace DusanKasan\Knapsack;
 
+use ArrayIterator;
+use Iterator;
+use IteratorAggregate;
+
 /**
  * Returns its argument.
  *
@@ -50,4 +54,23 @@ function increment($value)
 function decrement($value)
 {
     return $value - 1;
+}
+
+/**
+ * Converts any iterable to an Iterator.
+ *
+ * @param iterable $iterable
+ * @return Iterator
+ */
+function iterableToIterator(iterable $iterable): Iterator {
+    if ($iterable instanceof IteratorAggregate) {
+        $iterable = $iterable->getIterator();
+    }
+
+    if ($iterable instanceof Iterator) {
+        return $iterable;
+    }
+
+    /** @var array $iterable */
+    return new ArrayIterator($iterable);
 }

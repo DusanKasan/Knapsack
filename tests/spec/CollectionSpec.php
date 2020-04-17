@@ -5,6 +5,7 @@ namespace spec\DusanKasan\Knapsack;
 use ArrayIterator;
 use DOMXPath;
 use DusanKasan\Knapsack\Collection;
+use DusanKasan\Knapsack\CollectionInterface;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
@@ -242,7 +243,7 @@ class CollectionSpec extends ObjectBehavior
 
         $this
             ->reduce(
-                function (Collection $temp, $item) {
+                function (CollectionInterface $temp, $item) {
                     return $temp->append($item);
                 },
                 new Collection([])
@@ -403,8 +404,8 @@ class CollectionSpec extends ObjectBehavior
             )
             ->shouldReturn('not found');
 
-        $this->find('\DusanKasan\Knapsack\isCollection', null, true)->first()->shouldReturn(5);
-        $this->find('\DusanKasan\Knapsack\isCollection')->shouldReturn([5]);
+        $this->find(function($item) {return is_iterable($item);}, null, true)->first()->shouldReturn(5);
+        $this->find(function($item) {return is_iterable($item);})->shouldReturn([5]);
     }
 
     function it_can_count_by()
@@ -556,7 +557,7 @@ class CollectionSpec extends ObjectBehavior
 
         $this
             ->reduceRight(
-                function (Collection $temp, $item) {
+                function (CollectionInterface $temp, $item) {
                     return $temp->append($item);
                 },
                 new Collection([])
@@ -1080,7 +1081,7 @@ class CollectionSpec extends ObjectBehavior
     {
         $this->beConstructedWith([1, 2, 3]);
         $this
-            ->transform(function (Collection $collection) {
+            ->transform(function (CollectionInterface $collection) {
                 return $collection->map('\DusanKasan\Knapsack\increment');
             })
             ->toArray()
@@ -1091,7 +1092,7 @@ class CollectionSpec extends ObjectBehavior
             ->during(
                 'transform',
                 [
-                    function (Collection $collection) {
+                    function (CollectionInterface $collection) {
                         return $collection->first();
                     },
                 ]
@@ -1187,14 +1188,14 @@ class CollectionSpec extends ObjectBehavior
     function it_can_get_average_of_the_collection()
     {
         $this->beConstructedWith([1, 2, 2, 3]);
-        $this->average()->shouldReturn(2);
+        $this->average()->shouldReturn(2.0);
         $this->append(3)->average()->shouldReturn(2.2);
     }
 
     function it_will_return_zero_when_average_is_called_on_empty_collection()
     {
         $this->beConstructedWith([]);
-        $this->average()->shouldReturn(0);
+        $this->average()->shouldReturn(0.0);
     }
 
     function it_can_get_maximal_value_in_the_colleciton()
@@ -1266,12 +1267,12 @@ class CollectionSpec extends ObjectBehavior
     function it_should_throw_an_invalid_argument_if_collection_items_are_not_collection()
     {
         $this->beConstructedWith([
-            [1, 2, 3],
+            1,
             [4, 5, 6],
             [7, 8, 9],
         ]);
 
-        $this->shouldThrow(InvalidArgument::class)->during('transpose');
+        $this->transpose()->getIterator()->shouldThrow(InvalidArgument::class)->during('rewind');
     }
 
     function it_can_use_the_utility_methods()

@@ -5,17 +5,20 @@ namespace DusanKasan\Knapsack;
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use DusanKasan\Knapsack\Exceptions\NoMoreItems;
+use Generator;
 use Iterator;
-use IteratorIterator;
+use ReflectionObject;
 use Traversable;
 
 /**
  * Converts $collection to array. If there are multiple items with the same key, only the last will be preserved.
  *
- * @param array|Traversable $collection
- * @return array
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return array<TKey, TVal>
  */
-function toArray($collection)
+function toArray(iterable $collection)
 {
     return is_array($collection) ? $collection : iterator_to_array($collection);
 }
@@ -23,14 +26,15 @@ function toArray($collection)
 /**
  * Returns a lazy collection of distinct items in $collection.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return iterable<TKey, TVal>
  */
-function distinct($collection)
+function distinct(iterable $collection): iterable
 {
-    $generatorFactory = function () use ($collection) {
+    $factory = function () use ($collection): Generator {
         $distinctValues = [];
-
         foreach ($collection as $key => $value) {
             if (!in_array($value, $distinctValues)) {
                 $distinctValues[] = $value;
@@ -39,19 +43,19 @@ function distinct($collection)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns number of items in $collection.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @return int
  */
-function size($collection)
+function size($collection): int
 {
     $result = 0;
-    foreach ($collection as $value) {
+    foreach ($collection as $_) {
         $result++;
     }
 
@@ -61,76 +65,74 @@ function size($collection)
 /**
  * Returns a non-lazy collection with items from $collection in reversed order.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return iterable<TKey, TVal>
  */
-function reverse($collection)
+function reverse(iterable $collection): iterable
 {
-    $generatorFactory = function () use ($collection) {
+    $factory = function () use ($collection): Generator {
         $array = [];
         foreach ($collection as $key => $value) {
             $array[] = [$key, $value];
         }
 
-        return map(
-            indexBy(
-                array_reverse($array),
-                function ($item) {
-                    return $item[0];
-                }
-            ),
-            function ($item) {
-                return $item[1];
-            }
-        );
+        foreach (array_reverse($array) as $item) {
+            yield $item[0] => $item[1];
+        }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of values from $collection (i.e. the keys are reset).
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TVal
+ * @param iterable<mixed, TVal> $collection
+ * @return iterable<int, TVal>
  */
-function values($collection)
+function values(iterable $collection): iterable
 {
-    $generatorFactory = function () use ($collection) {
+    $factory = function () use ($collection): iterable {
         foreach ($collection as $value) {
             yield $value;
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of keys from $collection.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @param iterable<TKey, mixed> $collection
+ * @return iterable<int, TKey>
  */
-function keys($collection)
+function keys(iterable $collection): iterable
 {
-    $generatorFactory = function () use ($collection) {
+    $factory = function () use ($collection): Generator {
         foreach ($collection as $key => $value) {
             yield $key;
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of items from $collection repeated infinitely.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return iterable<TKey, TVal>
  */
-function cycle($collection)
+function cycle(iterable $collection): iterable
 {
-    $generatorFactory = function () use ($collection) {
+    $factory = function () use ($collection): Generator {
         while (true) {
             foreach ($collection as $key => $value) {
                 yield $key => $value;
@@ -138,36 +140,42 @@ function cycle($collection)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a non-lazy collection of shuffled items from $collection.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return iterable<TKey, TVal>
  */
-function shuffle($collection)
+function shuffle(iterable $collection): iterable
 {
-    $buffer = [];
-    foreach ($collection as $key => $value) {
-        $buffer[] = [$key, $value];
-    }
+    $factory = function () use ($collection): Traversable {
+        $buffer = [];
+        foreach ($collection as $key => $value) {
+            $buffer[] = [$key, $value];
+        }
 
-    \shuffle($buffer);
+        \shuffle($buffer);
 
-    return dereferenceKeyValue($buffer);
+        return dereferenceKeyValue($buffer);
+    };
+
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns true if $collection does not contain any items.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @return bool
  */
-function isEmpty($collection)
+function isEmpty(iterable $collection): bool
 {
-    foreach ($collection as $value) {
+    foreach ($collection as $_) {
         return false;
     }
 
@@ -177,10 +185,10 @@ function isEmpty($collection)
 /**
  * Returns true if $collection does contain any items.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @return bool
  */
-function isNotEmpty($collection)
+function isNotEmpty(iterable $collection)
 {
     return !isEmpty($collection);
 }
@@ -189,21 +197,32 @@ function isNotEmpty($collection)
  * Returns a collection where keys are distinct values from $collection and values are number of occurrences of each
  * value.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TVal
+ * @param iterable<mixed, TVal> $collection
+ * @return iterable<TVal, int>
  */
-function frequencies($collection)
+function frequencies(iterable $collection): iterable
 {
-    return countBy($collection, '\DusanKasan\Knapsack\identity');
+    return countBy(
+        $collection,
+        /**
+         * @param mixed $item
+         * @return mixed
+         */
+        function ($item) {
+            return $item;
+        }
+    );
 }
 
 /**
  * Returns the first item of $collection or throws ItemNotFound if #collection is empty.
  *
- * @param array|Traversable $collection
- * @return mixed
+ * @template TVal
+ * @param iterable<mixed, TVal> $collection
+ * @return TVal
  */
-function first($collection)
+function first(iterable $collection)
 {
     return get(values($collection), 0);
 }
@@ -211,8 +230,9 @@ function first($collection)
 /**
  * Returns the last item of $collection or throws ItemNotFound if #collection is empty.
  *
- * @param array|Traversable $collection
- * @return mixed
+ * @template TVal
+ * @param iterable<mixed, TVal> $collection
+ * @return TVal
  */
 function last($collection)
 {
@@ -223,37 +243,48 @@ function last($collection)
  * Returns a lazy collection of items of $collection where value of each item is set to the return value of calling
  * $function on its value and key.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey):TRes $function
+ * @return iterable<TKey, TRes>
  */
-function map($collection, callable $function)
+function map(iterable $collection, callable $function): iterable
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         foreach ($collection as $key => $value) {
             yield $key => $function($value, $key);
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of items from $collection for which $function returns true.
  *
- * @param array|Traversable $collection
- * @param callable|null $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): bool|null $function
+ * @return iterable<TKey, TVal>
  */
 function filter($collection, callable $function = null)
 {
     if (null === $function) {
-        $function = function ($value) {
-            return (bool) $value;
-        };
+        $function =
+            /**
+             * @param mixed $value
+             * @param mixed $_
+             * @return bool
+             */
+            function ($value, $_): bool {
+                return (bool)$value;
+            };
     }
 
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         foreach ($collection as $key => $value) {
             if ($function($value, $key)) {
                 yield $key => $value;
@@ -261,18 +292,20 @@ function filter($collection, callable $function = null)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection with items from all $collections passed as argument appended together
  *
- * @param array|Traversable ...$collections
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> ...$collections
+ * @return iterable<TKey, TVal>
  */
-function concat(...$collections)
+function concat(iterable ...$collections): iterable
 {
-    $generatorFactory = function () use ($collections) {
+    $factory = function () use ($collections): iterable {
         foreach ($collections as $collection) {
             foreach ($collection as $key => $value) {
                 yield $key => $value;
@@ -280,7 +313,7 @@ function concat(...$collections)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
@@ -288,12 +321,15 @@ function concat(...$collections)
  * passing $startValue and current key/item as parameters. The output of $function is used as $startValue in
  * next iteration. The output of $function on last element is the return value of this function.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @param mixed $startValue
- * @return mixed
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TRes, TVal, TKey): TRes $function
+ * @param TRes $startValue
+ * @return TRes
  */
-function reduce($collection, callable $function, $startValue)
+function reduce(iterable $collection, callable $function, $startValue)
 {
     $tmp = duplicate($startValue);
 
@@ -308,13 +344,13 @@ function reduce($collection, callable $function, $startValue)
  * Flattens multiple levels of nesting in collection. If $levelsToFlatten is not specified, flattens all levels of
  * nesting.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @param int $levelsToFlatten -1 to flatten everything
- * @return Collection
+ * @return iterable
  */
-function flatten($collection, $levelsToFlatten = -1)
+function flatten(iterable $collection, int $levelsToFlatten = -1): iterable
 {
-    $generatorFactory = function () use ($collection, $levelsToFlatten) {
+    $factory = function () use ($collection, $levelsToFlatten): Generator {
         $flattenNextLevel = $levelsToFlatten < 0 || $levelsToFlatten > 0;
         $childLevelsToFlatten = $levelsToFlatten > 0 ? $levelsToFlatten - 1 : $levelsToFlatten;
 
@@ -329,38 +365,54 @@ function flatten($collection, $levelsToFlatten = -1)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
- * Returns a non-lazy collection sorted using $collection($item1, $item2, $key1, $key2 ). $collection should
+ * Returns a non-lazy collection sorted using $function($item1, $item2, $key1, $key2). $function should
  * return true if first item is larger than the second and false otherwise.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value1, $value2, $key1, $key2)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TVal, TKey, TKey): bool $function
+ * @return iterable<TKey, TVal>
  */
-function sort($collection, callable $function)
+function sort(iterable $collection, callable $function): iterable
 {
-    $array = iterator_to_array(
-        values(
-            map(
-                $collection,
-                function ($value, $key) {
-                    return [$key, $value];
-                }
+    $factory = function () use ($collection, $function): Traversable {
+        $array = toArray(
+            values(
+                map(
+                    $collection,
+                    /**
+                     * @param mixed $value
+                     * @param mixed $key
+                     * @return array
+                     */
+                    function ($value, $key): array {
+                        return [$key, $value];
+                    }
+                )
             )
-        )
-    );
+        );
 
-    uasort(
-        $array,
-        function ($a, $b) use ($function) {
-            return $function($a[1], $b[1], $a[0], $b[0]);
-        }
-    );
+        uasort(
+            $array,
+            /**
+             * @param mixed $a
+             * @param mixed $b
+             * @return int
+             */
+            function ($a, $b) use ($function): int {
+                return (int)$function($a[1], $b[1], $a[0], $b[0]);
+            }
+        );
 
-    return dereferenceKeyValue($array);
+        return dereferenceKeyValue($array);
+    };
+
+    return new RewindableIterable($factory);
 }
 
 /**
@@ -368,14 +420,16 @@ function sort($collection, callable $function)
  * If $to is not provided, the returned collection is contains all items from $from until end of $collection. All items
  * before $from are iterated over, but not included in result.
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $from
  * @param int $to -1 to slice until end
- * @return Collection
+ * @return iterable<TKey, TVal>
  */
-function slice($collection, $from, $to = -1)
+function slice(iterable $collection, int $from, int $to = -1): iterable
 {
-    $generatorFactory = function () use ($collection, $from, $to) {
+    $factory = function () use ($collection, $from, $to): iterable {
         $index = 0;
         foreach ($collection as $key => $value) {
             if ($index >= $from && ($index < $to || $to == -1)) {
@@ -388,69 +442,84 @@ function slice($collection, $from, $to = -1)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a non-lazy collection of items grouped by the result of $function.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): TRes $function
+ * @return iterable<TRes, iterable<int, TVal>>
  */
-function groupBy($collection, callable $function)
+function groupBy(iterable $collection, callable $function): iterable
 {
-    $result = [];
+    $factory = function () use ($collection, $function): array {
+        $result = [];
 
-    foreach ($collection as $key => $value) {
-        $newKey = $function($value, $key);
+        foreach ($collection as $key => $value) {
+            $newKey = $function($value, $key);
+            $result[$newKey][] = $value;
+        }
 
-        $result[$newKey][] = $value;
-    }
+        return $result;
+    };
 
-    return Collection::from($result)
-        ->map(function ($entry) {
-            return new Collection($entry);
-        });
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a non-lazy collection of items grouped by the value at given key. Ignores non-collection items and items
  * without the given keys
  *
- * @param array|Traversable $collection
- * @param mixed $key
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<iterable<TKey, TVal>> $collection
+ * @param TKey $key
+ * @return iterable<TVal, iterable<TKey, TVal>>
  */
-function groupByKey($collection, $key)
+function groupByKey(iterable $collection, $key): iterable
 {
-    $generatorFactory = function () use ($collection, $key) {
-
+    $generatorFactory = function () use ($collection, $key): iterable {
         return groupBy(
             filter(
                 $collection,
-                function ($item) use ($key) {
-                    return isCollection($item) && has($item, $key);
+                /**
+                 * @param mixed $item
+                 * @return bool
+                 */
+                function ($item) use ($key): bool {
+                    return is_iterable($item) && has($item, $key);
                 }
             ),
+            /**
+             * @param mixed $value
+             * @return mixed
+             */
             function ($value) use ($key) {
                 return get($value, $key);
             }
         );
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($generatorFactory);
 }
+
 /**
  * Executes $function for each item in $collection
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): void $function
+ * @return iterable<TKey, TVal>
  */
-function each($collection, callable $function)
+function each(iterable $collection, callable $function): iterable
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         foreach ($collection as $key => $value) {
             $function($value, $key);
 
@@ -458,17 +527,19 @@ function each($collection, callable $function)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns an item with $key key from $collection. If that key is not present, throws ItemNotFound.
  *
- * @param array|Traversable $collection
- * @param mixed $key
- * @return mixed
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param TKey $key
+ * @return TVal
  */
-function get($collection, $key)
+function get(iterable $collection, $key)
 {
     foreach ($collection as $valueKey => $value) {
         if ($key === $valueKey) {
@@ -482,12 +553,14 @@ function get($collection, $key)
 /**
  * Returns an item with $key key from $collection. If that key is not present, returns $default.
  *
- * @param array|Traversable $collection
- * @param mixed $key
- * @param mixed $default value returned if key is not found
- * @return mixed
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param TKey $key
+ * @param TVal $default value returned if key is not found
+ * @return TVal
  */
-function getOrDefault($collection, $key, $default)
+function getOrDefault(iterable $collection, $key, $default)
 {
     try {
         return get($collection, $key);
@@ -500,12 +573,14 @@ function getOrDefault($collection, $key, $default)
  * Returns the first item from $collection for which $function returns true. If item like that is not present, returns
  * $default.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @param mixed $default
- * @return mixed
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): bool $function
+ * @param TVal|null $default
+ * @return TVal|null
  */
-function find($collection, callable $function, $default = null)
+function find(iterable $collection, callable $function, $default = null)
 {
     foreach ($collection as $key => $value) {
         if ($function($value, $key)) {
@@ -520,42 +595,56 @@ function find($collection, callable $function, $default = null)
  * Returns a lazy collection by changing keys of $collection for each item to the result of $function for
  * that item.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @template TNewKey
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): TNewKey $function
+ * @return iterable<TNewKey, TVal>
  */
 function indexBy($collection, callable $function)
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         foreach ($collection as $key => $value) {
             yield $function($value, $key) => $value;
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a non-lazy collection of items whose keys are the return values of $function and values are the number of
  * items in this collection for which the $function returned this value.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): TRes $function
+ * @return iterable<TRes, int>
  */
 function countBy($collection, callable $function)
 {
     return map(
         groupBy($collection, $function),
-        '\DusanKasan\Knapsack\size'
+        /**
+         * @param mixed $c
+         * @return int
+         */
+        function ($c): int {
+            return size($c);
+        }
     );
 }
 
 /**
  * Returns true if $function returns true for every item in $collection
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
+ * @template TKey
+ * @template TVal
+ * @param iterable $collection
+ * @param callable(TVal, TKey): bool $function
  * @return bool
  */
 function every($collection, callable $function)
@@ -572,8 +661,10 @@ function every($collection, callable $function)
 /**
  * Returns true if $function returns true for at least one item in $collection.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
+ * @template TKey
+ * @template TVal
+ * @param iterable $collection
+ * @param callable(TVal, TKey): bool $function
  * @return bool
  */
 function some($collection, callable $function)
@@ -590,7 +681,7 @@ function some($collection, callable $function)
 /**
  * Returns true if $needle is found in $collection values.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @param mixed $needle
  * @return bool
  */
@@ -608,12 +699,15 @@ function contains($collection, $needle)
 /**
  * Reduce that walks from right to the left.
  *
- * @param array|Traversable $collection
- * @param callable $function
- * @param mixed $startValue
- * @return mixed
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TRes, TVal, TKey): TRes $function
+ * @param TRes $startValue
+ * @return TRes
  */
-function reduceRight($collection, callable $function, $startValue)
+function reduceRight(iterable $collection, callable $function, $startValue)
 {
     return reduce(reverse($collection), $function, $startValue);
 }
@@ -621,11 +715,13 @@ function reduceRight($collection, callable $function, $startValue)
 /**
  * Returns a lazy collection of first $numberOfItems items of $collection.
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $numberOfItems
- * @return Collection
+ * @return iterable<TKey, TVal>
  */
-function take($collection, $numberOfItems)
+function take(iterable $collection, int $numberOfItems): iterable
 {
     return slice($collection, 0, $numberOfItems);
 }
@@ -633,11 +729,13 @@ function take($collection, $numberOfItems)
 /**
  * Returns a lazy collection of all but first $numberOfItems items of $collection.
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $numberOfItems
- * @return Collection
+ * @return iterable<TKey, TVal>
  */
-function drop($collection, $numberOfItems)
+function drop(iterable $collection, int $numberOfItems): iterable
 {
     return slice($collection, $numberOfItems);
 }
@@ -647,14 +745,15 @@ function drop($collection, $numberOfItems)
  * $function to the last value in the collection. By default this produces an infinite collection. However you can
  * end the collection by throwing a NoMoreItems exception.
  *
- * @param mixed $value
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TVal
+ * @param TVal $value
+ * @param callable(TVal): TVal $function
+ * @return iterable<int, TVal>
  */
 function iterate($value, callable $function)
 {
     $duplicated = duplicate($value);
-    $generatorFactory = function () use ($duplicated, $function) {
+    $factory = function () use ($duplicated, $function): iterable {
         $value = $duplicated;
 
         yield $value;
@@ -669,21 +768,28 @@ function iterate($value, callable $function)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of items from $collection for which $function returned true.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): bool $function
+ * @return iterable<TKey, TVal>
  */
-function reject($collection, callable $function)
+function reject(iterable $collection, callable $function): iterable
 {
     return filter(
         $collection,
-        function ($value, $key) use ($function) {
+        /**
+         * @param mixed $value
+         * @param mixed $key
+         * @return bool
+         */
+        function ($value, $key) use ($function): bool {
             return !$function($value, $key);
         }
     );
@@ -692,13 +798,15 @@ function reject($collection, callable $function)
 /**
  * Returns a lazy collection of items in $collection without the last $numberOfItems items.
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $numberOfItems
- * @return Collection
+ * @return iterable<TKey, TVal>
  */
-function dropLast($collection, $numberOfItems = 1)
+function dropLast(iterable $collection, $numberOfItems = 1): iterable
 {
-    $generatorFactory = function () use ($collection, $numberOfItems) {
+    $factory = function () use ($collection, $numberOfItems): iterable {
         $buffer = [];
 
         foreach ($collection as $key => $value) {
@@ -711,19 +819,21 @@ function dropLast($collection, $numberOfItems = 1)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of items from $collection separated by $separator.
  *
- * @param array|Traversable $collection
- * @param mixed $separator
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param TVal $separator
+ * @return iterable<TKey|int, TVal>
  */
-function interpose($collection, $separator)
+function interpose(iterable $collection, $separator): iterable
 {
-    $generatorFactory = function () use ($collection, $separator) {
+    $factory = function () use ($collection, $separator): iterable {
         foreach (take($collection, 1) as $key => $value) {
             yield $key => $value;
         }
@@ -734,23 +844,25 @@ function interpose($collection, $separator)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of first item from first collection, first item from second, second from first and
  * so on. Accepts any number of collections.
  *
- * @param array|Traversable ...$collections
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> ...$collections
+ * @return iterable<TKey, TVal>
  */
-function interleave(...$collections)
+function interleave(iterable ...$collections): iterable
 {
-    $generatorFactory = function () use ($collections) {
+    $generatorFactory = function () use ($collections): iterable {
         /* @var Iterator[] $iterators */
         $iterators = array_map(
             function ($collection) {
-                $it = new IteratorIterator(new Collection($collection));
+                $it = iterableToIterator($collection);
                 $it->rewind();
                 return $it;
             },
@@ -769,21 +881,23 @@ function interleave(...$collections)
         } while ($valid);
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($generatorFactory);
 }
 
 /**
  * Returns a lazy collection of items in $collection with $value added as first element. If $key is not provided
  * it will be next integer index.
  *
- * @param array|Traversable $collection
- * @param mixed $value
- * @param mixed|null $key
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param TVal $value
+ * @param TKey|null $key
+ * @return iterable<TKey, TVal>
  */
-function prepend($collection, $value, $key = null)
+function prepend(iterable $collection, $value, $key = null): iterable
 {
-    $generatorFactory = function () use ($collection, $value, $key) {
+    $generatorFactory = function () use ($collection, $value, $key): iterable {
         if ($key === null) {
             yield $value;
         } else {
@@ -795,21 +909,23 @@ function prepend($collection, $value, $key = null)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($generatorFactory);
 }
 
 /**
  * Returns a lazy collection of items in $collection with $value added as last element. If $key is not provided
  * it will be next integer index.
  *
- * @param array|Traversable $collection
- * @param mixed $value
- * @param mixed|null $key
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param TVal $value
+ * @param TKey|null $key
+ * @return iterable<TKey, TVal>
  */
-function append($collection, $value, $key = null)
+function append(iterable $collection, $value, $key = null): iterable
 {
-    $generatorFactory = function () use ($collection, $value, $key) {
+    $generatorFactory = function () use ($collection, $value, $key): iterable {
         foreach ($collection as $k => $v) {
             yield $k => $v;
         }
@@ -821,19 +937,21 @@ function append($collection, $value, $key = null)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($generatorFactory);
 }
 
 /**
  * Returns a lazy collection by removing items from $collection until first item for which $function returns false.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): bool $function
+ * @return iterable<TKey, TVal>
  */
-function dropWhile($collection, callable $function)
+function dropWhile(iterable $collection, callable $function): iterable
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         $shouldDrop = true;
         foreach ($collection as $key => $value) {
             if ($shouldDrop) {
@@ -846,19 +964,21 @@ function dropWhile($collection, callable $function)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of items from $collection until first item for which $function returns false.
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): bool $function
+ * @return iterable<TKey, TVal>
  */
 function takeWhile($collection, callable $function)
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         $shouldTake = true;
         foreach ($collection as $key => $value) {
             if ($shouldTake) {
@@ -871,17 +991,20 @@ function takeWhile($collection, callable $function)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection. A result of calling map and flatten(1)
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): iterable<TRes> $function
+ * @return iterable<int, TRes>
  */
-function mapcat($collection, callable $function)
+function mapcat(iterable $collection, callable $function): iterable
 {
     return flatten(map($collection, $function), 1);
 }
@@ -889,68 +1012,76 @@ function mapcat($collection, callable $function)
 /**
  * Returns a lazy collection [take($collection, $position), drop($collection, $position)]
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $position
- * @return Collection
+ * @return iterable<int, iterable<TKey, TVal>>
  */
-function splitAt($collection, $position)
+function splitAt(iterable $collection, int $position): iterable
 {
-    $generatorFactory = function () use ($collection, $position) {
+    $factory = function () use ($collection, $position): Generator {
         yield take($collection, $position);
         yield drop($collection, $position);
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection [takeWhile($collection, $function), dropWhile($collection, $function)]
  *
- * @param array|Traversable $collection
- * @param callable $function ($value, $key)
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey): bool $function
+ * @return iterable<int, iterable<TKey, TVal>>
  */
-function splitWith($collection, callable $function)
+function splitWith($collection, callable $function): iterable
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         yield takeWhile($collection, $function);
         yield dropWhile($collection, $function);
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection with items from $collection but values that are found in keys of $replacementMap
  * are replaced by their values.
  *
- * @param array|Traversable $collection
- * @param array|Traversable $replacementMap
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param iterable<TVal, TVal> $replacementMap
+ * @return iterable<TKey, TVal>
  */
-function replace($collection, $replacementMap)
+function replace(iterable $collection, iterable $replacementMap): iterable
 {
-    $generatorFactory = function () use ($collection, $replacementMap) {
+    $factory = function () use ($collection, $replacementMap): iterable {
         foreach ($collection as $key => $value) {
-            $newValue = getOrDefault($replacementMap, $value, $value);
-            yield $key => $newValue;
+            yield $key => getOrDefault($replacementMap, $value, $value);
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of reduction steps.
  *
- * @param array|Traversable $collection
- * @param callable $function
- * @param mixed $startValue
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @template TRes
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TRes, TVal, TKey): TRes $function
+ * @param TRes $startValue
+ * @return iterable<int, TRes>
  */
-function reductions($collection, callable $function, $startValue)
+function reductions(iterable $collection, callable $function, $startValue): iterable
 {
-    $generatorFactory = function () use ($collection, $function, $startValue) {
+    $factory = function () use ($collection, $function, $startValue): iterable {
         $tmp = duplicate($startValue);
 
         yield $tmp;
@@ -960,19 +1091,21 @@ function reductions($collection, callable $function, $startValue)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of every nth ($step) item in  $collection.
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $step
- * @return Collection
+ * @return iterable<TKey, TVal>
  */
-function takeNth($collection, $step)
+function takeNth(iterable $collection, int $step)
 {
-    $generatorFactory = function () use ($collection, $step) {
+    $factory = function () use ($collection, $step): iterable {
         $index = 0;
         foreach ($collection as $key => $value) {
             if ($index % $step == 0) {
@@ -983,7 +1116,7 @@ function takeNth($collection, $step)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
@@ -993,15 +1126,17 @@ function takeNth($collection, $step)
  * necessary to complete last partition up to $numberOfItems items. In case there are
  * not enough padding elements, return a partition with less than $numberOfItems items.
  *
- * @param array|Traversable $collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
  * @param int $numberOfItems
  * @param int $step
- * @param array|Traversable $padding
- * @return Collection
+ * @param iterable $padding
+ * @return iterable<int, iterable<TKey, TVal>>
  */
-function partition($collection, $numberOfItems, $step = -1, $padding = [])
+function partition(iterable $collection, int $numberOfItems, int $step = -1, iterable $padding = []): iterable
 {
-    $generatorFactory = function () use ($collection, $numberOfItems, $step, $padding) {
+    $generator = function () use ($collection, $numberOfItems, $step, $padding): Generator {
         $buffer = [];
         $itemsToSkip = 0;
         $tmpStep = $step ?: $numberOfItems;
@@ -1021,25 +1156,24 @@ function partition($collection, $numberOfItems, $step = -1, $padding = [])
             }
         }
 
-        yield take(
-            concat(dereferenceKeyValue($buffer), $padding),
-            $numberOfItems
-        );
+        yield take(concat(dereferenceKeyValue($buffer), $padding), $numberOfItems);
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($generator);
 }
 
 /**
  * Returns a lazy collection created by partitioning $collection each time $function returned a different value.
  *
- * @param array|Traversable $collection
- * @param callable $function
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param callable(TVal, TKey=): mixed $function
+ * @return iterable<iterable<TKey, TVal>>
  */
-function partitionBy($collection, callable $function)
+function partitionBy(iterable $collection, callable $function): iterable
 {
-    $generatorFactory = function () use ($collection, $function) {
+    $factory = function () use ($collection, $function): iterable {
         $result = null;
         $buffer = [];
 
@@ -1060,19 +1194,20 @@ function partitionBy($collection, callable $function)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of $value repeated $times times. If $times is not provided the collection is infinite.
  *
- * @param mixed $value
+ * @template TVal
+ * @param TVal $value
  * @param int $times
- * @return Collection
+ * @return iterable<int, TVal>
  */
-function repeat($value, $times = -1)
+function repeat($value, int $times = -1): iterable
 {
-    $generatorFactory = function () use ($value, $times) {
+    $factory = function () use ($value, $times): iterable {
         $tmpTimes = $times;
 
         while ($tmpTimes != 0) {
@@ -1082,7 +1217,7 @@ function repeat($value, $times = -1)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
@@ -1091,14 +1226,14 @@ function repeat($value, $times = -1)
  * @param int $start
  * @param int|null $end
  * @param int $step
- * @return Collection
+ * @return iterable<int, int>
  */
-function range($start = 0, $end = null, $step = 1)
+function range(int $start = 0, int $end = null, int $step = 1): iterable
 {
-    $generatorFactory = function () use ($start, $end, $step) {
+    $factory = function () use ($start, $end, $step): iterable {
         return iterate(
             $start,
-            function ($value) use ($step, $end) {
+            function (int $value) use ($step, $end): int {
                 $result = $value + $step;
 
                 if ($end !== null && $result > $end) {
@@ -1110,26 +1245,16 @@ function range($start = 0, $end = null, $step = 1)
         );
     };
 
-    return new Collection($generatorFactory);
-}
-
-/**
- * Returns true if $input is array or Traversable object.
- *
- * @param mixed $input
- * @return bool
- */
-function isCollection($input)
-{
-    return is_array($input) || $input instanceof Traversable;
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns duplicated/cloned $input that has no relation to the original one. Used for making sure there are no side
  * effect in functions.
  *
- * @param mixed $input
- * @return mixed
+ * @template TVal
+ * @param TVal $input
+ * @return TVal
  */
 function duplicate($input)
 {
@@ -1137,6 +1262,10 @@ function duplicate($input)
         return toArray(
             map(
                 $input,
+                /**
+                 * @param mixed $i
+                 * @return mixed
+                 */
                 function ($i) {
                     return duplicate($i);
                 }
@@ -1152,33 +1281,37 @@ function duplicate($input)
 /**
  * Transforms [[$key, $value], [$key2, $value2]] into [$key => $value, $key2 => $value2]. Used as a helper
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @TODO: types
+ * @param iterable $collection
+ * @return Traversable
  */
-function dereferenceKeyValue($collection)
+function dereferenceKeyValue(iterable $collection): Traversable
 {
-    $generatorFactory = function () use ($collection) {
-        foreach ($collection as $value) {
-            yield $value[0] => $value[1];
-        }
-    };
-
-    return new Collection($generatorFactory);
+    foreach ($collection as $value) {
+        yield $value[0] => $value[1];
+    }
 }
 
 /**
  * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return iterable<TKey, TVal>
  */
-function realize($collection)
+function realize(iterable $collection): iterable
 {
     return dereferenceKeyValue(
         toArray(
             map(
                 $collection,
-                function ($value, $key) {
+                /**
+                 * @param mixed $value
+                 * @param mixed $key
+                 * @return array
+                 */
+                function ($value, $key): array {
                     return [$key, $value];
                 }
             )
@@ -1189,8 +1322,11 @@ function realize($collection)
 /**
  * Returns the second item of $collection or throws ItemNotFound if $collection is empty or has 1 item.
  *
- * @param array|Traversable $collection
- * @return mixed
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return TVal
+ * @throws ItemNotFound
  */
 function second($collection)
 {
@@ -1201,44 +1337,50 @@ function second($collection)
  * Combines $keys and $values into a lazy collection. The resulting collection has length equal to the size of smaller
  * argument.
  *
- * @param array|Traversable $keys
- * @param array|Traversable $values
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<mixed, TKey> $keys
+ * @param iterable<mixed, TVal> $values
+ * @return iterable<TKey, TVal>
  */
-function combine($keys, $values)
+function combine(iterable $keys, iterable $values): iterable
 {
-    $generatorFactory = function () use ($keys, $values) {
-        $keyCollection = new Collection($keys);
-        $valueIt = new IteratorIterator(new Collection($values));
-        $valueIt->rewind();
-
-        foreach ($keyCollection as $key) {
-            if (!$valueIt->valid()) {
+    $values = iterableToIterator($values);
+    $factory = function () use ($keys, $values): iterable {
+        foreach ($keys as $key) {
+            if (!$values->valid()) {
                 break;
             }
 
-            yield $key => $valueIt->current();
-            $valueIt->next();
+            yield $key => $values->current();
+            $values->next();
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection without the items associated to any of the keys from $keys.
  *
- * @param array|Traversable $collection
- * @param array|Traversable $keys
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param iterable<TKey> $keys
+ * @return iterable<TKey, TVal>
  */
-function except($collection, $keys)
+function except(iterable $collection, iterable $keys): iterable
 {
     $keys = toArray(values($keys));
 
     return reject(
         $collection,
-        function ($value, $key) use ($keys) {
+        /**
+         * @param mixed $value
+         * @param mixed $key
+         * @return bool
+         */
+        function ($value, $key) use ($keys): bool {
             return in_array($key, $keys);
         }
     );
@@ -1247,9 +1389,11 @@ function except($collection, $keys)
 /**
  * Returns a lazy collection of items associated to any of the keys from $keys.
  *
- * @param array|Traversable $collection
- * @param array|Traversable $keys
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param iterable<TKey> $keys
+ * @return iterable<TKey, TVal>
  */
 function only($collection, $keys)
 {
@@ -1257,7 +1401,12 @@ function only($collection, $keys)
 
     return filter(
         $collection,
-        function ($value, $key) use ($keys) {
+        /**
+         * @param mixed $_
+         * @param mixed $key
+         * @return bool
+         */
+        function ($_, $key) use ($keys): bool {
             return in_array($key, $keys, true);
         }
     );
@@ -1267,14 +1416,16 @@ function only($collection, $keys)
  * Returns a lazy collection of items that are in $collection but are not in any of the other arguments, indexed by the
  * keys from the first collection. Note that the ...$collections are iterated non-lazily.
  *
- * @param array|Traversable $collection
- * @param array|Traversable ...$collections
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param iterable<TKey, TVal> ...$collections
+ * @return iterable<TKey, TVal>
  */
-function diff($collection, ...$collections)
+function diff(iterable $collection, ...$collections)
 {
     $valuesToCompare = toArray(values(concat(...$collections)));
-    $generatorFactory = function () use ($collection, $valuesToCompare) {
+    $factory = function () use ($collection, $valuesToCompare): iterable {
         foreach ($collection as $key => $value) {
             if (!in_array($value, $valuesToCompare)) {
                 yield $key => $value;
@@ -1282,21 +1433,23 @@ function diff($collection, ...$collections)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection of items that are in $collection and all the other arguments, indexed by the keys from the
  * first collection. Note that the ...$collections are iterated non-lazily.
  *
- * @param array|Traversable $collection
- * @param array|Traversable ...$collections
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param iterable<TVal> ...$collections
+ * @return iterable<TKey, TVal>
  */
-function intersect($collection, ...$collections)
+function intersect(iterable $collection, iterable ...$collections): iterable
 {
     $valuesToCompare = toArray(values(concat(...$collections)));
-    $generatorFactory = function () use ($collection, $valuesToCompare) {
+    $factory = function () use ($collection, $valuesToCompare): iterable {
         foreach ($collection as $key => $value) {
             if (in_array($value, $valuesToCompare)) {
                 yield $key => $value;
@@ -1304,34 +1457,37 @@ function intersect($collection, ...$collections)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Returns a lazy collection where keys and values are flipped.
  *
- * @param array|Traversable $collection
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @return iterable<TVal, TKey>
  */
 function flip($collection)
 {
-    $generatorFactory = function () use ($collection) {
+    $factory = function () use ($collection): iterable {
         foreach ($collection as $key => $value) {
             yield $value => $key;
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Checks for the existence of an item with key $key in $collection.
  *
- * @param array|Traversable $collection
- * @param mixed $key
+ * @template TKey
+ * @param iterable<TKey, mixed> $collection
+ * @param TKey $key
  * @return bool
  */
-function has($collection, $key)
+function has(iterable $collection, $key): bool
 {
     try {
         get($collection, $key);
@@ -1345,25 +1501,27 @@ function has($collection, $key)
  * Returns a lazy collection of non-lazy collections of items from nth position from each passed collection. Stops when
  * any of the collections don't have an item at the nth position.
  *
- * @param array|Traversable ...$collections
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> ...$collections
+ * @return iterable<int, iterable<TKey, TVal>>
  */
-function zip(...$collections)
+function zip(iterable ...$collections): iterable
 {
     /* @var Iterator[] $iterators */
     $iterators = array_map(
         function ($collection) {
-            $it = new IteratorIterator(new Collection($collection));
+            $it = iterableToIterator($collection);
             $it->rewind();
             return $it;
         },
         $collections
     );
 
-    $generatorFactory = function () use ($iterators) {
+    $factory = function () use ($iterators): iterable {
         while (true) {
             $isMissingItems = false;
-            $zippedItem = new Collection([]);
+            $zippedItem = [];
 
             foreach ($iterators as $it) {
                 if (!$it->valid()) {
@@ -1383,34 +1541,42 @@ function zip(...$collections)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Transpose each item in a collection, interchanging the row and column indexes.
  * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
  *
- * @param Collection[] $collection
- * @return Collection
+ * @template TVal
+ * @param iterable<iterable<TVal>> $collection
+ * @return iterable<iterable<TVal>>
  */
-function transpose($collection)
+function transpose(iterable $collection): iterable
 {
-    if (some($collection, function ($value) {
-        return !($value instanceof Collection);
-    })) {
+    if (some(
+        $collection,
+        /**
+         * @param mixed $value
+         * @return bool
+         */
+        function ($value): bool {
+            return !is_iterable($value);
+        }
+    )) {
         throw new InvalidArgument('Can only transpose collections of collections.');
     }
 
-    return Collection::from(
-        array_map(
-            function (...$items) {
-                return new Collection($items);
-            },
-            ...toArray(
-                map(
-                    $collection,
-                    'DusanKasan\Knapsack\toArray'
-                )
+    return array_map(
+        function (...$items) {
+            return $items;
+        },
+        ...toArray(
+            map(
+                $collection,
+                function (iterable $c): array {
+                    return toArray($c);
+                }
             )
         )
     );
@@ -1420,18 +1586,30 @@ function transpose($collection)
  * Returns a lazy collection of data extracted from $collection items by dot separated key path. Supports the *
  * wildcard. If a key contains \ or * it must be escaped using \ character.
  *
- * @param array|Traversable $collection
- * @param mixed $keyPath
- * @return Collection
+ * @param iterable<mixed, mixed> $collection
+ * @param string $keyPath
+ * @return iterable<mixed, mixed>
  */
-function extract($collection, $keyPath)
+function extract(iterable $collection, string $keyPath): iterable
 {
     preg_match_all('/(.*[^\\\])(?:\.|$)/U', $keyPath, $matches);
     $pathParts = $matches[1];
 
-    $extractor = function ($coll) use ($pathParts) {
+    $extractor = function (iterable $coll) use ($pathParts): iterable {
         foreach ($pathParts as $pathPart) {
-            $coll = flatten(filter($coll, '\DusanKasan\Knapsack\isCollection'), 1);
+            $coll = flatten(
+                filter(
+                    $coll,
+                    /**
+                     * @param mixed $item
+                     * @return bool
+                     */
+                    function ($item) {
+                        return is_iterable($item);
+                    }
+                ),
+                1
+            );
 
             if ($pathPart != '*') {
                 $pathPart = str_replace(['\.', '\*'], ['.', '*'], $pathPart);
@@ -1442,7 +1620,7 @@ function extract($collection, $keyPath)
         return $coll;
     };
 
-    $generatorFactory = function () use ($collection, $extractor) {
+    $factory = function () use ($collection, $extractor): iterable {
         foreach ($collection as $item) {
             foreach ($extractor([$item]) as $extracted) {
                 yield $extracted;
@@ -1450,17 +1628,17 @@ function extract($collection, $keyPath)
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
  * Checks whether $collection has exactly $size items.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @param int $size
  * @return bool
  */
-function sizeIs($collection, $size)
+function sizeIs(iterable $collection, int $size): bool
 {
     $itemsTempCount = 0;
 
@@ -1478,11 +1656,11 @@ function sizeIs($collection, $size)
 /**
  * Checks whether $collection has less than $size items.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @param int $size
  * @return bool
  */
-function sizeIsLessThan($collection, $size)
+function sizeIsLessThan(iterable $collection, int $size): bool
 {
     $itemsTempCount = 0;
 
@@ -1500,11 +1678,11 @@ function sizeIsLessThan($collection, $size)
 /**
  * Checks whether $collection has more than $size items.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @param int $size
  * @return bool
  */
-function sizeIsGreaterThan($collection, $size)
+function sizeIsGreaterThan(iterable $collection, int $size): bool
 {
     $itemsTempCount = 0;
 
@@ -1523,12 +1701,12 @@ function sizeIsGreaterThan($collection, $size)
  * Checks whether $collection has between $fromSize to $toSize items. $toSize can be
  * smaller than $fromSize.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @param int $fromSize
  * @param int $toSize
  * @return bool
  */
-function sizeIsBetween($collection, $fromSize, $toSize)
+function sizeIsBetween(iterable $collection, int $fromSize, int $toSize): bool
 {
     if ($fromSize > $toSize) {
         $tmp = $toSize;
@@ -1551,10 +1729,11 @@ function sizeIsBetween($collection, $fromSize, $toSize)
 /**
  * Returns a sum of all values in the $collection.
  *
- * @param array|Traversable $collection
- * @return int|float
+ * @template TVal of numeric
+ * @param iterable<TVal> $collection
+ * @return TVal
  */
-function sum($collection)
+function sum(iterable $collection)
 {
     $result = 0;
 
@@ -1568,8 +1747,8 @@ function sum($collection)
 /**
  * Returns average of values from $collection.
  *
- * @param array|Traversable $collection
- * @return int|float
+ * @param iterable<numeric> $collection
+ * @return float
  */
 function average($collection)
 {
@@ -1581,14 +1760,15 @@ function average($collection)
         $count++;
     }
 
-    return $count ? $sum/$count : 0;
+    return (float)($count ? $sum / $count : 0);
 }
 
 /**
  * Returns maximal value from $collection.
  *
- * @param array|Traversable $collection
- * @return mixed
+ * @template TVal of numeric
+ * @param iterable<TVal> $collection
+ * @return TVal
  */
 function max($collection)
 {
@@ -1604,8 +1784,9 @@ function max($collection)
 /**
  * Returns minimal value from $collection.
  *
- * @param array|Traversable $collection
- * @return mixed
+ * @template TVal of numeric
+ * @param iterable<TVal> $collection
+ * @return TVal
  */
 function min($collection)
 {
@@ -1627,7 +1808,7 @@ function min($collection)
 /**
  * Returns a string by concatenating the $collection values into a string.
  *
- * @param array|Traversable $collection
+ * @param iterable $collection
  * @return string
  */
 function toString($collection)
@@ -1635,7 +1816,7 @@ function toString($collection)
     $result = '';
 
     foreach ($collection as $value) {
-        $result .= (string) $value;
+        $result .= (string)$value;
     }
 
     return $result;
@@ -1643,23 +1824,25 @@ function toString($collection)
 
 
 /**
- * Returns a lazy collection with items from $collection, but items with keys  that are found in keys of $replacementMap
+ * Returns a lazy collection with items from $collection, but items with keys that are found in keys of $replacementMap
  * are replaced by their values.
  *
- * @param array|Traversable $collection
- * @param array|Traversable $replacementMap
- * @return Collection
+ * @template TKey
+ * @template TVal
+ * @param iterable<TKey, TVal> $collection
+ * @param iterable<TKey, TVal> $replacementMap
+ * @return iterable<TKey, TVal>
  */
 function replaceByKeys($collection, $replacementMap)
 {
-    $generatorFactory = function () use ($collection, $replacementMap) {
+    $factory = function () use ($collection, $replacementMap): iterable {
         foreach ($collection as $key => $value) {
             $newValue = getOrDefault($replacementMap, $key, $value);
             yield $key => $newValue;
         }
     };
 
-    return new Collection($generatorFactory);
+    return new RewindableIterable($factory);
 }
 
 /**
@@ -1686,7 +1869,7 @@ function replaceByKeys($collection, $replacementMap)
  * @param int|null $maxDepth
  * @return array|mixed
  */
-function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
+function dump($input, int $maxItemsPerCollection = null, int $maxDepth = null)
 {
     if (is_scalar($input)) {
         return $input;
@@ -1710,7 +1893,7 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
                     $normalizedProperties[$betterKey] = dump(
                         $value,
                         $maxItemsPerCollection,
-                        $maxDepth>0 ? $maxDepth-1 : null
+                        $maxDepth > 0 ? $maxDepth - 1 : null
                     );
 
                     break;
@@ -1726,13 +1909,13 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
             return '^^^';
         }
 
-        $reflection = new \ReflectionObject($input);
+        $reflection = new ReflectionObject($input);
         $normalizedProperties = [];
         foreach ($reflection->getProperties() as $property) {
             $property->setAccessible(true);
             $normalizedProperties[$property->getName()] = $property->getValue($input);
         }
-        return [get_class($input) => dump($normalizedProperties, null, $maxDepth>0 ? $maxDepth-1 : null)];
+        return [get_class($input) => dump($normalizedProperties, null, $maxDepth > 0 ? $maxDepth - 1 : null)];
     }
 
     return gettype($input);
@@ -1741,12 +1924,13 @@ function dump($input, $maxItemsPerCollection = null, $maxDepth = null)
 /**
  * Calls dump on $input and then prints it using the var_export. Returns $input.
  *
- * @param mixed $input
+ *
+ * @param iterable $input
  * @param int|null $maxItemsPerCollection
  * @param int|null $maxDepth
  * @return mixed
  */
-function printDump($input, $maxItemsPerCollection = null, $maxDepth = null)
+function printDump(iterable $input, int $maxItemsPerCollection = null, int $maxDepth = null)
 {
     var_export(dump($input, $maxItemsPerCollection, $maxDepth));
     return $input;

@@ -3,7 +3,13 @@
 namespace DusanKasan\Knapsack;
 
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
+use DusanKasan\Knapsack\Exceptions\ItemNotFound;
+use Generator;
 
+/**
+ * @template TKey
+ * @template TVal
+ */
 trait CollectionTrait
 {
     /**
@@ -19,87 +25,89 @@ trait CollectionTrait
     /**
      * Returns a lazy collection of items for which $function returned true.
      *
-     * @param callable|null $function ($value, $key)
-     * @return Collection
+     * @param callable(TVal, TKey): bool|null $function
+     * @return static<TKey, TVal>
      */
     public function filter(callable $function = null)
     {
-        return filter($this->getItems(), $function);
+        return static::from(filter($this->getItems(), $function));
     }
 
     /**
      * Returns a lazy collection of distinct items. The comparison is the same as in in_array.
      *
-     * @return Collection
+     * @return static<TKey, TVal>
      */
     public function distinct()
     {
-        return distinct($this->getItems());
+        return static::from(distinct($this->getItems()));
     }
 
     /**
      * Returns a lazy collection with items from all $collections passed as argument appended together
      *
-     * @param array|\Traversable ...$collections
-     * @return Collection
+     * @param iterable<TKey, TVal> ...$collections
+     * @return static<TKey, TVal>
      */
     public function concat(...$collections)
     {
-        return concat($this, ...$collections);
+        return static::from(concat($this, ...$collections));
     }
 
     /**
      * Returns collection where each item is changed to the output of executing $function on each key/item.
      *
-     * @param callable $function
-     * @return Collection
+     * @template TRes
+     * @param callable(TVal, TKey):TRes $function
+     * @return static<TKey, TRes>
      */
     public function map(callable $function)
     {
-        return map($this->getItems(), $function);
+        return static::from(map($this->getItems(), $function));
     }
 
     /**
      * Reduces the collection to single value by iterating over the collection and calling $function while
      * passing $startValue and current key/item as parameters. The output of $function is used as $startValue in
      * next iteration. The output of $function on last element is the return value of this function. If
-     * $convertToCollection is true and the return value is a collection (array|Traversable) an instance of Collection
+     * $convertToCollection is true and the return value is a collection (iterable) an instance of Collection
      * is returned.
      *
-     * @param callable $function ($tmpValue, $value, $key)
-     * @param mixed $startValue
+     * @template TRes
+     * @param callable $function
+     * @param TRes $startValue
      * @param bool $convertToCollection
-     * @return mixed|Collection
+     * @return TRes|CollectionInterface<mixed, mixed>
      */
     public function reduce(callable $function, $startValue, $convertToCollection = false)
     {
         $result = reduce($this->getItems(), $function, $startValue);
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Returns a lazy collection with one or multiple levels of nesting flattened. Removes all nesting when no value
      * is passed.
      *
-     * @param int $depth How many levels should be flatten, default (-1) is infinite.
-     * @return Collection
+     * @param int $levelsToFlatten -1 to flatten everything
+     * @return CollectionInterface<mixed, mixed>
      */
-    public function flatten($depth = -1)
+    public function flatten($levelsToFlatten = -1)
     {
-        return flatten($this->getItems(), $depth);
+        return new Collection(flatten($this->getItems(), $levelsToFlatten));
     }
 
     /**
      * Returns a non-lazy collection sorted using $function($item1, $item2, $key1, $key2 ). $function should
      * return true if first item is larger than the second and false otherwise.
      *
-     * @param callable $function ($value1, $value2, $key1, $key2)
-     * @return Collection
+     * @param callable(TVal, TVal, TKey, TKey): bool $function
+     * @return static<TKey, TVal>
      */
     public function sort(callable $function)
     {
-        return \DusanKasan\Knapsack\sort($this->getItems(), $function);
+        return static::from(\DusanKasan\Knapsack\sort($this->getItems(), $function));
     }
 
     /**
@@ -107,45 +115,54 @@ trait CollectionTrait
      * number $to. The items before $from are also iterated over, just not returned.
      *
      * @param int $from
-     * @param int $to If omitted, will slice until end
-     * @return Collection
+     * @param int $to -1 to slice until end
+     * @return static<TKey, TVal>
      */
-    public function slice($from, $to = -1)
+    public function slice(int $from, int $to = -1)
     {
-        return slice($this->getItems(), $from, $to);
+        return static::from(slice($this->getItems(), $from, $to));
     }
 
     /**
      * Returns collection which items are separated into groups indexed by the return value of $function.
      *
-     * @param callable $function ($value, $key)
-     * @return Collection
+     * @template TRes
+     * @param callable(TVal, TKey): TRes $function
+     * @return CollectionInterface<TRes, static<int, TVal>>
      */
-    public function groupBy(callable $function)
+    public function groupBy(callable $function): CollectionInterface
     {
-        return groupBy($this->getItems(), $function);
+        return new Collection(function () use ($function): iterable {
+            foreach (groupBy($this->getItems(), $function) as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
      * Returns collection where items are separated into groups indexed by the value at given key.
      *
      * @param mixed $key
-     * @return Collection
+     * @return CollectionInterface<mixed, mixed>
      */
-    public function groupByKey($key)
+    public function groupByKey($key): CollectionInterface
     {
-        return groupByKey($this->getItems(), $key);
+        return new Collection(function () use ($key): iterable {
+            foreach (groupByKey($this->getItems(), $key) as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
      * Returns a lazy collection in which $function is executed for each item.
      *
-     * @param callable $function ($value, $key)
-     * @return Collection
+     * @param callable(TVal, TKey): void $function
+     * @return static<TKey, TVal>
      */
     public function each(callable $function)
     {
-        return \DusanKasan\Knapsack\each($this->getItems(), $function);
+        return static::from(each($this->getItems(), $function));
     }
 
     /**
@@ -153,93 +170,94 @@ trait CollectionTrait
      *
      * @return int
      */
-    public function size()
+    public function size(): int
     {
         return size($this->getItems());
     }
 
     /**
      * Returns value at the key $key. If multiple values have this key, return first. If no value has this key, throw
-     * ItemNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * ItemNotFound. If $convertToCollection is true and the return value is a collection (iterable) an
      * instance of Collection will be returned.
      *
-     * @param mixed $key
+     * @param TKey $key
      * @param bool $convertToCollection
-     * @return mixed|Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
+     * @return TVal|CollectionInterface
+     * @throws ItemNotFound
      */
     public function get($key, $convertToCollection = false)
     {
         $result = get($this->getItems(), $key);
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Returns item at the key $key. If multiple items have this key, return first. If no item has this key, return
      * $ifNotFound. If no value has this key, throw ItemNotFound. If $convertToCollection is true and the return value
-     * is a collection (array|Traversable) an instance of Collection will be returned.
+     * is a collection (iterable) an instance of Collection will be returned.
      *
-     * @param mixed $key
-     * @param mixed $default
+     * @param TKey $key
+     * @param TVal $default
      * @param bool $convertToCollection
-     * @return mixed|Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
+     * @return TVal|CollectionInterface
      */
     public function getOrDefault($key, $default = null, $convertToCollection = false)
     {
         $result = getOrDefault($this->getItems(), $key, $default);
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Returns first value matched by $function. If no value matches, return $default. If $convertToCollection is true
-     * and the return value is a collection (array|Traversable) an instance of Collection will be returned.
+     * and the return value is a collection (iterable) an instance of Collection will be returned.
      *
-     * @param callable $function
-     * @param mixed|null $default
+     * @param callable(TVal, TKey): bool $function
+     * @param TVal|null $default
      * @param bool $convertToCollection
-     * @return mixed|Collection
+     * @return TVal|CollectionInterface
      */
     public function find(callable $function, $default = null, $convertToCollection = false)
     {
         $result = find($this->getItems(), $function, $default);
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Returns a non-lazy collection of items whose keys are the return values of $function and values are the number of
      * items in this collection for which the $function returned this value.
      *
-     * @param callable $function
-     * @return Collection
+     * @template TRes
+     * @param callable(TVal, TKey): TRes $function
+     * @return CollectionInterface<TRes, int>
      */
-    public function countBy(callable $function)
+    public function countBy(callable $function): CollectionInterface
     {
-        return countBy($this->getItems(), $function);
+        return new Collection(countBy($this->getItems(), $function));
     }
 
     /**
      * Returns a lazy collection by changing keys of this collection for each item to the result of $function for
      * that item.
      *
-     * @param callable $function
-     * @return Collection
+     * @template TNewKey
+     * @param callable(TVal, TKey): TNewKey $function
+     * @return static<TNewKey, TVal>
      */
     public function indexBy(callable $function)
     {
-        return indexBy($this->getItems(), $function);
+        return static::from(indexBy($this->getItems(), $function));
     }
 
     /**
      * Returns true if $function returns true for every item in this collection, false otherwise.
      *
-     * @param callable $function
+     * @param callable(TVal, TKey): bool $function
      * @return bool
      */
-    public function every(callable $function)
+    public function every(callable $function): bool
     {
         return every($this->getItems(), $function);
     }
@@ -247,10 +265,10 @@ trait CollectionTrait
     /**
      * Returns true if $function returns true for at least one item in this collection, false otherwise.
      *
-     * @param callable $function
+     * @param callable(TVal, TKey): bool $function
      * @return bool
      */
-    public function some(callable $function)
+    public function some(callable $function): bool
     {
         return some($this->getItems(), $function);
     }
@@ -258,7 +276,7 @@ trait CollectionTrait
     /**
      * Returns true if $value is present in the collection.
      *
-     * @param mixed $value
+     * @param TVal $value
      * @return bool
      */
     public function contains($value)
@@ -269,173 +287,174 @@ trait CollectionTrait
     /**
      * Returns collection of items in this collection in reverse order.
      *
-     * @return Collection
+     * @return static<TKey, TVal>
      */
     public function reverse()
     {
-        return reverse($this->getItems());
+        return static::from(reverse($this->getItems()));
     }
 
     /**
      * Reduce the collection to single value. Walks from right to left. If $convertToCollection is true and the return
-     * value is a collection (array|Traversable) an instance of Collection is returned.
+     * value is a collection (iterable) an instance of Collection is returned.
      *
-     * @param callable $function Must take 2 arguments, intermediate value and item from the iterator.
-     * @param mixed $startValue
+     * @template TRes
+     * @param callable $function
+     * @param TRes $startValue
      * @param bool $convertToCollection
-     * @return mixed|Collection
+     * @return TRes|CollectionInterface
      */
     public function reduceRight(callable $function, $startValue, $convertToCollection = false)
     {
         $result = reduceRight($this->getItems(), $function, $startValue);
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * A form of slice that returns first $numberOfItems items.
      *
      * @param int $numberOfItems
-     * @return Collection
+     * @return static<TKey, TVal>
      */
-    public function take($numberOfItems)
+    public function take(int $numberOfItems)
     {
-        return take($this->getItems(), $numberOfItems);
+        return static::from(take($this->getItems(), $numberOfItems));
     }
 
     /**
      * A form of slice that returns all but first $numberOfItems items.
      *
      * @param int $numberOfItems
-     * @return Collection
+     * @return static<TKey, TVal>
      */
-    public function drop($numberOfItems)
+    public function drop(int $numberOfItems)
     {
-        return drop($this->getItems(), $numberOfItems);
+        return static::from(drop($this->getItems(), $numberOfItems));
     }
 
     /**
      * Returns collection of values from this collection but with keys being numerical from 0 upwards.
      *
-     * @return Collection
+     * @return static<int, TVal>
      */
     public function values()
     {
-        return values($this->getItems());
+        return static::from(values($this->getItems()));
     }
 
     /**
      * Returns a lazy collection without elements matched by $function.
      *
-     * @param callable $function
-     * @return Collection
+     * @param callable(TVal, TKey): bool $function
+     * @return static<TKey, TVal>
      */
     public function reject(callable $function)
     {
-        return reject($this->getItems(), $function);
+        return static::from(reject($this->getItems(), $function));
     }
 
     /**
      * Returns a lazy collection of the keys of this collection.
      *
-     * @return Collection
+     * @return CollectionInterface<int, TKey>
      */
     public function keys()
     {
-        return keys($this->getItems());
+        return new Collection(keys($this->getItems()));
     }
 
     /**
      * Returns a lazy collection of items of this collection separated by $separator
      *
-     * @param mixed $separator
-     * @return Collection
+     * @param TVal $separator
+     * @return static<TKey|int, TVal>
      */
     public function interpose($separator)
     {
-        return interpose($this->getItems(), $separator);
+        return static::from(interpose($this->getItems(), $separator));
     }
 
     /**
      * Returns a lazy collection with last $numberOfItems items skipped. These are still iterated over, just skipped.
      *
      * @param int $numberOfItems
-     * @return Collection
+     * @return static<TKey, TVal>
      */
-    public function dropLast($numberOfItems = 1)
+    public function dropLast(int $numberOfItems = 1)
     {
-        return dropLast($this->getItems(), $numberOfItems);
+        return static::from(dropLast($this->getItems(), $numberOfItems));
     }
 
     /**
      * Returns a lazy collection of first item from first collection, first item from second, second from first and
      * so on. Accepts any number of collections.
      *
-     * @param array|\Traversable ...$collections
-     * @return Collection
+     * @param iterable<TKey, TVal> ...$collections
+     * @return static<TKey, TVal>
      */
     public function interleave(...$collections)
     {
-        return interleave($this->getItems(), ...$collections);
+        return static::from(interleave($this->getItems(), ...$collections));
     }
 
     /**
      * Returns an infinite lazy collection of items in this collection repeated infinitely.
      *
-     * @return Collection
+     * @return static<TKey, TVal>
      */
     public function cycle()
     {
-        return cycle($this->getItems());
+        return static::from(cycle($this->getItems()));
     }
 
     /**
      * Returns a lazy collection of items of this collection with $value added as first element. If $key is not provided
      * it will be next integer index.
      *
-     * @param mixed $value
-     * @param mixed|null $key
-     * @return Collection
+     * @param TVal $value
+     * @param TKey|null $key
+     * @return static<TKey|null, TVal>
      */
     public function prepend($value, $key = null)
     {
-        return prepend($this->getItems(), $value, $key);
+        return static::from(prepend($this->getItems(), $value, $key));
     }
 
     /**
      * Returns a lazy collection of items of this collection with $value added as last element. If $key is not provided
      * it will be next integer index.
      *
-     * @param mixed $value
-     * @param mixed $key
-     * @return Collection
+     * @param TVal $value
+     * @param TKey|null $key
+     * @return static<TKey|null, TVal>
      */
     public function append($value, $key = null)
     {
-        return append($this->getItems(), $value, $key);
+        return static::from(append($this->getItems(), $value, $key));
     }
 
     /**
      * Returns a lazy collection by removing items from this collection until first item for which $function returns
      * false.
      *
-     * @param callable $function
-     * @return Collection
+     * @param callable(TVal, TKey): bool $function
+     * @return static<TKey, TVal>
      */
     public function dropWhile(callable $function)
     {
-        return dropWhile($this->getItems(), $function);
+        return static::from(dropWhile($this->getItems(), $function));
     }
 
     /**
      * Returns a lazy collection which is a result of calling map($function) and then flatten(1)
      *
      * @param callable $function
-     * @return Collection
+     * @return static
      */
     public function mapcat(callable $function)
     {
-        return mapcat($this->getItems(), $function);
+        return static::from(mapcat($this->getItems(), $function));
     }
 
     /**
@@ -443,45 +462,53 @@ trait CollectionTrait
      * returns false.
      *
      * @param callable $function
-     * @return Collection
+     * @return static
      */
     public function takeWhile(callable $function)
     {
-        return takeWhile($this->getItems(), $function);
+        return static::from(takeWhile($this->getItems(), $function));
     }
 
     /**
      * Returns a collection of [take($position), drop($position)]
      *
      * @param int $position
-     * @return Collection
+     * @return static
      */
     public function splitAt($position)
     {
-        return splitAt($this->getItems(), $position);
+        return static::from(function () use ($position): Generator {
+            foreach (splitAt($this->getItems(), $position) as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
      * Returns a collection of [takeWhile($predicament), dropWhile($predicament]
      *
      * @param callable $function
-     * @return Collection
+     * @return static
      */
     public function splitWith(callable $function)
     {
-        return splitWith($this->getItems(), $function);
+        return static::from(function () use ($function): Generator {
+            foreach (splitWith($this->getItems(), $function) as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
      * Returns a lazy collection with items from this collection but values that are found in keys of $replacementMap
      * are replaced by their values.
      *
-     * @param array|\Traversable $replacementMap
-     * @return Collection
+     * @param iterable $replacementMap
+     * @return static
      */
     public function replace($replacementMap)
     {
-        return replace($this->getItems(), $replacementMap);
+        return static::from(replace($this->getItems(), $replacementMap));
     }
 
     /**
@@ -489,32 +516,32 @@ trait CollectionTrait
      *
      * @param callable $function
      * @param mixed $startValue
-     * @return Collection
+     * @return static
      */
     public function reductions(callable $function, $startValue)
     {
-        return reductions($this->getItems(), $function, $startValue);
+        return static::from(reductions($this->getItems(), $function, $startValue));
     }
 
     /**
      * Returns a lazy collection of every nth item in this collection
      *
      * @param int $step
-     * @return Collection
+     * @return static
      */
     public function takeNth($step)
     {
-        return takeNth($this->getItems(), $step);
+        return static::from(takeNth($this->getItems(), $step));
     }
 
     /**
      * Returns a non-collection of shuffled items from this collection
      *
-     * @return Collection
+     * @return CollectionInterface
      */
     public function shuffle()
     {
-        return \DusanKasan\Knapsack\shuffle($this->getItems());
+        return static::from(\DusanKasan\Knapsack\shuffle($this->getItems()));
     }
 
     /**
@@ -526,12 +553,17 @@ trait CollectionTrait
      *
      * @param int $numberOfItems
      * @param int $step
-     * @param array|\Traversable $padding
-     * @return Collection
+     * @param iterable $padding
+     * @return static
      */
     public function partition($numberOfItems, $step = 0, $padding = [])
     {
-        return partition($this->getItems(), $numberOfItems, $step, $padding);
+        return static::from(function() use ($numberOfItems, $step, $padding) {
+            $c = partition($this->getItems(), $numberOfItems, $step, $padding);
+            foreach($c as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
@@ -539,11 +571,16 @@ trait CollectionTrait
      * return different result.
      *
      * @param callable $function
-     * @return Collection
+     * @return static
      */
     public function partitionBy(callable $function)
     {
-        return partitionBy($this->getItems(), $function);
+        return static::from(function() use ($function) {
+            $c = partitionBy($this->getItems(), $function);
+            foreach($c as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
@@ -570,124 +607,125 @@ trait CollectionTrait
      * Returns a collection where keys are distinct items from this collection and their values are number of
      * occurrences of each value.
      *
-     * @return Collection
+     * @return static<TVal, int>
      */
     public function frequencies()
     {
-        return frequencies($this->getItems());
+        return static::from(frequencies($this->getItems()));
     }
 
     /**
      * Returns first item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable) an instance of Collection is returned.
+     * is true and the return value is a collection (iterable) an instance of Collection is returned.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
+     * @throws ItemNotFound
      */
     public function first($convertToCollection = false)
     {
         $result = first($this->getItems());
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Returns last item of this collection. If the collection is empty, throws ItemNotFound. If $convertToCollection
-     * is true and the return value is a collection (array|Traversable) it is converted to Collection.
+     * is true and the return value is a collection (iterable) it is converted to Collection.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
+     * @throws ItemNotFound
      */
     public function last($convertToCollection = false)
     {
         $result = last($this->getItems());
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Realizes collection - turns lazy collection into non-lazy one by iterating over it and storing the key/values.
      *
-     * @return Collection
+     * @return static
      */
     public function realize()
     {
-        return realize($this->getItems());
+        return static::from(realize($this->getItems()));
     }
 
     /**
      * Returns the second item in this collection or throws ItemNotFound if the collection is empty or has 1 item. If
-     * $convertToCollection is true and the return value is a collection (array|Traversable) it is converted to
+     * $convertToCollection is true and the return value is a collection (iterable) it is converted to
      * Collection.
      *
      * @param bool $convertToCollection
      * @return mixed|Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
+     * @throws ItemNotFound
      */
     public function second($convertToCollection = false)
     {
         $result = second($this->getItems());
 
-        return ($convertToCollection && isCollection($result)) ? new Collection($result) : $result;
+        return ($convertToCollection && is_iterable($result)) ? new Collection($result) : $result;
     }
 
     /**
      * Combines the values of this collection as keys, with values of $collection as values.  The resulting collection
      * has length equal to the size of smaller collection.
      *
-     * @param array|\Traversable $collection
-     * @return Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
+     * @template TNewVal
+     * @param iterable<mixed, TNewVal> $collection
+     * @return static<TVal, TNewVal>
+     * @throws ItemNotFound
      */
-    public function combine($collection)
+    public function combine(iterable $collection)
     {
-        return combine($this->getItems(), $collection);
+        return static::from(combine($this->getItems(), $collection));
     }
 
     /**
      * Returns a lazy collection without the items associated to any of the keys from $keys.
      *
-     * @param array|\Traversable $keys
-     * @return Collection
+     * @param iterable<TKey> $keys
+     * @return static<TKey, TVal>
      */
-    public function except($keys)
+    public function except(iterable $keys)
     {
-        return except($this->getItems(), $keys);
+        return static::from(except($this->getItems(), $keys));
     }
 
     /**
      * Returns a lazy collection of items associated to any of the keys from $keys.
      *
-     * @param array|\Traversable $keys
-     * @return Collection
+     * @param iterable<TKey> $keys
+     * @return static<TVal, TKey>
      */
-    public function only($keys)
+    public function only(iterable $keys)
     {
-        return only($this->getItems(), $keys);
+        return static::from(only($this->getItems(), $keys));
     }
 
     /**
      * Returns a lazy collection of items that are in $this but are not in any of the other arguments, indexed by the
      * keys from the first collection. Note that the ...$collections are iterated non-lazily.
      *
-     * @param array|\Traversable ...$collections
-     * @return Collection
+     * @param iterable<TKey, TVal> ...$collections
+     * @return static<TKey, TVal>
      */
     public function diff(...$collections)
     {
-        return diff($this->getItems(), ...$collections);
+        return static::from(diff($this->getItems(), ...$collections));
     }
 
     /**
      * Returns a lazy collection where keys and values are flipped.
      *
-     * @return Collection
+     * @return static<TVal, TKey>
      */
     public function flip()
     {
-        return flip($this->getItems());
+        return static::from(flip($this->getItems()));
     }
 
     /**
@@ -705,30 +743,29 @@ trait CollectionTrait
      * Returns a lazy collection of non-lazy collections of items from nth position from this collection and each
      * passed collection. Stops when any of the collections don't have an item at the nth position.
      *
-     * @param array|\Traversable ...$collections
-     * @return Collection
+     * @param iterable<TKey, TVal> ...$collections
+     * @return static<int, iterable<TKey, TVal>>
      */
-    public function zip(...$collections)
+    public function zip(iterable ...$collections)
     {
         array_unshift($collections, $this->getItems());
-
-        return zip(...$collections);
+        return static::from(zip(...$collections));
     }
 
     /**
      * Uses a $transformer callable that takes a Collection and returns Collection on itself.
      *
      * @param callable $transformer Collection => Collection
-     * @return Collection
+     * @return CollectionInterface
      * @throws InvalidReturnValue
      */
     public function transform(callable $transformer)
     {
         $items = $this->getItems();
 
-        $transformed = $transformer($items instanceof Collection ? $items : new Collection($items));
+        $transformed = $transformer($items instanceof CollectionInterface ? $items : new Collection($items));
 
-        if (!($transformed instanceof Collection)) {
+        if (!($transformed instanceof CollectionInterface)) {
             throw new InvalidReturnValue;
         }
 
@@ -739,11 +776,16 @@ trait CollectionTrait
      * Transpose each item in a collection, interchanging the row and column indexes.
      * Can only transpose collections of collections. Otherwise an InvalidArgument is raised.
      *
-     * @return Collection
+     * @TODO: TVal must be iterable<X>
+     * @return static<int, TVal>
      */
     public function transpose()
     {
-        return transpose($this->getItems());
+        return static::from(function (): Generator {
+            foreach (transpose($this->getItems()) as $k => $v) {
+                yield $k => static::from($v);
+            }
+        });
     }
 
     /**
@@ -751,23 +793,23 @@ trait CollectionTrait
      * it must be escaped using \ character.
      *
      * @param mixed $keyPath
-     * @return Collection
+     * @return CollectionInterface<mixed, mixed>
      */
     public function extract($keyPath)
     {
-        return \DusanKasan\Knapsack\extract($this->getItems(), $keyPath);
+        return Collection::from(extract($this->getItems(), $keyPath));
     }
 
     /**
      * Returns a lazy collection of items that are in $this and all the other arguments, indexed by the keys from
      * the first collection. Note that the ...$collections are iterated non-lazily.
      *
-     * @param array|\Traversable ...$collections
-     * @return Collection
+     * @param iterable<TVal> ...$collections
+     * @return static<TKey, TVal>
      */
-    public function intersect(...$collections)
+    public function intersect(iterable ...$collections)
     {
-        return intersect($this->getItems(), ...$collections);
+        return static::from(intersect($this->getItems(), ...$collections));
     }
 
     /**
@@ -776,7 +818,7 @@ trait CollectionTrait
      * @param int $size
      * @return bool
      */
-    public function sizeIs($size)
+    public function sizeIs(int $size): bool
     {
         return sizeIs($this->getItems(), $size);
     }
@@ -787,7 +829,7 @@ trait CollectionTrait
      * @param int $size
      * @return bool
      */
-    public function sizeIsLessThan($size)
+    public function sizeIsLessThan(int $size): bool
     {
         return sizeIsLessThan($this->getItems(), $size);
     }
@@ -798,7 +840,7 @@ trait CollectionTrait
      * @param int $size
      * @return bool
      */
-    public function sizeIsGreaterThan($size)
+    public function sizeIsGreaterThan(int $size): bool
     {
         return sizeIsGreaterThan($this->getItems(), $size);
     }
@@ -811,7 +853,7 @@ trait CollectionTrait
      * @param int $toSize
      * @return bool
      */
-    public function sizeIsBetween($fromSize, $toSize)
+    public function sizeIsBetween(int $fromSize, int $toSize): bool
     {
         return sizeIsBetween($this->getItems(), $fromSize, $toSize);
     }
@@ -839,21 +881,21 @@ trait CollectionTrait
     /**
      * Returns maximal value from this collection.
      *
-     * @return mixed
+     * @return TVal
      */
     public function max()
     {
-        return \DusanKasan\Knapsack\max($this->getItems());
+        return max($this->getItems());
     }
 
     /**
      * Returns minimal value from this collection.
      *
-     * @return mixed
+     * @return TVal
      */
     public function min()
     {
-        return \DusanKasan\Knapsack\min($this->getItems());
+        return min($this->getItems());
     }
 
     /**
@@ -861,7 +903,7 @@ trait CollectionTrait
      *
      * @return string
      */
-    public function toString()
+    public function toString(): string
     {
         return toString($this->getItems());
     }
@@ -870,12 +912,12 @@ trait CollectionTrait
      * Returns a lazy collection with items from $collection, but items with keys  that are found in keys of
      * $replacementMap are replaced by their values.
      *
-     * @param array|\Traversable $replacementMap
-     * @return Collection
+     * @param iterable<TKey, TVal> $replacementMap
+     * @return static<TKey, TVal>
      */
-    public function replaceByKeys($replacementMap)
+    public function replaceByKeys(iterable $replacementMap)
     {
-        return replaceByKeys($this->getItems(), $replacementMap);
+        return static::from(replaceByKeys($this->getItems(), $replacementMap));
     }
 
     /**
@@ -902,7 +944,7 @@ trait CollectionTrait
      * @param int|null $maxDepth
      * @return array
      */
-    public function dump($maxItemsPerCollection = null, $maxDepth = null)
+    public function dump(int $maxItemsPerCollection = null, int $maxDepth = null): array
     {
         return dump($this->getItems(), $maxItemsPerCollection, $maxDepth);
     }
@@ -912,18 +954,24 @@ trait CollectionTrait
      *
      * @param int|null $maxItemsPerCollection
      * @param int|null $maxDepth
-     * @return Collection
+     * @return static
      */
-    public function printDump($maxItemsPerCollection = null, $maxDepth = null)
+    public function printDump(int $maxItemsPerCollection = null, int $maxDepth = null)
     {
-        return printDump($this->getItems(), $maxItemsPerCollection, $maxDepth);
+        printDump($this->getItems(), $maxItemsPerCollection, $maxDepth);
+        return $this;
     }
 
     /**
-     * @return array|\Traversable
+     * @return iterable<TKey, TVal>
      */
-    protected function getItems()
-    {
-        return $this;
-    }
+    protected abstract function getItems(): iterable;
+
+    /**
+     * @template CKey
+     * @template CVal
+     * @param callable():iterable<CKey, CVal>|iterable<CKey, CVal> $i
+     * @return static<CKey, CVal>
+     */
+    protected abstract static function from($i);
 }
