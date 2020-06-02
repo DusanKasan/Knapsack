@@ -289,7 +289,7 @@ function concat(...$collections)
  * next iteration. The output of $function on last element is the return value of this function.
  *
  * @param array|Traversable $collection
- * @param callable $function ($value, $key)
+ * @param callable $function ($tmpValue, $value, $key)
  * @param mixed $startValue
  * @return mixed
  */
