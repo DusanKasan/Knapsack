@@ -1,0 +1,9 @@
+/ci export-ignore
+/tests export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.scrutinizer.yml export-ignore
+/.sensiolabs.yml export-ignore
+/CONTRIBUTING.md
+/phpspec.yml export-ignore
+/phpunit.xml.dist export-ignore
