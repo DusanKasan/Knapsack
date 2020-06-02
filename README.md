@@ -1138,7 +1138,7 @@ Collection::from([1, 3, 3, 2])->size(); //4
 size([1, 3, 3, 2]); //4
 ```
 
-#### sizeBetween(int $fromSize, int $toSize) : bool
+#### sizeIsBetween(int $fromSize, int $toSize) : bool
 Checks whether this collection has between $fromSize to $toSize items. $toSize can be smaller than $fromSize.
 ```php
 Collection::from([1, 3, 3, 2])->sizeIsBetween(3, 5); //true
