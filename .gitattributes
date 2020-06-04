@@ -4,6 +4,6 @@
 /.gitignore export-ignore
 /.scrutinizer.yml export-ignore
 /.sensiolabs.yml export-ignore
-/CONTRIBUTING.md
+/CONTRIBUTING.md export-ignore
 /phpspec.yml export-ignore
 /phpunit.xml.dist export-ignore
