@@ -5,3 +5,5 @@ coverage.clover
 coverage.xml
 
 phpunit.xml
+
+.idea

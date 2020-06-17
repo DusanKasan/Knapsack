@@ -32,8 +32,8 @@ function distinct($collection)
         $distinctValues = [];
 
         foreach ($collection as $key => $value) {
-            if (!in_array($value, $distinctValues)) {
-                $distinctValues[] = $value;
+            if (!isset($distinctValues[$value])) {
+                $distinctValues[$value] = true;
                 yield $key => $value;
             }
         }
