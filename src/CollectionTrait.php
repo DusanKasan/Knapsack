@@ -177,14 +177,13 @@ trait CollectionTrait
 
     /**
      * Returns item at the key $key. If multiple items have this key, return first. If no item has this key, return
-     * $ifNotFound. If no value has this key, throw ItemNotFound. If $convertToCollection is true and the return value
-     * is a collection (array|Traversable) an instance of Collection will be returned.
+     * $ifNotFound. If $convertToCollection is true and the return value is a collection (array|Traversable) an
+     * instance of Collection will be returned.
      *
      * @param mixed $key
      * @param mixed $default
      * @param bool $convertToCollection
      * @return mixed|Collection
-     * @throws \DusanKasan\Knapsack\Exceptions\ItemNotFound
      */
     public function getOrDefault($key, $default = null, $convertToCollection = false)
     {
