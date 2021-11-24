@@ -95,6 +95,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      * {@inheritdoc}
      * @throws InvalidReturnValue
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         if ($this->inputFactory) {
