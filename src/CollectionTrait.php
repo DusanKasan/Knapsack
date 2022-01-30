@@ -90,19 +90,20 @@ trait CollectionTrait
      * Returns a lazy collection with one or multiple levels of nesting flattened. Removes all nesting when no value
      * is passed.
      *
-     * @param int $levelsToFlatten -1 to flatten everything
+     * @param int $depth -1 to flatten everything
      * @return CollectionInterface<mixed, mixed>
      */
-    public function flatten($levelsToFlatten = -1)
+    public function flatten($depth = -1)
     {
-        return new Collection(flatten($this->getItems(), $levelsToFlatten));
+        return new Collection(flatten($this->getItems(), $depth));
     }
 
     /**
-     * Returns a non-lazy collection sorted using $function($item1, $item2, $key1, $key2 ). $function should
-     * return true if first item is larger than the second and false otherwise.
+     * Returns a non-lazy collection sorted using $function($item1, $item2, $key1, $key2). $function should
+     * return true if first item is larger than the second and false otherwise. In PHP8 and forward, $function
+     * must return int as described by https://www.php.net/manual/en/function.usort.php.
      *
-     * @param callable(TVal, TVal, TKey, TKey): bool $function
+     * @param callable(TVal, TVal, TKey, TKey): bool|int $function
      * @return static<TKey, TVal>
      */
     public function sort(callable $function)
@@ -970,8 +971,8 @@ trait CollectionTrait
     /**
      * @template CKey
      * @template CVal
-     * @param callable():iterable<CKey, CVal>|iterable<CKey, CVal> $i
+     * @param callable():iterable<CKey, CVal>|iterable<CKey, CVal> $input
      * @return static<CKey, CVal>
      */
-    protected abstract static function from($i);
+    protected abstract static function from($input);
 }

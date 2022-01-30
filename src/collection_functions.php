@@ -375,7 +375,7 @@ function flatten(iterable $collection, int $levelsToFlatten = -1): iterable
  * @template TKey
  * @template TVal
  * @param iterable<TKey, TVal> $collection
- * @param callable(TVal, TVal, TKey, TKey): bool $function
+ * @param callable(TVal, TVal, TKey, TKey): bool|int $function
  * @return iterable<TKey, TVal>
  */
 function sort(iterable $collection, callable $function): iterable
@@ -397,7 +397,7 @@ function sort(iterable $collection, callable $function): iterable
             )
         );
 
-        uasort(
+        usort(
             $array,
             /**
              * @param mixed $a

@@ -14,13 +14,13 @@
     }
   ],
   "require-dev": {
-    "phpspec/phpspec": "^6.1",
-    "friends-of-phpspec/phpspec-code-coverage": "^4.3",
+    "phpspec/phpspec": "^7.0",
+    "friends-of-phpspec/phpspec-code-coverage": "^6.1",
     "squizlabs/php_codesniffer": "^3.5",
     "phpmd/phpmd" : "^2.8",
-    "phpunit/phpunit": "^8.5",
+    "phpunit/phpunit": "^9.5",
     "symfony/console": "^5.0",
-    "vimeo/psalm": "^3.11"
+    "vimeo/psalm": "^4.0"
   },
   "require": {
     "php": ">=7.2"

@@ -3,9 +3,10 @@
 namespace DusanKasan\Knapsack\Tests\Scenarios;
 
 use DusanKasan\Knapsack\Collection;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_TestCase;
 
-class CallableFunctionNamesTest extends PHPUnit_Framework_TestCase
+class CallableFunctionNamesTest extends TestCase
 {
     /**
      * Example that it's possible to use callable function names as arguments.

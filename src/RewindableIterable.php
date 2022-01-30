@@ -36,7 +36,6 @@ class RewindableIterable implements IteratorAggregate
      */
     public function getIterator(): Traversable
     {
-        $fn = $this->factory;
-        return $fn();
+        return ($this->factory)();
     }
 }

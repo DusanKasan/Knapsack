@@ -3,9 +3,10 @@
 namespace DusanKasan\Knapsack\Tests\Scenarios;
 
 use DusanKasan\Knapsack\Collection;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_TestCase;
 
-class MultipleOperationsTest extends PHPUnit_Framework_TestCase
+class MultipleOperationsTest extends TestCase
 {
     /**
      * Example of a longer pipeline. If this was real code, you should probably split it into smaller chunks.
