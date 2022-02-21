@@ -95,6 +95,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      * {@inheritdoc}
      * @throws InvalidReturnValue
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         if ($this->inputFactory) {
@@ -119,16 +120,7 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      */
     public function serialize()
     {
-        return serialize(
-            toArray(
-                map(
-                    $this->input,
-                    function ($value, $key) {
-                        return [$key, $value];
-                    }
-                )
-            )
-        );
+        return serialize($this->__serialize());
     }
 
     /**
@@ -136,6 +128,29 @@ class Collection implements IteratorAggregate, \Serializable, CollectionInterfac
      */
     public function unserialize($serialized)
     {
-        $this->input = dereferenceKeyValue(unserialize($serialized));
+        $this->__unserialize(unserialize($serialized));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __serialize()
+    {
+        return toArray(
+            map(
+                $this->input,
+                function ($value, $key) {
+                    return [$key, $value];
+                }
+            )
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __unserialize($serialized)
+    {
+        $this->input = dereferenceKeyValue($serialized);
     }
 }
