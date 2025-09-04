@@ -19,7 +19,7 @@ interface CollectionInterface
      * @param callable|null $function ($value, $key)
      * @return Collection
      */
-    public function filter(callable $function = null);
+    public function filter(?callable $function = null);
 
     /**
      * Returns a lazy collection of distinct items. The comparison is the same as in in_array.

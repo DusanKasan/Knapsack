@@ -22,7 +22,7 @@ trait CollectionTrait
      * @param callable|null $function ($value, $key)
      * @return Collection
      */
-    public function filter(callable $function = null)
+    public function filter(?callable $function = null)
     {
         return filter($this->getItems(), $function);
     }

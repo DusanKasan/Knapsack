@@ -245,7 +245,7 @@ function map($collection, callable $function)
  * @param callable|null $function ($value, $key)
  * @return Collection
  */
-function filter($collection, callable $function = null)
+function filter($collection, ?callable $function = null)
 {
     if (null === $function) {
         $function = function ($value) {
